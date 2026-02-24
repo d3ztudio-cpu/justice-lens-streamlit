@@ -1,3 +1,7 @@
 streamlit
 firebase-admin
+pinecone-client
+langchain-huggingface
 pandas
+requests
+sentence-transformers
