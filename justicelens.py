@@ -487,3 +487,4 @@ else:
                         <b>Scenario:</b><br>{ld.get('query')}<br><br>
                         <b>AI Report:</b><br>{ld.get('report')}
                     </div>""", unsafe_allow_html=True)
+                    
