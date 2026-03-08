@@ -429,7 +429,13 @@ def init_firebase():
     return firestore.client() if firebase_admin._apps else None
 
 db = init_firebase()
-pinecone_index, legal_embeddings = init_backend()
+pinecone_index, legal_embeddings = None, None
+
+def get_backend():
+    global pinecone_index, legal_embeddings
+    if pinecone_index is None or legal_embeddings is None:
+        pinecone_index, legal_embeddings = init_backend()
+    return pinecone_index, legal_embeddings
 
 # --- SESSION STATE ---
 if "user" not in st.session_state: st.session_state.user = None
@@ -654,10 +660,12 @@ else:
                             with st.spinner("Querying Legal Database..."):
                                 ctx = "General context applied."
                                 try:
-                                    v = legal_embeddings.embed_query(user_msg)
-                                    m = pinecone_index.query(vector=v, top_k=1, include_metadata=True)
-                                    if m['matches'] and m['matches'][0]['score'] > 0.4:
-                                        ctx = m['matches'][0]['metadata'].get('text', '')
+                                    idx, emb = get_backend()
+                                    if idx and emb:
+                                        v = emb.embed_query(user_msg)
+                                        m = idx.query(vector=v, top_k=1, include_metadata=True)
+                                        if m['matches'] and m['matches'][0]['score'] > 0.4:
+                                            ctx = m['matches'][0]['metadata'].get('text', '')
                                 except: 
                                     pass
                                 ans = legal_brain(user_msg, ctx)
