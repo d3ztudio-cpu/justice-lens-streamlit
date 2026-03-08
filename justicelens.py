@@ -68,6 +68,7 @@ st.markdown("""
     .stMarkdown, label, li, h1, h2, h3 {
         font-family: 'Manrope', sans-serif !important;
         color: var(--text) !important;
+        font-size: 0.95rem !important;
     }
     h1, h2, h3 {
         font-family: 'Space Grotesk', sans-serif !important;
@@ -82,7 +83,8 @@ st.markdown("""
         min-height: 100vh;
     }
     .main .block-container {
-        padding-top: 1.7rem !important;
+        padding-top: 1.05rem !important;
+        max-width: 1120px !important;
         animation: fadeUp 0.45s ease-out;
     }
     @keyframes fadeUp {
@@ -217,7 +219,7 @@ st.markdown("""
         -webkit-backdrop-filter: blur(10px);
     }
     .glass-card {
-        padding: 1.6rem;
+        padding: 1.2rem;
         border-radius: 18px;
         margin-bottom: 1rem;
         transition: transform 0.22s ease, box-shadow 0.22s ease;
@@ -237,9 +239,9 @@ st.markdown("""
         background: radial-gradient(circle, rgba(67,162,255,0.20), transparent 70%);
         pointer-events: none;
     }
-    h1 { font-size: 2.24rem !important; font-weight: 800 !important; }
-    h2 { font-size: 1.36rem !important; font-weight: 700 !important; margin-bottom: 0.8rem !important; }
-    h3 { font-size: 1rem !important; font-weight: 700 !important; color: var(--gold) !important; margin-top: 0 !important; }
+    h1 { font-size: 1.95rem !important; font-weight: 800 !important; }
+    h2 { font-size: 1.2rem !important; font-weight: 700 !important; margin-bottom: 0.7rem !important; }
+    h3 { font-size: 0.92rem !important; font-weight: 700 !important; color: var(--gold) !important; margin-top: 0 !important; }
 
     .stTextInput > div > div > input,
     textarea, .stTextArea textarea, [data-baseweb="input"] input {
@@ -392,7 +394,7 @@ st.markdown("""
         letter-spacing: 0.2px;
     }
     .hero-logo {
-        width: min(220px, 56vw);
+        width: min(170px, 34vw);
         display: block;
         margin: 0 auto 1rem auto;
         border-radius: 14px;
@@ -445,7 +447,7 @@ st.markdown("""
         .team-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 700px) {
-        h1 { font-size: 1.72rem !important; }
+        h1 { font-size: 1.5rem !important; }
         h2 { font-size: 1.1rem !important; }
         .glass-card, .team-card, .admin-data-card { padding: 1rem !important; }
         .hero-logo { width: min(180px, 62vw); }
@@ -697,7 +699,7 @@ if not st.session_state.user:
     with col2:
         l1, l2, l3 = st.columns([1, 2, 1])
         with l2:
-            st.image(LOGO_SOURCE, use_container_width=True)
+            st.image(LOGO_SOURCE, width=300)
         st.markdown("""
             <div class="glass-card hero-panel" style="text-align: center;">
                 <h1 style="color:#EAF2FF !important;">Justice Lens</h1>
