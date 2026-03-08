@@ -30,26 +30,46 @@ st.set_page_config(
 # --- PREMIUM NEAT & LOGO-MATCHED UI (Navy & Gold) ---
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap');
     
     /* 1. THEME VARIABLES */
     :root {
-        --navy: #0F172A;
-        --gold: #C5A059;
-        --slate: #1E293B;
-        --border: #E2E8F0;
-        --bg-light: #F8FAFC;
+        --ink: #0B1324;
+        --navy: #14213D;
+        --blue: #1D4ED8;
+        --gold: #D4A84B;
+        --slate: #24344F;
+        --border: #DDE4EF;
+        --bg-light: #F4F8FF;
+        --card-bg: rgba(255, 255, 255, 0.88);
+        --shadow: 0 14px 35px rgba(11, 19, 36, 0.12);
     }
 
-    /* 2. TEXT VISIBILITY FIX */
-    /* Force Navy for content, but allow white for buttons */
+    /* 2. TYPOGRAPHY / BASE */
     html, body, [data-testid="stMarkdownContainer"] p, 
     .stMarkdown, label, li, h1, h2, h3 { 
-        font-family: 'Inter', sans-serif !important;
-        color: var(--navy) !important; 
+        font-family: 'Manrope', sans-serif !important;
+        color: var(--ink) !important;
     }
-    
-    .stApp { background: #FFFFFF; }
+    h1, h2, h3 {
+        font-family: 'Sora', sans-serif !important;
+        letter-spacing: -0.02em;
+    }
+    .stApp {
+        background:
+            radial-gradient(circle at 12% 18%, rgba(212, 168, 75, 0.20), transparent 35%),
+            radial-gradient(circle at 85% 3%, rgba(29, 78, 216, 0.15), transparent 30%),
+            linear-gradient(180deg, #F9FCFF 0%, #EFF5FF 46%, #FDFEFF 100%) !important;
+        min-height: 100vh;
+    }
+    .main .block-container {
+        padding-top: 2rem !important;
+        animation: fadeUp 0.55s ease-out;
+    }
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 
     /* 3. SIDEBAR TOGGLE & ICON CLEANUP */
     [data-testid="stSidebarCollapseButton"] button, 
@@ -58,8 +78,6 @@ st.markdown("""
         border: none !important;
         position: relative !important;
     }
-
-    /* Target and hide the glitchy icon text labels permanently */
     [data-testid="stSidebarCollapseButton"] button div p, 
     [data-testid="stHeader"] button div p,
     [data-testid="stExpander"] summary div p,
@@ -72,7 +90,6 @@ st.markdown("""
         display: none !important;
         visibility: hidden !important;
     }
-
     [data-testid="stSidebarCollapseButton"] button::before {
         content: '<<';
         color: #FFFFFF !important;
@@ -80,7 +97,6 @@ st.markdown("""
         font-size: 1.2rem !important;
         visibility: visible !important;
     }
-
     [data-testid="stHeader"] button::before {
         content: '>>';
         color: var(--navy) !important;
@@ -89,7 +105,7 @@ st.markdown("""
         visibility: visible !important;
     }
 
-    /* 4. HIDE STREAMLIT BRANDING */
+    /* 4. CLEAN HEADER */
     [data-testid="stStatusWidget"], .st-emotion-cache-zt53z0 {
         display: none !important;
         visibility: hidden !important;
@@ -99,60 +115,127 @@ st.markdown("""
         border: none !important;
     }
 
-    /* 5. SIDEBAR DESIGN */
+    /* 5. SIDEBAR */
     section[data-testid="stSidebar"] {
-        background-color: var(--navy) !important;
-        border-right: 1px solid var(--slate);
+        background: linear-gradient(165deg, #0B1324 8%, #14213D 56%, #1E3A8A 100%) !important;
+        border-right: 1px solid rgba(255,255,255,0.12);
+        box-shadow: inset -1px 0 0 rgba(255,255,255,0.12);
     }
-    section[data-testid="stSidebar"] * { 
-        color: #FFFFFF !important; 
-        font-size: 0.85rem !important; 
-    }
-    div[data-testid="stSidebarUserContent"] .st-at {
-        background-color: var(--gold) !important;
-        border-radius: 6px;
-    }
-
-    /* 6. NEAT COMPONENTS */
-    .glass-card {
-        background: #FFFFFF !important;
-        padding: 1.5rem;
-        border-radius: 1rem;
-        border: 1px solid var(--border);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        margin-bottom: 1rem;
-    }
-    h1 { font-size: 2rem !important; font-weight: 800 !important; }
-    h2 { font-size: 1.3rem !important; font-weight: 700 !important; margin-bottom: 0.8rem !important; }
-    h3 { font-size: 1rem !important; font-weight: 700 !important; color: var(--gold) !important; margin-top: 0 !important; }
-
-    /* 7. THEMED BUTTONS - CRITICAL VISIBILITY FIX */
-    .stButton > button {
-        width: 100%; border-radius: 6px; border: none; padding: 0.5rem 1rem;
-        font-weight: 700; background: var(--navy);
-        color: #FFFFFF !important; /* Force White Text */
-        transition: 0.3s;
-        text-transform: uppercase; letter-spacing: 1px;
-        font-size: 0.75rem !important;
-    }
-    .stButton > button:hover { 
-        background: var(--gold); 
+    section[data-testid="stSidebar"] * {
         color: #FFFFFF !important;
-        transform: translateY(-1px); 
+        font-size: 0.87rem !important;
+    }
+    section[data-testid="stSidebar"] [data-baseweb="tab-list"] {
+        gap: 8px;
+        padding: 6px;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.08);
+    }
+    section[data-testid="stSidebar"] [data-baseweb="tab"] {
+        border-radius: 8px !important;
+        transition: all 0.2s ease !important;
+    }
+    section[data-testid="stSidebar"] [aria-selected="true"] {
+        background: var(--gold) !important;
+        color: #111827 !important;
+        font-weight: 800 !important;
     }
 
-    /* 8. ELITE CHAT INTERFACE */
+    /* 6. CARDS */
+    .glass-card {
+        background: var(--card-bg) !important;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        padding: 1.6rem;
+        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.75);
+        box-shadow: var(--shadow);
+        margin-bottom: 1rem;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        animation: fadeUp 0.5s ease both;
+    }
+    .glass-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 18px 36px rgba(11, 19, 36, 0.16);
+    }
+    .hero-panel {
+        position: relative;
+        overflow: hidden;
+    }
+    .hero-panel::before {
+        content: "";
+        position: absolute;
+        inset: -30% auto auto -10%;
+        width: 320px;
+        height: 320px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(212,168,75,0.30), transparent 68%);
+        pointer-events: none;
+        animation: pulseGlow 4s ease-in-out infinite;
+    }
+    @keyframes pulseGlow {
+        0%,100% { transform: scale(1); opacity: 0.8; }
+        50% { transform: scale(1.15); opacity: 0.45; }
+    }
+    h1 { font-size: 2.2rem !important; font-weight: 800 !important; }
+    h2 { font-size: 1.35rem !important; font-weight: 700 !important; margin-bottom: 0.8rem !important; }
+    h3 { font-size: 1rem !important; font-weight: 700 !important; color: #9A6B11 !important; margin-top: 0 !important; }
+
+    /* 7. INPUTS / BUTTONS */
+    .stTextInput > div > div > input {
+        border-radius: 10px !important;
+        border: 1px solid #CFD8E8 !important;
+        background: rgba(255,255,255,0.95) !important;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+    }
+    .stTextInput > div > div > input:focus {
+        border-color: #1D4ED8 !important;
+        box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15) !important;
+    }
+    .stButton > button {
+        width: 100%; border-radius: 10px; border: none; padding: 0.58rem 1rem;
+        font-weight: 800; background: linear-gradient(135deg, #0F1B36 0%, #1D4ED8 100%);
+        color: #FFFFFF !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        text-transform: uppercase; letter-spacing: 1px;
+        font-size: 0.74rem !important;
+        box-shadow: 0 8px 20px rgba(29, 78, 216, 0.25);
+    }
+    .stButton > button:hover {
+        filter: brightness(1.08);
+        color: #FFFFFF !important;
+        transform: translateY(-2px);
+        box-shadow: 0 12px 26px rgba(29, 78, 216, 0.30);
+    }
+    .stFormSubmitButton > button {
+        border-radius: 10px !important;
+        background: linear-gradient(90deg, #14213D, #1E3A8A) !important;
+        color: #fff !important;
+        border: 1px solid rgba(255,255,255,0.12) !important;
+    }
+
+    /* 8. CHAT */
     .chat-container {
         max-width: 900px; margin: 0 auto;
-        padding: 1.5rem; background: #FFFFFF; border-radius: 1rem;
+        padding: 1.4rem; background: rgba(255,255,255,0.78);
+        border-radius: 18px;
+        border: 1px solid rgba(255,255,255,0.70);
+        backdrop-filter: blur(8px);
+        box-shadow: var(--shadow);
     }
     .bubble-container { display: flex; flex-direction: column; gap: 1.2rem; }
     .chat-bubble {
         padding: 1rem 1.4rem; border-radius: 1.25rem; font-size: 0.95rem; line-height: 1.5;
-        max-width: 85%; box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        max-width: 85%; box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+        animation: bubbleIn 0.25s ease both;
+    }
+    @keyframes bubbleIn {
+        from { opacity: 0; transform: translateY(6px) scale(0.99); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
     }
     .user-bubble {
-        background: var(--navy); color: #FFFFFF !important;
+        background: linear-gradient(135deg, #14213D, #1D4ED8);
+        color: #FFFFFF !important;
         align-self: flex-end; border-bottom-right-radius: 4px;
     }
     .ai-bubble {
@@ -160,32 +243,53 @@ st.markdown("""
         align-self: flex-start; border-bottom-left-radius: 4px;
         border: 1px solid var(--border);
     }
-    .role-label { 
-        font-size: 0.6rem; font-weight: 900; color: var(--gold) !important; 
+    .role-label {
+        font-size: 0.6rem; font-weight: 900; color: var(--gold) !important;
         margin-bottom: 3px; text-transform: uppercase; letter-spacing: 2px;
     }
 
-    /* 9. ADMIN DASHBOARD CARDS */
+    /* 9. ADMIN */
     .admin-data-card {
-        background: white !important; border: 1px solid var(--border) !important;
+        background: rgba(255,255,255,0.96) !important; border: 1px solid var(--border) !important;
         border-radius: 12px; padding: 1.25rem; margin-bottom: 0.8rem;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        box-shadow: 0 8px 20px rgba(11, 19, 36, 0.08);
     }
     .admin-data-card b, .admin-data-card p { color: var(--navy) !important; }
     .admin-data-card p { margin: 0; font-size: 0.8rem !important; opacity: 0.8; }
-    
     .status-badge {
         font-weight: 800; font-size: 0.65rem; padding: 2px 8px; border-radius: 4px;
         color: white !important;
     }
 
-    /* 10. PROGRESS BAR */
-    .stProgress > div > div > div > div { background-color: var(--gold) !important; }
-    
-    /* Expander visibility fix */
-    [data-testid="stExpander"] summary p { 
-        font-weight: 700 !important; 
-        color: var(--navy) !important; 
+    /* 10. MISC */
+    .stProgress > div > div > div > div {
+        background: linear-gradient(90deg, #D4A84B, #EAC67E) !important;
+    }
+    [data-testid="stRadio"] label {
+        padding: 0.4rem 0.55rem;
+        border-radius: 8px;
+        transition: background 0.2s ease;
+    }
+    [data-testid="stRadio"] label:hover {
+        background: rgba(212, 168, 75, 0.14);
+    }
+    .team-card {
+        background: var(--card-bg);
+        padding: 1.5rem;
+        border-radius: 1rem;
+        text-align: center;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        animation: fadeUp 0.5s ease both;
+    }
+    .team-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 18px 36px rgba(11, 19, 36, 0.15);
+    }
+    [data-testid="stExpander"] summary p {
+        font-weight: 700 !important;
+        color: var(--navy) !important;
         font-size: 1rem !important;
     }
     </style>
@@ -361,7 +465,7 @@ if not st.session_state.user:
     col1, col2, col3 = st.columns([1, 8, 1])
     with col2:
         st.markdown("""
-            <div class="glass-card" style="text-align: center;">
+            <div class="glass-card hero-panel" style="text-align: center;">
                 <h1 style="color:#0F172A !important;">Justice Lens</h1>
                 <p style="color:#C5A059 !important; font-weight:700; font-size:1rem; letter-spacing:2px; margin-top:-10px;">SECURE AI CYBER LEGAL DEFENSE</p>
                 <div style="background:#F8FAFC; padding:2rem; border-radius:1rem; border:1px solid #E2E8F0; text-align:left; margin: 2rem 0;">
@@ -434,7 +538,7 @@ else:
         team = [{"n": "Archana V S", "r": "Legal Logic Architect"}, {"n": "Dolus K Shyju", "r": "Technical Lead"}, {"n": "RoseSaniya P X", "r": "UI Engineering"}, {"n": "Sreeraj S P", "r": "Database Design"}]
         cols = st.columns(4)
         for i, m in enumerate(team):
-            cols[i].markdown(f'''<div style="background:white; padding:1.5rem; border-radius:1rem; text-align:center; border:1px solid #E2E8F0; box-shadow:0 4px 10px rgba(0,0,0,0.03);"><div style="font-size:3rem; margin-bottom:10px;">👤</div><h3 style="font-size:1rem !important; border:none; padding:0;">{m["n"]}</h3><p style="color:var(--gold) !important; font-weight:800; font-size:0.8rem !important; margin-top:5px;">{m["r"]}</p></div>''', unsafe_allow_html=True)
+            cols[i].markdown(f'''<div class="team-card"><div style="font-size:3rem; margin-bottom:10px;">👤</div><h3 style="font-size:1rem !important; border:none; padding:0;">{m["n"]}</h3><p style="color:var(--gold) !important; font-weight:800; font-size:0.8rem !important; margin-top:5px;">{m["r"]}</p></div>''', unsafe_allow_html=True)
 
     elif page == "🚨 Admin Dashboard" and st.session_state.admin_mode:
         st.title("🚨 System Oversight")
