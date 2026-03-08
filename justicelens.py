@@ -137,6 +137,18 @@ st.markdown("""
         display: none !important;
         visibility: hidden !important;
     }
+    /* Hide Streamlit creator/hosting badges shown in app footer */
+    [data-testid="stAppCreatorBadge"],
+    [data-testid="stAppHostingBadge"],
+    [data-testid="stBadge"],
+    [data-testid="stCaptionContainer"] a[href*="streamlit.io"],
+    a[href*="streamlit.io/cloud"],
+    a[href*="share.streamlit.io"] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
     [data-testid="stToolbarActions"] {
         display: none !important;
     }
