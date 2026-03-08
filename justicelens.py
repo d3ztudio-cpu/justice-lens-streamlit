@@ -716,51 +716,96 @@ else:
         st.title("🚨 System Oversight")
         if db:
             u_ref = db.collection("artifacts").document("justicelens-law").collection("public").document("data").collection("users")
-            
-            st.markdown("### 👥 Active User Directory")
-            for u in u_ref.stream():
-                ud = u.to_dict()
-                last_active = ud.get('last_active').strftime('%d %b, %H:%M') if ud.get('last_active') else "N/A"
-                status_color = "#ef4444" if ud.get('is_banned') else "#22c55e"
-                
-                # USER CARD WITH FORCED NAVY TEXT
+            user_docs = list(u_ref.stream())
+            users = []
+            for u in user_docs:
+                ud = u.to_dict() or {}
+                users.append({
+                    "doc_id": u.id,
+                    "name": ud.get("name", "Unknown"),
+                    "email": ud.get("email", ""),
+                    "uid": ud.get("uid", u.id),
+                    "is_banned": bool(ud.get("is_banned", False)),
+                    "last_active": ud.get("last_active")
+                })
+
+            total_users = len(users)
+            banned_users = sum(1 for x in users if x["is_banned"])
+            active_users = total_users - banned_users
+            guest_users = sum(1 for x in users if str(x["email"]).lower() == "guest@justicelens.io")
+
+            s1, s2, s3, s4 = st.columns(4)
+            s1.metric("Total Users", total_users)
+            s2.metric("Active Users", active_users)
+            s3.metric("Banned Users", banned_users)
+            s4.metric("Guest Users", guest_users)
+
+            f1, f2 = st.columns([2, 1])
+            with f1:
+                search_q = st.text_input("Search user (name/email)", key="admin_user_search")
+            with f2:
+                status_filter = st.selectbox("Status", ["All", "Active", "Banned"], key="admin_status_filter")
+
+            filtered_users = users
+            if search_q:
+                q = search_q.strip().lower()
+                filtered_users = [x for x in filtered_users if q in str(x["name"]).lower() or q in str(x["email"]).lower()]
+            if status_filter == "Active":
+                filtered_users = [x for x in filtered_users if not x["is_banned"]]
+            elif status_filter == "Banned":
+                filtered_users = [x for x in filtered_users if x["is_banned"]]
+
+            if users:
+                export_df = pd.DataFrame([
+                    {
+                        "name": x["name"],
+                        "email": x["email"],
+                        "uid": x["uid"],
+                        "status": "BANNED" if x["is_banned"] else "ACTIVE",
+                        "last_active": x["last_active"].strftime('%Y-%m-%d %H:%M:%S') if x["last_active"] else ""
+                    } for x in users
+                ])
+                st.download_button(
+                    "DOWNLOAD USER LIST (CSV)",
+                    data=export_df.to_csv(index=False),
+                    file_name="justice_lens_users.csv",
+                    mime="text/csv",
+                    use_container_width=True
+                )
+
+            st.markdown("### 👥 User Directory")
+            if not filtered_users:
+                st.info("No users match the current filter.")
+            for ud in filtered_users:
+                last_active = ud["last_active"].strftime('%d %b, %H:%M') if ud["last_active"] else "N/A"
+                status_color = "#ef4444" if ud["is_banned"] else "#22c55e"
+
                 st.markdown(f"""
                     <div class="admin-data-card">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <div><b>{ud.get('name')}</b><p>{ud.get('email')}</p><p>Last Active: {last_active}</p></div>
-                            <div><span class="status-badge" style="background:{status_color}; color:white !important;">{'BANNED' if ud.get('is_banned') else 'ACTIVE'}</span></div>
+                            <div><b>{ud['name']}</b><p>{ud['email']}</p><p>Last Active: {last_active}</p></div>
+                            <div><span class="status-badge" style="background:{status_color}; color:white !important;">{'BANNED' if ud['is_banned'] else 'ACTIVE'}</span></div>
                         </div>
                     </div>
                 """, unsafe_allow_html=True)
-                
+
                 c_btn1, c_btn2 = st.columns(2)
                 with c_btn1:
-                    b_label = "✅ UNBAN" if ud.get('is_banned') else "🚫 BAN"
-                    if st.button(b_label, key=f"ban_{u.id}"):
-                        u_ref.document(u.id).update({"is_banned": not ud.get('is_banned')})
+                    b_label = "✅ UNBAN" if ud["is_banned"] else "🚫 BAN"
+                    if st.button(b_label, key=f"ban_{ud['doc_id']}"):
+                        u_ref.document(ud["doc_id"]).update({"is_banned": not ud["is_banned"]})
                         st.rerun()
                 with c_btn2:
-                    if st.button("🗑️ DELETE", key=f"del_{u.id}"):
+                    if st.button("🗑️ DELETE", key=f"del_{ud['doc_id']}"):
                         try:
-                            auth.delete_user(u.id)
+                            auth.delete_user(ud["doc_id"])
                         except:
                             pass
                         try:
-                            u_ref.document(u.id).delete()
+                            u_ref.document(ud["doc_id"]).delete()
                             st.rerun()
                         except Exception as e:
                             st.error(f"Error: {e}")
-            
-            st.markdown("---")
-            # Consultation stream fixed visibility and always visible header
-            st.markdown("### 📋 Consultation Stream")
-            logs = db.collection("artifacts").document("justicelens-law").collection("public").document("data").collection("logs").stream()
-            for l in logs:
-                ld = l.to_dict()
-                # Use label with forced visibility for expander summary
-                with st.expander(f"Case: {ld.get('user')} | {ld.get('timestamp').strftime('%H:%M:%S')}"):
-                    st.markdown(f"""<div style="color:var(--navy) !important; font-size:0.85rem; padding:10px; background:#f8fafc; border-radius:8px;">
-                        <b>Scenario:</b><br>{ld.get('query')}<br><br>
-                        <b>AI Report:</b><br>{ld.get('report')}
-                    </div>""", unsafe_allow_html=True)
+        else:
+            st.error("Database not available.")
                     
