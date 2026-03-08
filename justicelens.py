@@ -78,29 +78,29 @@ st.markdown("""
     [data-testid="stSidebarCollapseButton"] button,
     [data-testid="collapsedControl"] button,
     [data-testid="stSidebarCollapsedControl"] button {
-        background: #FFFFFF !important;
-        border: 3px solid var(--accent) !important;
+        background: #0E2448 !important;
+        border: 1px solid #2C5A98 !important;
         border-radius: 999px !important;
-        width: 44px !important;
-        height: 44px !important;
+        width: 36px !important;
+        height: 36px !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
-        box-shadow: 0 0 0 3px rgba(67,162,255,0.20), 0 10px 16px rgba(2, 9, 22, 0.35) !important;
+        box-shadow: 0 4px 10px rgba(2, 9, 22, 0.24) !important;
         padding: 0 !important;
     }
     [data-testid="stSidebarCollapseButton"] button svg,
     [data-testid="collapsedControl"] button svg,
     [data-testid="stSidebarCollapsedControl"] button svg {
-        color: #113061 !important;
-        width: 1.05rem !important;
-        height: 1.05rem !important;
+        color: #DCEAFF !important;
+        width: 0.92rem !important;
+        height: 0.92rem !important;
     }
     [data-testid="stSidebarCollapseButton"] button svg path,
     [data-testid="collapsedControl"] button svg path,
     [data-testid="stSidebarCollapsedControl"] button svg path {
-        stroke: #113061 !important;
-        fill: #113061 !important;
+        stroke: #DCEAFF !important;
+        fill: #DCEAFF !important;
     }
     [data-testid="stSidebarCollapseButton"] button:hover,
     [data-testid="collapsedControl"] button:hover,
@@ -110,15 +110,18 @@ st.markdown("""
     }
     [data-testid="collapsedControl"] button p,
     [data-testid="stSidebarCollapsedControl"] button p {
-        color: #113061 !important;
+        color: #DCEAFF !important;
         font-weight: 900 !important;
-        font-size: 1.05rem !important;
+        font-size: 0.95rem !important;
     }
     [data-testid="stDecoration"], [data-testid="stStatusWidget"],
     [data-testid="stMainMenu"], .st-emotion-cache-zt53z0,
     button[title="Main menu"], button[aria-label="Main menu"] {
         display: none !important;
         visibility: hidden !important;
+    }
+    [data-testid="stToolbarActions"] {
+        display: none !important;
     }
     header[data-testid="stHeader"] {
         background-color: transparent !important;
