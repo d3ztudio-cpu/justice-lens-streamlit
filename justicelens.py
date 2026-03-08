@@ -71,38 +71,14 @@ st.markdown("""
         to { opacity: 1; transform: translateY(0); }
     }
 
-    /* 3. SIDEBAR TOGGLE & ICON CLEANUP */
-    [data-testid="stSidebarCollapseButton"] button, 
-    [data-testid="stHeader"] button {
-        background-color: transparent !important;
-        border: none !important;
-        position: relative !important;
-    }
-    [data-testid="stSidebarCollapseButton"] button div p, 
-    [data-testid="stHeader"] button div p,
-    [data-testid="stExpander"] summary div p,
-    span:contains("keyboard_"),
-    div:contains("keyboard_"),
-    span:contains("arrow_right"),
-    div:contains("arrow_right") {
-        font-size: 0px !important;
-        color: transparent !important;
+    /* 3. HEADER / TOOLBAR CLEANUP (REMOVE UNWANTED ARROWS) */
+    [data-testid="stToolbar"] {
         display: none !important;
         visibility: hidden !important;
     }
-    [data-testid="stSidebarCollapseButton"] button::before {
-        content: '<<';
-        color: #FFFFFF !important;
-        font-weight: 900 !important;
-        font-size: 1.2rem !important;
-        visibility: visible !important;
-    }
-    [data-testid="stHeader"] button::before {
-        content: '>>';
-        color: var(--navy) !important;
-        font-weight: 900 !important;
-        font-size: 1.2rem !important;
-        visibility: visible !important;
+    [data-testid="stSidebarCollapseButton"] button {
+        background-color: transparent !important;
+        border: none !important;
     }
 
     /* 4. CLEAN HEADER */
@@ -123,7 +99,24 @@ st.markdown("""
     }
     section[data-testid="stSidebar"] * {
         color: #FFFFFF !important;
-        font-size: 0.87rem !important;
+        font-size: 0.9rem !important;
+    }
+    section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {
+        padding: 0.6rem 0.75rem 1rem 0.75rem !important;
+    }
+    section[data-testid="stSidebar"] .stTextInput > label {
+        font-weight: 700 !important;
+        margin-bottom: 0.25rem !important;
+    }
+    section[data-testid="stSidebar"] .stTextInput > div > div > input {
+        min-height: 42px !important;
+        padding: 0.55rem 0.75rem !important;
+        font-size: 0.9rem !important;
+        color: #0B1324 !important;
+        background: rgba(255,255,255,0.98) !important;
+    }
+    section[data-testid="stSidebar"] .stTabs [data-baseweb="tab-list"] {
+        margin-bottom: 0.55rem !important;
     }
     section[data-testid="stSidebar"] [data-baseweb="tab-list"] {
         gap: 8px;
@@ -186,6 +179,16 @@ st.markdown("""
         border-radius: 10px !important;
         border: 1px solid #CFD8E8 !important;
         background: rgba(255,255,255,0.95) !important;
+        color: #0B1324 !important;
+        caret-color: #0B1324 !important;
+    }
+    .stTextInput > div > div > input::placeholder {
+        color: #64748B !important;
+        opacity: 1 !important;
+    }
+    textarea, .stTextArea textarea, [data-baseweb="input"] input {
+        color: #0B1324 !important;
+        caret-color: #0B1324 !important;
         transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
     }
     .stTextInput > div > div > input:focus {
@@ -286,6 +289,35 @@ st.markdown("""
     .team-card:hover {
         transform: translateY(-4px);
         box-shadow: 0 18px 36px rgba(11, 19, 36, 0.15);
+    }
+    .hero-logo {
+        width: min(220px, 56vw);
+        display: block;
+        margin: 0 auto 1rem auto;
+        border-radius: 14px;
+        border: 1px solid rgba(20, 33, 61, 0.15);
+        box-shadow: 0 10px 24px rgba(11, 19, 36, 0.12);
+    }
+    @media (max-width: 960px) {
+        .main .block-container {
+            padding-top: 1rem !important;
+            padding-left: 0.8rem !important;
+            padding-right: 0.8rem !important;
+        }
+        .chat-container {
+            padding: 1rem;
+        }
+        .chat-bubble {
+            max-width: 96%;
+            font-size: 0.92rem;
+        }
+    }
+    @media (max-width: 700px) {
+        h1 { font-size: 1.65rem !important; }
+        h2 { font-size: 1.1rem !important; }
+        .glass-card, .team-card {
+            padding: 1rem !important;
+        }
     }
     [data-testid="stExpander"] summary p {
         font-weight: 700 !important;
@@ -466,6 +498,7 @@ if not st.session_state.user:
     with col2:
         st.markdown("""
             <div class="glass-card hero-panel" style="text-align: center;">
+                <img class="hero-logo" src="https://dffijjxsicbmyyufqozf.supabase.co/storage/v1/object/public/Elements/JUSTICE%20LENS.jpg" alt="Justice Lens Logo" />
                 <h1 style="color:#0F172A !important;">Justice Lens</h1>
                 <p style="color:#C5A059 !important; font-weight:700; font-size:1rem; letter-spacing:2px; margin-top:-10px;">SECURE AI CYBER LEGAL DEFENSE</p>
                 <div style="background:#F8FAFC; padding:2rem; border-radius:1rem; border:1px solid #E2E8F0; text-align:left; margin: 2rem 0;">
