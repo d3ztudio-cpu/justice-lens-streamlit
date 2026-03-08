@@ -497,34 +497,85 @@ def check_ban(uid):
     return doc.to_dict().get("is_banned", False) if doc.exists else False
 
 # --- AI LOGIC ---
-def get_scope(text):
+def get_intent_category(user_input):
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
-    data = {
-        "model": "llama-3.1-8b-instant",
-        "messages": [
-            {"role": "system", "content": "Respond ONLY 'CYBER' or 'PHYSICAL'. Online scams = CYBER. Physical theft = PHYSICAL."},
-            {"role": "user", "content": text}
-        ], "temperature": 0.0
-    }
-    try:
-        res = requests.post(url, headers=headers, json=data, timeout=8)
-        return res.json()['choices'][0]['message']['content'].strip().upper()
-    except: return "PHYSICAL"
 
-def legal_brain(text, context):
-    url = "https://api.groq.com/openai/v1/chat/completions"
-    headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
-    prompt = f"SCENARIO: {text}\nLAW DATA: {context}\nRole: Expert Indian Cyber Lawyer. Markdown Citations: 📜 SECTIONS, ⚖️ PUNISHMENTS, 📊 WIN PROBABILITY, 🚀 ACTION PLAN."
+    classifier_prompt = f"""
+    Analyze the user input: "{user_input}"
+    Categories:
+    1. PHYSICAL: Related to physical crimes (theft, assault).
+    2. CYBER_SCENARIO: A real-life cyber problem/victim situation.
+    3. CYBER_EXPLAIN: A direct request for legal definitions (e.g. "Explain 70").
+    Respond with ONLY the category name.
+    """
     data = {
         "model": "llama-3.1-8b-instant",
-        "messages": [{"role": "user", "content": prompt}], "temperature": 0.2
+        "messages": [{"role": "user", "content": classifier_prompt}],
+        "temperature": 0.0
     }
     try:
-        res = requests.post(url, headers=headers, json=data, timeout=12)
-        content = res.json()['choices'][0]['message']['content']
-        return content.replace("**", "")
-    except: return "⚠️ AI Engine Error."
+        response = requests.post(url, headers=headers, json=data, timeout=10)
+        return response.json()['choices'][0]['message']['content'].strip().upper()
+    except:
+        return "PHYSICAL"
+
+def ask_groq_lawyer(user_input, law_evidence, category):
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
+
+    case_history = """
+    HISTORICAL PRECEDENTS (USE FOR SCENARIOS):
+    - Hacking/Unauthorized Access: State of Tamil Nadu vs. Suhas Katti (2004).
+    - Data Negligence: Shreya Singhal vs. Union of India (2015).
+    - Financial Fraud: CBI vs. Arif Azim (Sony Sambandh Case).
+    """
+
+    legal_anchor = """
+    INTERNAL REFERENCE (ABSOLUTE TRUTH):
+    - Section 70: Protected Systems. Definition: Unauthorized access to systems declared as critical infrastructure by the Government. Punishment = Up to 10 years.
+    - Section 67A: Sexually Explicit Content. Definition: Publishing or transmitting material containing sexually explicit acts in electronic form. Punishment = 5-7 years + 10 Lakh fine.
+    - Section 66F: Cyber Terrorism. Definition: Acts done with intent to threaten unity, integrity, or security of India via computer. Punishment = LIFE IMPRISONMENT.
+    - Section 66E: Violation of Privacy. Definition: Intentionally capturing or publishing private images of any person without consent. Punishment = 3 years / 2 Lakh fine.
+    - Section 43A: Corporate Data Negligence. Definition: Failure by a body corporate to implement reasonable security practices for sensitive data. Punishment = Compensation ONLY.
+    - Section 66B: Stolen Computer Resource. Punishment = 3 years / 5 Lakh fine.
+    """
+
+    if "EXPLAIN" in category:
+        system_prompt = f"""
+        {legal_anchor}
+        You are a Precise Legal Reference Tool.
+        - Provide: OFFICIAL TITLE, DEFINITION, and EXACT PUNISHMENT.
+        - STRICT RULE: DO NOT provide 'Win Probability', 'Action Plan', or 'Case History'.
+        - Use the definitions exactly as provided in the INTERNAL REFERENCE.
+        """
+    else:
+        system_prompt = f"""
+        {legal_anchor}
+        {case_history}
+        You are an Expert Cyber Law Consultant. Use this EXACT format:
+        ⚖️ RELEVANT SECTIONS: [Cite sections]
+        ⚖️ PUNISHMENTS: [List jail/compensation]
+        📚 CASE HISTORY: [Cite landmark case]
+        📊 WIN PROBABILITY: [Percentage] - [Reasoning]
+        🚀 ACTION PLAN:
+        1. Notify CERT-In (www.cert-in.org.in) within 6 hours.
+        2. File complaint at www.cybercrime.gov.in.
+        3. Appoint a Cyber Forensic Auditor.
+        """
+
+    full_prompt = f"{system_prompt}\nUSER QUERY: {user_input}\nDATABASE EVIDENCE: {law_evidence}"
+
+    data = {
+        "model": "llama-3.1-8b-instant",
+        "messages": [{"role": "user", "content": full_prompt}],
+        "temperature": 0.0
+    }
+    try:
+        response = requests.post(url, headers=headers, json=data, timeout=18)
+        return response.json()['choices'][0]['message']['content']
+    except:
+        return "⚠️ AI Engine Error."
 
 # --- SIDEBAR UI ---
 with st.sidebar:
@@ -676,22 +727,23 @@ else:
                 if user_msg:
                     st.session_state.chat_history.append({"role": "user", "content": user_msg})
                     with st.spinner("Analyzing Scope..."):
-                        scope = get_scope(user_msg)
-                        if "PHYSICAL" in scope:
-                            ans = "⚠️ REJECTION: Physical crime detected. Justice Lens handles digital crimes ONLY under the IT Act 2000. Contact local police."
+                        category = get_intent_category(user_msg)
+                        if "PHYSICAL" in category:
+                            ans = "⚠️ This tool handles Cyber Crimes only. For physical theft, file an FIR under IPC."
                         else:
                             with st.spinner("Querying Legal Database..."):
-                                ctx = "General context applied."
+                                dataset_evidence = "General context."
                                 try:
                                     idx, emb = get_backend()
                                     if idx and emb:
                                         v = emb.embed_query(user_msg)
-                                        m = idx.query(vector=v, top_k=1, include_metadata=True)
-                                        if m['matches'] and m['matches'][0]['score'] > 0.4:
-                                            ctx = m['matches'][0]['metadata'].get('text', '')
-                                except: 
+                                        m = idx.query(vector=v, top_k=5, include_metadata=True)
+                                        dataset_evidence = " ".join(
+                                            [x.get('metadata', {}).get('text', '') for x in m.get('matches', [])]
+                                        ) or "General context."
+                                except:
                                     pass
-                                ans = legal_brain(user_msg, ctx)
+                                ans = ask_groq_lawyer(user_msg, dataset_evidence, category)
                     st.session_state.chat_history.append({"role": "assistant", "content": ans})
                     if db:
                         db.collection("artifacts").document("justicelens-law").collection("public").document("data").collection("logs").add({
