@@ -151,6 +151,25 @@ st.markdown("""
         border-radius: 11px !important;
         padding: 0.58rem 0.76rem !important;
     }
+    section[data-testid="stSidebar"] [data-baseweb="input"] {
+        align-items: center !important;
+        border-radius: 11px !important;
+        overflow: hidden !important;
+    }
+    section[data-testid="stSidebar"] [data-baseweb="input"] > div {
+        display: flex !important;
+        align-items: center !important;
+    }
+    section[data-testid="stSidebar"] input[type="password"] {
+        padding-right: 2.7rem !important;
+        line-height: 1.2 !important;
+    }
+    section[data-testid="stSidebar"] [data-baseweb="input"] button {
+        margin-right: 0.25rem !important;
+        min-width: 1.9rem !important;
+        height: 1.9rem !important;
+        border-radius: 0.5rem !important;
+    }
     section[data-testid="stSidebar"] .stTabs [data-baseweb="tab-list"] {
         margin-bottom: 0.6rem !important;
     }
