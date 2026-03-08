@@ -76,20 +76,29 @@ st.markdown("""
 
     /* 3. HEADER / SIDEBAR TOGGLE */
     [data-testid="stSidebarCollapseButton"] button {
-        background: rgba(20, 33, 61, 0.12) !important;
-        border: 1px solid rgba(20, 33, 61, 0.20) !important;
+        background: #D4A84B !important;
+        border: 1px solid #C0922E !important;
         border-radius: 10px !important;
         width: 40px !important;
         height: 36px !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
+        box-shadow: 0 6px 14px rgba(20, 33, 61, 0.16) !important;
     }
     [data-testid="stSidebarCollapseButton"] button svg {
         display: block !important;
-        color: #14213D !important;
+        color: #0B1324 !important;
         width: 1.1rem !important;
         height: 1.1rem !important;
+    }
+    [data-testid="stSidebarCollapseButton"] button svg path {
+        stroke: #0B1324 !important;
+        fill: #0B1324 !important;
+    }
+    [data-testid="stSidebarCollapseButton"] button:hover {
+        filter: brightness(1.05);
+        transform: translateY(-1px);
     }
     [data-testid="stToolbarActions"] {
         display: none !important;
@@ -369,7 +378,7 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # --- BOOTSTRAP / INITIALIZATION ---
-@st.cache_resource
+@st.cache_resource(show_spinner=False)
 def init_backend():
     try:
         splash = st.empty()
