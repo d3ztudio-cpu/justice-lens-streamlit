@@ -365,6 +365,32 @@ st.markdown("""
         transform: translateY(-3px);
         box-shadow: 0 18px 35px rgba(2, 9, 22, 0.44);
     }
+    .team-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1rem;
+        margin-top: 0.8rem;
+    }
+    .team-card .avatar {
+        font-size: 2.4rem;
+        margin-bottom: 0.75rem;
+        line-height: 1;
+    }
+    .team-card .team-name {
+        font-family: 'Space Grotesk', sans-serif !important;
+        font-size: 1.45rem;
+        font-weight: 700;
+        color: #EAF2FF !important;
+        margin-bottom: 0.35rem;
+        word-break: break-word;
+    }
+    .team-card .team-role {
+        font-size: 0.95rem;
+        line-height: 1.45;
+        color: #E0B45B !important;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+    }
     .hero-logo {
         width: min(220px, 56vw);
         display: block;
@@ -416,12 +442,15 @@ st.markdown("""
         }
         .chat-container { padding: 1rem; }
         .chat-bubble { max-width: 96%; font-size: 0.92rem; }
+        .team-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 700px) {
         h1 { font-size: 1.72rem !important; }
         h2 { font-size: 1.1rem !important; }
         .glass-card, .team-card, .admin-data-card { padding: 1rem !important; }
         .hero-logo { width: min(180px, 62vw); }
+        .team-grid { grid-template-columns: 1fr; }
+        .team-card .team-name { font-size: 1.3rem; }
     }
     @media (max-width: 640px) {
         section[data-testid="stSidebar"] { min-width: 84vw !important; }
@@ -795,10 +824,25 @@ else:
 
     elif page == "Project Team":
         st.title("🛡️ The Core Developers")
-        team = [{"n": "Archana V S", "r": "Legal Logic Architect"}, {"n": "Dolus K Shyju", "r": "Technical Lead"}, {"n": "RoseSaniya P X", "r": "UI Engineering"}, {"n": "Sreeraj S P", "r": "Database Design"}]
-        cols = st.columns(4)
-        for i, m in enumerate(team):
-            cols[i].markdown(f'''<div class="team-card"><div style="font-size:3rem; margin-bottom:10px;">👤</div><h3 style="font-size:1rem !important; border:none; padding:0;">{m["n"]}</h3><p style="color:var(--gold) !important; font-weight:800; font-size:0.8rem !important; margin-top:5px;">{m["r"]}</p></div>''', unsafe_allow_html=True)
+        team = [
+            {"n": "Archana V S", "r": "Legal Logic Architect"},
+            {"n": "Dolus K Shyju", "r": "Technical Lead"},
+            {"n": "RoseSaniya P X", "r": "UI Engineering"},
+            {"n": "Sreeraj S P", "r": "Database Design"},
+        ]
+        team_cards = "".join(
+            [
+                f'''
+                <div class="team-card">
+                    <div class="avatar">👤</div>
+                    <div class="team-name">{m["n"]}</div>
+                    <div class="team-role">{m["r"]}</div>
+                </div>
+                '''
+                for m in team
+            ]
+        )
+        st.markdown(f'<div class="team-grid">{team_cards}</div>', unsafe_allow_html=True)
 
     elif page == "🚨 Admin Dashboard" and st.session_state.admin_mode:
         st.title("🚨 System Oversight")
