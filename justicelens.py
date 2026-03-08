@@ -78,8 +78,8 @@ st.markdown("""
     [data-testid="stSidebarCollapseButton"] button,
     [data-testid="collapsedControl"] button,
     [data-testid="stSidebarCollapsedControl"] button {
-        background: #D4A84B !important;
-        border: 1px solid #C0922E !important;
+        background: #14213D !important;
+        border: 1px solid #1E3A8A !important;
         border-radius: 10px !important;
         width: 40px !important;
         height: 36px !important;
@@ -92,15 +92,15 @@ st.markdown("""
     [data-testid="collapsedControl"] button svg,
     [data-testid="stSidebarCollapsedControl"] button svg {
         display: block !important;
-        color: #0B1324 !important;
+        color: #FFFFFF !important;
         width: 1.1rem !important;
         height: 1.1rem !important;
     }
     [data-testid="stSidebarCollapseButton"] button svg path,
     [data-testid="collapsedControl"] button svg path,
     [data-testid="stSidebarCollapsedControl"] button svg path {
-        stroke: #0B1324 !important;
-        fill: #0B1324 !important;
+        stroke: #FFFFFF !important;
+        fill: #FFFFFF !important;
     }
     [data-testid="stSidebarCollapseButton"] button:hover,
     [data-testid="collapsedControl"] button:hover,
@@ -110,7 +110,7 @@ st.markdown("""
     }
     [data-testid="collapsedControl"] button p,
     [data-testid="stSidebarCollapsedControl"] button p {
-        color: #0B1324 !important;
+        color: #FFFFFF !important;
         font-weight: 900 !important;
         font-size: 1.05rem !important;
         line-height: 1 !important;
