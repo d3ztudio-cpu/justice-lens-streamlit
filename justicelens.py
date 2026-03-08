@@ -75,7 +75,9 @@ st.markdown("""
     }
 
     /* 3. HEADER / SIDEBAR TOGGLE */
-    [data-testid="stSidebarCollapseButton"] button {
+    [data-testid="stSidebarCollapseButton"] button,
+    [data-testid="collapsedControl"] button,
+    [data-testid="stSidebarCollapsedControl"] button {
         background: #D4A84B !important;
         border: 1px solid #C0922E !important;
         border-radius: 10px !important;
@@ -86,19 +88,32 @@ st.markdown("""
         justify-content: center !important;
         box-shadow: 0 6px 14px rgba(20, 33, 61, 0.16) !important;
     }
-    [data-testid="stSidebarCollapseButton"] button svg {
+    [data-testid="stSidebarCollapseButton"] button svg,
+    [data-testid="collapsedControl"] button svg,
+    [data-testid="stSidebarCollapsedControl"] button svg {
         display: block !important;
         color: #0B1324 !important;
         width: 1.1rem !important;
         height: 1.1rem !important;
     }
-    [data-testid="stSidebarCollapseButton"] button svg path {
+    [data-testid="stSidebarCollapseButton"] button svg path,
+    [data-testid="collapsedControl"] button svg path,
+    [data-testid="stSidebarCollapsedControl"] button svg path {
         stroke: #0B1324 !important;
         fill: #0B1324 !important;
     }
-    [data-testid="stSidebarCollapseButton"] button:hover {
+    [data-testid="stSidebarCollapseButton"] button:hover,
+    [data-testid="collapsedControl"] button:hover,
+    [data-testid="stSidebarCollapsedControl"] button:hover {
         filter: brightness(1.05);
         transform: translateY(-1px);
+    }
+    [data-testid="collapsedControl"] button p,
+    [data-testid="stSidebarCollapsedControl"] button p {
+        color: #0B1324 !important;
+        font-weight: 900 !important;
+        font-size: 1.05rem !important;
+        line-height: 1 !important;
     }
     [data-testid="stToolbarActions"] {
         display: none !important;
