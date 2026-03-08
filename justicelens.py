@@ -803,8 +803,7 @@ else:
                             ans = "⚠️ This tool handles Cyber Crimes only. For physical theft, file an FIR under IPC."
                         elif "NON_LEGAL" in category:
                             ans = (
-                                "ℹ️ This question is outside the cyber-legal assistant scope. "
-                                "Please ask a cybercrime legal query or open `Project Team` for website/team details."
+                                "ℹ️ when an off topic querry is send to the ai the ai must respond  like this message. Sorry, I don't have that information. Could you please provide more context about your cyber crime query?"
                             )
                         else:
                             with st.spinner("Querying Legal Database..."):
