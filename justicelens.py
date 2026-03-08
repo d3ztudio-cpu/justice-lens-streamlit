@@ -8,6 +8,7 @@ import json
 import uuid
 import requests
 import time
+import streamlit.components.v1 as components
 from pinecone import Pinecone
 from langchain_huggingface import HuggingFaceEmbeddings
 
@@ -339,6 +340,12 @@ st.markdown("""
         text-transform: uppercase;
         box-shadow: 0 8px 20px rgba(67,162,255,0.26);
     }
+    .light-panel, .light-panel p, .light-panel b {
+        color: #0B1B39 !important;
+    }
+    .light-panel h3 {
+        color: #A57316 !important;
+    }
 
     [data-testid="stExpander"] summary p {
         font-weight: 700 !important;
@@ -430,6 +437,7 @@ if "user" not in st.session_state: st.session_state.user = None
 if "chat_history" not in st.session_state: st.session_state.chat_history = []
 if "admin_mode" not in st.session_state: st.session_state.admin_mode = False
 if "view" not in st.session_state: st.session_state.view = "🤖 AI Lawyer"
+if "open_sidebar_request" not in st.session_state: st.session_state.open_sidebar_request = False
 
 # --- AUTH SYSTEM ---
 def authenticate(email, password):
@@ -489,6 +497,19 @@ def legal_brain(text, context):
         content = res.json()['choices'][0]['message']['content']
         return content.replace("**", "")
     except: return "⚠️ AI Engine Error."
+
+if st.session_state.open_sidebar_request:
+    components.html(
+        """
+        <script>
+        const doc = window.parent.document;
+        const btn = doc.querySelector('[data-testid="collapsedControl"] button, [data-testid="stSidebarCollapsedControl"] button');
+        if (btn) { btn.click(); }
+        </script>
+        """,
+        height=0,
+    )
+    st.session_state.open_sidebar_request = False
 
 # --- SIDEBAR UI ---
 with st.sidebar:
@@ -557,13 +578,17 @@ if not st.session_state.user:
             <div class="glass-card hero-panel" style="text-align: center;">
                 <h1 style="color:#EAF2FF !important;">Justice Lens</h1>
                 <p style="color:#C5A059 !important; font-weight:700; font-size:1rem; letter-spacing:2px; margin-top:-10px;">SECURE AI CYBER LEGAL DEFENSE</p>
-                <div style="background:rgba(255,255,255,0.92); color:#0B1B39 !important; padding:2rem; border-radius:1rem; border:1px solid #BBD3F3; text-align:left; margin: 2rem 0;">
+                <div class="light-panel" style="background:rgba(255,255,255,0.92); padding:2rem; border-radius:1rem; border:1px solid #BBD3F3; text-align:left; margin: 2rem 0;">
                     <h3 style="margin-top:0;">Expert Advocacy</h3>
                     <p>Protect your digital footprint under the <b>Indian IT Act 2000</b>. Our engine provides instant legal reports using context-aware AI retrieval.</p>
                 </div>
-                <div class="start-btn">START RESEARCHING</div>
             </div>
         """, unsafe_allow_html=True)
+        cta_l, cta_m, cta_r = st.columns([2, 3, 2])
+        with cta_m:
+            if st.button("START RESEARCHING", key="start_researching_btn"):
+                st.session_state.open_sidebar_request = True
+                st.rerun()
 
 else:
     page = st.session_state.view
