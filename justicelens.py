@@ -114,8 +114,8 @@ st.markdown("""
         font-weight: 900 !important;
         font-size: 1.05rem !important;
     }
-    [data-testid="stToolbar"], [data-testid="stToolbarActions"], [data-testid="stDecoration"],
-    [data-testid="stStatusWidget"], [data-testid="stMainMenu"], .st-emotion-cache-zt53z0,
+    [data-testid="stDecoration"], [data-testid="stStatusWidget"],
+    [data-testid="stMainMenu"], .st-emotion-cache-zt53z0,
     button[title="Main menu"], button[aria-label="Main menu"] {
         display: none !important;
         visibility: hidden !important;
@@ -217,8 +217,8 @@ st.markdown("""
         opacity: 1 !important;
     }
     .stTextInput > div > div > input:focus {
-        border-color: #43A2FF !important;
-        box-shadow: 0 0 0 3px rgba(67,162,255,0.22) !important;
+        border-color: #5E739A !important;
+        box-shadow: none !important;
     }
 
     .stButton > button, .stFormSubmitButton > button {
