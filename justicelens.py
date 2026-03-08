@@ -18,6 +18,9 @@ PINECONE_KEY = st.secrets.get("PINECONE_KEY", "")
 GROQ_API_KEY = st.secrets.get("GROQ_API_KEY", "")
 FIREBASE_WEB_API_KEY = st.secrets.get("FIREBASE_WEB_API_KEY", "AIzaSyAklh23Fu6-P5vNsGDh2-U9titgRvqzJaU")
 INDEX_NAME = "justice-lens"
+LOGO_FALLBACK_URL = "https://dffijjxsicbmyyufqozf.supabase.co/storage/v1/object/public/Elements/JUSTICE%20LENS.jpg"
+LOCAL_LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.png")
+LOGO_SOURCE = LOCAL_LOGO_PATH if os.path.exists(LOCAL_LOGO_PATH) else LOGO_FALLBACK_URL
 
 # --- PAGE CONFIG ---
 st.set_page_config(
@@ -71,14 +74,32 @@ st.markdown("""
         to { opacity: 1; transform: translateY(0); }
     }
 
-    /* 3. HEADER / TOOLBAR CLEANUP (REMOVE UNWANTED ARROWS) */
-    [data-testid="stToolbar"] {
-        display: none !important;
-        visibility: hidden !important;
-    }
+    /* 3. HEADER / SIDEBAR TOGGLE */
     [data-testid="stSidebarCollapseButton"] button {
-        background-color: transparent !important;
-        border: none !important;
+        background: rgba(20, 33, 61, 0.12) !important;
+        border: 1px solid rgba(20, 33, 61, 0.20) !important;
+        border-radius: 10px !important;
+        width: 40px !important;
+        height: 36px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    [data-testid="stSidebarCollapseButton"] button svg {
+        display: none !important;
+    }
+    [data-testid="stSidebarCollapseButton"] button::before {
+        content: "☰";
+        color: #14213D !important;
+        font-size: 1.1rem !important;
+        font-weight: 800 !important;
+        line-height: 1 !important;
+    }
+    [data-testid="stToolbarActions"] {
+        display: none !important;
+    }
+    [data-testid="stDecoration"] {
+        display: none !important;
     }
 
     /* 4. CLEAN HEADER */
@@ -123,6 +144,8 @@ st.markdown("""
         padding: 6px;
         border-radius: 10px;
         background: rgba(255,255,255,0.08);
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
     }
     section[data-testid="stSidebar"] [data-baseweb="tab"] {
         border-radius: 8px !important;
@@ -324,6 +347,28 @@ st.markdown("""
         color: var(--navy) !important;
         font-size: 1rem !important;
     }
+    @media (max-width: 1100px) {
+        section[data-testid="stSidebar"] {
+            min-width: 300px !important;
+            max-width: 86vw !important;
+        }
+    }
+    @media (max-width: 640px) {
+        section[data-testid="stSidebar"] {
+            min-width: 84vw !important;
+        }
+        section[data-testid="stSidebar"] [data-baseweb="tab"] {
+            font-size: 0.8rem !important;
+            padding: 0.35rem 0.3rem !important;
+        }
+        .stButton > button, .stFormSubmitButton > button {
+            font-size: 0.7rem !important;
+            padding: 0.5rem 0.7rem !important;
+        }
+        .hero-logo {
+            width: min(180px, 62vw);
+        }
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -438,7 +483,7 @@ def legal_brain(text, context):
 
 # --- SIDEBAR UI ---
 with st.sidebar:
-    st.image("https://dffijjxsicbmyyufqozf.supabase.co/storage/v1/object/public/Elements/JUSTICE%20LENS.jpg", use_container_width=True)
+    st.image(LOGO_SOURCE, use_container_width=True)
     
     if not st.session_state.user:
         auth_tab = st.tabs(["Login", "Join"])
@@ -496,9 +541,11 @@ with st.sidebar:
 if not st.session_state.user:
     col1, col2, col3 = st.columns([1, 8, 1])
     with col2:
+        l1, l2, l3 = st.columns([1, 2, 1])
+        with l2:
+            st.image(LOGO_SOURCE, use_container_width=True)
         st.markdown("""
             <div class="glass-card hero-panel" style="text-align: center;">
-                <img class="hero-logo" src="https://dffijjxsicbmyyufqozf.supabase.co/storage/v1/object/public/Elements/JUSTICE%20LENS.jpg" alt="Justice Lens Logo" />
                 <h1 style="color:#0F172A !important;">Justice Lens</h1>
                 <p style="color:#C5A059 !important; font-weight:700; font-size:1rem; letter-spacing:2px; margin-top:-10px;">SECURE AI CYBER LEGAL DEFENSE</p>
                 <div style="background:#F8FAFC; padding:2rem; border-radius:1rem; border:1px solid #E2E8F0; text-align:left; margin: 2rem 0;">
