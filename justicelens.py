@@ -438,6 +438,7 @@ if "chat_history" not in st.session_state: st.session_state.chat_history = []
 if "admin_mode" not in st.session_state: st.session_state.admin_mode = False
 if "view" not in st.session_state: st.session_state.view = "🤖 AI Lawyer"
 if "open_sidebar_request" not in st.session_state: st.session_state.open_sidebar_request = False
+if "start_researching_flow" not in st.session_state: st.session_state.start_researching_flow = False
 
 # --- AUTH SYSTEM ---
 def authenticate(email, password):
@@ -511,6 +512,19 @@ if st.session_state.open_sidebar_request:
     )
     st.session_state.open_sidebar_request = False
 
+if st.session_state.start_researching_flow:
+    components.html(
+        """
+        <script>
+        const doc = window.parent.document;
+        const btn = doc.querySelector('[data-testid="collapsedControl"] button, [data-testid="stSidebarCollapsedControl"] button');
+        if (btn) { btn.click(); }
+        </script>
+        """,
+        height=0,
+    )
+    st.session_state.start_researching_flow = False
+
 # --- SIDEBAR UI ---
 with st.sidebar:
     st.image(LOGO_SOURCE, use_container_width=True)
@@ -526,6 +540,7 @@ with st.sidebar:
                     if check_ban(u_obj.uid): st.error("Access Forbidden.")
                     else:
                         st.session_state.user = {"name": u_obj.display_name or e_val.split('@')[0], "email": e_val, "uid": u_obj.uid}
+                        st.session_state.view = "🤖 AI Lawyer"
                         sync_user(st.session_state.user)
                         st.rerun()
                 else: st.error("Invalid Credentials.")
@@ -587,7 +602,7 @@ if not st.session_state.user:
         cta_l, cta_m, cta_r = st.columns([2, 3, 2])
         with cta_m:
             if st.button("START RESEARCHING", key="start_researching_btn"):
-                st.session_state.open_sidebar_request = True
+                st.session_state.start_researching_flow = True
                 st.rerun()
 
 else:
