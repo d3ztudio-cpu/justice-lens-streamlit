@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 import firebase_admin
 from firebase_admin import credentials, firestore, auth
 import os
@@ -21,6 +22,20 @@ INDEX_NAME = "justice-lens"
 LOGO_FALLBACK_URL = "https://i.ibb.co/B57FLnW4/image.png"
 LOCAL_LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.png")
 LOGO_SOURCE = LOCAL_LOGO_PATH if os.path.exists(LOCAL_LOGO_PATH) else LOGO_FALLBACK_URL
+APP_TZ = ZoneInfo("Asia/Kolkata")
+
+def utc_now():
+    return datetime.now(timezone.utc)
+
+def format_app_time(dt_obj, fmt='%d %b, %H:%M'):
+    if not dt_obj:
+        return "N/A"
+    try:
+        if dt_obj.tzinfo is None:
+            dt_obj = dt_obj.replace(tzinfo=timezone.utc)
+        return dt_obj.astimezone(APP_TZ).strftime(fmt)
+    except Exception:
+        return "N/A"
 
 # --- PAGE CONFIG ---
 st.set_page_config(
@@ -498,7 +513,7 @@ def sync_user(user_data):
             user_ref = db.collection("artifacts").document("justicelens-law").collection("public").document("data").collection("users").document(user_data['uid'])
             user_ref.set({
                 **user_data,
-                "last_active": datetime.now(),
+                "last_active": utc_now(),
                 "is_banned": user_data.get('is_banned', False)
             }, merge=True)
         except: pass
@@ -766,7 +781,7 @@ else:
                     if db:
                         db.collection("artifacts").document("justicelens-law").collection("public").document("data").collection("logs").add({
                             "uid": st.session_state.user['uid'], "user": st.session_state.user['name'],
-                            "query": user_msg, "report": ans, "timestamp": datetime.now()
+                            "query": user_msg, "report": ans, "timestamp": utc_now()
                         })
                     st.rerun()
 
@@ -835,7 +850,7 @@ else:
                         "email": x["email"],
                         "uid": x["uid"],
                         "status": "BANNED" if x["is_banned"] else "ACTIVE",
-                        "last_active": x["last_active"].strftime('%Y-%m-%d %H:%M:%S') if x["last_active"] else ""
+                        "last_active_ist": format_app_time(x["last_active"], '%Y-%m-%d %H:%M:%S')
                     } for x in users
                 ])
                 st.download_button(
@@ -850,7 +865,7 @@ else:
             if not filtered_users:
                 st.info("No users match the current filter.")
             for ud in filtered_users:
-                last_active = ud["last_active"].strftime('%d %b, %H:%M') if ud["last_active"] else "N/A"
+                last_active = format_app_time(ud["last_active"], '%d %b, %H:%M IST')
                 status_color = "#ef4444" if ud["is_banned"] else "#22c55e"
 
                 st.markdown(f"""
