@@ -33,367 +33,342 @@ st.set_page_config(
 # --- PREMIUM NEAT & LOGO-MATCHED UI (Navy & Gold) ---
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
     
-    /* 1. THEME VARIABLES */
     :root {
-        --ink: #0B1324;
-        --navy: #14213D;
-        --blue: #1D4ED8;
-        --gold: #D4A84B;
-        --slate: #24344F;
-        --border: #DDE4EF;
-        --bg-light: #F4F8FF;
-        --card-bg: rgba(255, 255, 255, 0.88);
-        --shadow: 0 14px 35px rgba(11, 19, 36, 0.12);
+        --bg: #071228;
+        --bg-soft: #0D1B35;
+        --panel: #0F1F3D;
+        --panel-2: #13274B;
+        --text: #E6EEFF;
+        --muted: #9FB2D9;
+        --line: #223B6B;
+        --accent: #43A2FF;
+        --accent-2: #7FC4FF;
+        --gold: #E0B45B;
+        --good-shadow: 0 16px 38px rgba(3, 9, 22, 0.45);
     }
 
-    /* 2. TYPOGRAPHY / BASE */
-    html, body, [data-testid="stMarkdownContainer"] p, 
-    .stMarkdown, label, li, h1, h2, h3 { 
+    html, body, [data-testid="stMarkdownContainer"] p,
+    .stMarkdown, label, li, h1, h2, h3 {
         font-family: 'Manrope', sans-serif !important;
-        color: var(--ink) !important;
+        color: var(--text) !important;
     }
     h1, h2, h3 {
-        font-family: 'Sora', sans-serif !important;
+        font-family: 'Space Grotesk', sans-serif !important;
         letter-spacing: -0.02em;
     }
+
     .stApp {
         background:
-            radial-gradient(circle at 12% 18%, rgba(212, 168, 75, 0.20), transparent 35%),
-            radial-gradient(circle at 85% 3%, rgba(29, 78, 216, 0.15), transparent 30%),
-            linear-gradient(180deg, #F9FCFF 0%, #EFF5FF 46%, #FDFEFF 100%) !important;
+            radial-gradient(1200px 600px at 12% 0%, rgba(67,162,255,0.15), transparent 50%),
+            radial-gradient(900px 500px at 100% 12%, rgba(224,180,91,0.10), transparent 48%),
+            linear-gradient(180deg, #061022 0%, #091730 45%, #08162D 100%) !important;
         min-height: 100vh;
     }
     .main .block-container {
-        padding-top: 2rem !important;
-        animation: fadeUp 0.55s ease-out;
+        padding-top: 1.7rem !important;
+        animation: fadeUp 0.45s ease-out;
     }
     @keyframes fadeUp {
         from { opacity: 0; transform: translateY(8px); }
         to { opacity: 1; transform: translateY(0); }
     }
 
-    /* 3. HEADER / SIDEBAR TOGGLE */
     [data-testid="stSidebarCollapseButton"] button,
     [data-testid="collapsedControl"] button,
     [data-testid="stSidebarCollapsedControl"] button {
-        background: #14213D !important;
-        border: 3px solid #1D4ED8 !important;
+        background: #FFFFFF !important;
+        border: 3px solid var(--accent) !important;
         border-radius: 999px !important;
-        width: 42px !important;
-        height: 42px !important;
+        width: 44px !important;
+        height: 44px !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
-        box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.18), 0 8px 16px rgba(20, 33, 61, 0.18) !important;
+        box-shadow: 0 0 0 3px rgba(67,162,255,0.20), 0 10px 16px rgba(2, 9, 22, 0.35) !important;
         padding: 0 !important;
     }
     [data-testid="stSidebarCollapseButton"] button svg,
     [data-testid="collapsedControl"] button svg,
     [data-testid="stSidebarCollapsedControl"] button svg {
-        display: block !important;
-        color: #FFFFFF !important;
-        width: 1.1rem !important;
-        height: 1.1rem !important;
+        color: #113061 !important;
+        width: 1.05rem !important;
+        height: 1.05rem !important;
     }
     [data-testid="stSidebarCollapseButton"] button svg path,
     [data-testid="collapsedControl"] button svg path,
     [data-testid="stSidebarCollapsedControl"] button svg path {
-        stroke: #FFFFFF !important;
-        fill: #FFFFFF !important;
+        stroke: #113061 !important;
+        fill: #113061 !important;
     }
     [data-testid="stSidebarCollapseButton"] button:hover,
     [data-testid="collapsedControl"] button:hover,
     [data-testid="stSidebarCollapsedControl"] button:hover {
-        filter: brightness(1.05);
         transform: translateY(-1px);
+        filter: brightness(1.02);
     }
     [data-testid="collapsedControl"] button p,
     [data-testid="stSidebarCollapsedControl"] button p {
-        color: #FFFFFF !important;
+        color: #113061 !important;
         font-weight: 900 !important;
         font-size: 1.05rem !important;
-        line-height: 1 !important;
     }
-    .start-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        margin-top: 0.6rem;
-        padding: 0.72rem 1.15rem;
-        border-radius: 999px;
-        background: linear-gradient(135deg, #14213D, #1D4ED8);
-        border: 2px solid rgba(29, 78, 216, 0.45);
-        color: #FFFFFF !important;
-        font-weight: 800;
-        letter-spacing: 0.7px;
-        font-size: 0.8rem !important;
-        text-transform: uppercase;
-        box-shadow: 0 8px 20px rgba(29, 78, 216, 0.25);
-    }
-    [data-testid="stToolbarActions"] {
-        display: none !important;
-    }
-    [data-testid="stDecoration"] {
-        display: none !important;
-    }
-
-    /* 4. CLEAN HEADER */
+    [data-testid="stToolbarActions"], [data-testid="stDecoration"],
     [data-testid="stStatusWidget"], .st-emotion-cache-zt53z0 {
         display: none !important;
         visibility: hidden !important;
     }
     header[data-testid="stHeader"] {
-        background-color: rgba(255, 255, 255, 0) !important;
+        background-color: transparent !important;
         border: none !important;
     }
 
-    /* 5. SIDEBAR */
     section[data-testid="stSidebar"] {
-        background: linear-gradient(165deg, #0B1324 8%, #14213D 56%, #1E3A8A 100%) !important;
-        border-right: 1px solid rgba(255,255,255,0.12);
-        box-shadow: inset -1px 0 0 rgba(255,255,255,0.12);
+        background:
+            radial-gradient(120% 80% at 0% 0%, rgba(67,162,255,0.20), transparent 50%),
+            linear-gradient(180deg, #08162F 0%, #0B1C3A 100%) !important;
+        border-right: 1px solid #1E386A;
+        box-shadow: inset -1px 0 0 rgba(127,196,255,0.10);
     }
     section[data-testid="stSidebar"] * {
-        color: #FFFFFF !important;
+        color: #F2F7FF !important;
         font-size: 0.9rem !important;
     }
     section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {
-        padding: 0.6rem 0.75rem 1rem 0.75rem !important;
+        padding: 0.65rem 0.8rem 1rem 0.8rem !important;
     }
     section[data-testid="stSidebar"] .stTextInput > label {
         font-weight: 700 !important;
-        margin-bottom: 0.25rem !important;
+        margin-bottom: 0.24rem !important;
     }
     section[data-testid="stSidebar"] .stTextInput > div > div > input {
-        min-height: 42px !important;
-        padding: 0.55rem 0.75rem !important;
-        font-size: 0.9rem !important;
-        color: #0B1324 !important;
-        background: rgba(255,255,255,0.98) !important;
+        min-height: 44px !important;
+        background: rgba(255,255,255,0.97) !important;
+        color: #0A1A37 !important;
+        border: 1px solid #A7C2E7 !important;
+        border-radius: 11px !important;
+        padding: 0.58rem 0.76rem !important;
     }
     section[data-testid="stSidebar"] .stTabs [data-baseweb="tab-list"] {
-        margin-bottom: 0.55rem !important;
+        margin-bottom: 0.6rem !important;
     }
     section[data-testid="stSidebar"] [data-baseweb="tab-list"] {
         gap: 8px;
         padding: 6px;
         border-radius: 10px;
-        background: rgba(255,255,255,0.08);
+        background: rgba(127,196,255,0.10);
         display: grid !important;
         grid-template-columns: 1fr 1fr;
     }
     section[data-testid="stSidebar"] [data-baseweb="tab"] {
         border-radius: 8px !important;
-        transition: all 0.2s ease !important;
+        transition: all 0.18s ease !important;
     }
     section[data-testid="stSidebar"] [aria-selected="true"] {
-        background: var(--gold) !important;
-        color: #111827 !important;
+        background: linear-gradient(135deg, #3F9EFF, #67B3FF) !important;
+        color: #061022 !important;
         font-weight: 800 !important;
     }
 
-    /* 6. CARDS */
+    .glass-card, .team-card, .admin-data-card, .chat-container {
+        background: linear-gradient(160deg, rgba(19,39,75,0.92), rgba(15,31,61,0.92)) !important;
+        border: 1px solid #22437A !important;
+        box-shadow: var(--good-shadow);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
     .glass-card {
-        background: var(--card-bg) !important;
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
         padding: 1.6rem;
         border-radius: 18px;
-        border: 1px solid rgba(255, 255, 255, 0.75);
-        box-shadow: var(--shadow);
         margin-bottom: 1rem;
-        transition: transform 0.25s ease, box-shadow 0.25s ease;
-        animation: fadeUp 0.5s ease both;
+        transition: transform 0.22s ease, box-shadow 0.22s ease;
     }
     .glass-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 18px 36px rgba(11, 19, 36, 0.16);
+        transform: translateY(-2px);
+        box-shadow: 0 20px 40px rgba(2, 9, 22, 0.50);
     }
-    .hero-panel {
-        position: relative;
-        overflow: hidden;
-    }
+    .hero-panel { position: relative; overflow: hidden; }
     .hero-panel::before {
         content: "";
         position: absolute;
-        inset: -30% auto auto -10%;
-        width: 320px;
-        height: 320px;
+        inset: -45% auto auto -16%;
+        width: 380px;
+        height: 380px;
         border-radius: 50%;
-        background: radial-gradient(circle, rgba(212,168,75,0.30), transparent 68%);
+        background: radial-gradient(circle, rgba(67,162,255,0.20), transparent 70%);
         pointer-events: none;
-        animation: pulseGlow 4s ease-in-out infinite;
     }
-    @keyframes pulseGlow {
-        0%,100% { transform: scale(1); opacity: 0.8; }
-        50% { transform: scale(1.15); opacity: 0.45; }
-    }
-    h1 { font-size: 2.2rem !important; font-weight: 800 !important; }
-    h2 { font-size: 1.35rem !important; font-weight: 700 !important; margin-bottom: 0.8rem !important; }
-    h3 { font-size: 1rem !important; font-weight: 700 !important; color: #9A6B11 !important; margin-top: 0 !important; }
+    h1 { font-size: 2.24rem !important; font-weight: 800 !important; }
+    h2 { font-size: 1.36rem !important; font-weight: 700 !important; margin-bottom: 0.8rem !important; }
+    h3 { font-size: 1rem !important; font-weight: 700 !important; color: var(--gold) !important; margin-top: 0 !important; }
 
-    /* 7. INPUTS / BUTTONS */
-    .stTextInput > div > div > input {
+    .stTextInput > div > div > input,
+    textarea, .stTextArea textarea, [data-baseweb="input"] input {
         border-radius: 10px !important;
-        border: 1px solid #CFD8E8 !important;
-        background: rgba(255,255,255,0.95) !important;
-        color: #0B1324 !important;
-        caret-color: #0B1324 !important;
+        border: 1px solid #375C97 !important;
+        background: #F7FAFF !important;
+        color: #0A1A37 !important;
+        caret-color: #0A1A37 !important;
     }
     .stTextInput > div > div > input::placeholder {
-        color: #64748B !important;
+        color: #6B7FA7 !important;
         opacity: 1 !important;
     }
-    textarea, .stTextArea textarea, [data-baseweb="input"] input {
-        color: #0B1324 !important;
-        caret-color: #0B1324 !important;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
-    }
     .stTextInput > div > div > input:focus {
-        border-color: #1D4ED8 !important;
-        box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15) !important;
-    }
-    .stButton > button {
-        width: 100%; border-radius: 10px; border: none; padding: 0.58rem 1rem;
-        font-weight: 800; background: linear-gradient(135deg, #0F1B36 0%, #1D4ED8 100%);
-        color: #FFFFFF !important;
-        transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
-        text-transform: uppercase; letter-spacing: 1px;
-        font-size: 0.74rem !important;
-        box-shadow: 0 8px 20px rgba(29, 78, 216, 0.25);
-    }
-    .stButton > button:hover {
-        filter: brightness(1.08);
-        color: #FFFFFF !important;
-        transform: translateY(-2px);
-        box-shadow: 0 12px 26px rgba(29, 78, 216, 0.30);
-    }
-    .stFormSubmitButton > button {
-        border-radius: 10px !important;
-        background: linear-gradient(90deg, #14213D, #1E3A8A) !important;
-        color: #fff !important;
-        border: 1px solid rgba(255,255,255,0.12) !important;
+        border-color: #43A2FF !important;
+        box-shadow: 0 0 0 3px rgba(67,162,255,0.22) !important;
     }
 
-    /* 8. CHAT */
+    .stButton > button, .stFormSubmitButton > button {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid rgba(127,196,255,0.32);
+        padding: 0.58rem 1rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #1A58A5 0%, #43A2FF 100%);
+        color: #FFFFFF !important;
+        text-transform: uppercase;
+        letter-spacing: 0.9px;
+        font-size: 0.74rem !important;
+        box-shadow: 0 8px 20px rgba(67,162,255,0.22);
+        transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
+    }
+    .stButton > button:hover, .stFormSubmitButton > button:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.05);
+        box-shadow: 0 12px 24px rgba(67,162,255,0.26);
+    }
+
     .chat-container {
-        max-width: 900px; margin: 0 auto;
-        padding: 1.4rem; background: rgba(255,255,255,0.78);
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 1.4rem;
         border-radius: 18px;
-        border: 1px solid rgba(255,255,255,0.70);
-        backdrop-filter: blur(8px);
-        box-shadow: var(--shadow);
     }
     .bubble-container { display: flex; flex-direction: column; gap: 1.2rem; }
     .chat-bubble {
-        padding: 1rem 1.4rem; border-radius: 1.25rem; font-size: 0.95rem; line-height: 1.5;
-        max-width: 85%; box-shadow: 0 6px 16px rgba(0,0,0,0.06);
-        animation: bubbleIn 0.25s ease both;
+        padding: 1rem 1.35rem;
+        border-radius: 1.25rem;
+        font-size: 0.95rem;
+        line-height: 1.52;
+        max-width: 88%;
+        animation: bubbleIn 0.2s ease both;
     }
     @keyframes bubbleIn {
-        from { opacity: 0; transform: translateY(6px) scale(0.99); }
-        to { opacity: 1; transform: translateY(0) scale(1); }
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: translateY(0); }
     }
     .user-bubble {
-        background: linear-gradient(135deg, #14213D, #1D4ED8);
+        background: linear-gradient(135deg, #1A58A5, #43A2FF);
         color: #FFFFFF !important;
-        align-self: flex-end; border-bottom-right-radius: 4px;
+        border-bottom-right-radius: 5px;
     }
     .ai-bubble {
-        background: var(--bg-light); color: var(--navy) !important;
-        align-self: flex-start; border-bottom-left-radius: 4px;
-        border: 1px solid var(--border);
+        background: rgba(255,255,255,0.93);
+        color: #0B1B39 !important;
+        border: 1px solid #BED4F2;
+        border-bottom-left-radius: 5px;
     }
     .role-label {
-        font-size: 0.6rem; font-weight: 900; color: var(--gold) !important;
-        margin-bottom: 3px; text-transform: uppercase; letter-spacing: 2px;
+        font-size: 0.64rem;
+        font-weight: 900;
+        color: #8FCBFF !important;
+        margin-bottom: 3px;
+        text-transform: uppercase;
+        letter-spacing: 1.8px;
     }
 
-    /* 9. ADMIN */
     .admin-data-card {
-        background: rgba(255,255,255,0.96) !important; border: 1px solid var(--border) !important;
-        border-radius: 12px; padding: 1.25rem; margin-bottom: 0.8rem;
-        box-shadow: 0 8px 20px rgba(11, 19, 36, 0.08);
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 0.8rem;
     }
-    .admin-data-card b, .admin-data-card p { color: var(--navy) !important; }
-    .admin-data-card p { margin: 0; font-size: 0.8rem !important; opacity: 0.8; }
+    .admin-data-card b, .admin-data-card p { color: #E9F1FF !important; }
+    .admin-data-card p { margin: 0; font-size: 0.82rem !important; opacity: 0.84; }
     .status-badge {
-        font-weight: 800; font-size: 0.65rem; padding: 2px 8px; border-radius: 4px;
+        font-weight: 800;
+        font-size: 0.66rem;
+        padding: 2px 8px;
+        border-radius: 4px;
         color: white !important;
     }
 
-    /* 10. MISC */
     .stProgress > div > div > div > div {
-        background: linear-gradient(90deg, #D4A84B, #EAC67E) !important;
+        background: linear-gradient(90deg, #43A2FF, #7FC4FF) !important;
     }
     [data-testid="stRadio"] label {
-        padding: 0.4rem 0.55rem;
+        padding: 0.45rem 0.6rem;
         border-radius: 8px;
-        transition: background 0.2s ease;
+        transition: background 0.15s ease;
     }
     [data-testid="stRadio"] label:hover {
-        background: rgba(212, 168, 75, 0.14);
+        background: rgba(67,162,255,0.16);
     }
     .team-card {
-        background: var(--card-bg);
         padding: 1.5rem;
-        border-radius: 1rem;
+        border-radius: 14px;
         text-align: center;
-        border: 1px solid var(--border);
-        box-shadow: var(--shadow);
-        transition: transform 0.25s ease, box-shadow 0.25s ease;
-        animation: fadeUp 0.5s ease both;
+        transition: transform 0.22s ease, box-shadow 0.22s ease;
     }
     .team-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 18px 36px rgba(11, 19, 36, 0.15);
+        transform: translateY(-3px);
+        box-shadow: 0 18px 35px rgba(2, 9, 22, 0.44);
     }
     .hero-logo {
         width: min(220px, 56vw);
         display: block;
         margin: 0 auto 1rem auto;
         border-radius: 14px;
-        border: 1px solid rgba(20, 33, 61, 0.15);
-        box-shadow: 0 10px 24px rgba(11, 19, 36, 0.12);
+        border: 1px solid #27508C;
+        box-shadow: 0 10px 24px rgba(2, 9, 22, 0.42);
     }
-    @media (max-width: 960px) {
-        .main .block-container {
-            padding-top: 1rem !important;
-            padding-left: 0.8rem !important;
-            padding-right: 0.8rem !important;
-        }
-        .chat-container {
-            padding: 1rem;
-        }
-        .chat-bubble {
-            max-width: 96%;
-            font-size: 0.92rem;
-        }
+    .start-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 0.7rem;
+        padding: 0.75rem 1.24rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #1A58A5, #43A2FF);
+        border: 2px solid rgba(127,196,255,0.42);
+        color: #FFFFFF !important;
+        font-weight: 800;
+        letter-spacing: 0.8px;
+        font-size: 0.8rem !important;
+        text-transform: uppercase;
+        box-shadow: 0 8px 20px rgba(67,162,255,0.26);
     }
-    @media (max-width: 700px) {
-        h1 { font-size: 1.65rem !important; }
-        h2 { font-size: 1.1rem !important; }
-        .glass-card, .team-card {
-            padding: 1rem !important;
-        }
-    }
+
     [data-testid="stExpander"] summary p {
         font-weight: 700 !important;
-        color: var(--navy) !important;
+        color: #E8F1FF !important;
         font-size: 1rem !important;
     }
+
     @media (max-width: 1100px) {
         section[data-testid="stSidebar"] {
             min-width: 300px !important;
             max-width: 86vw !important;
         }
     }
-    @media (max-width: 640px) {
-        section[data-testid="stSidebar"] {
-            min-width: 84vw !important;
+    @media (max-width: 960px) {
+        .main .block-container {
+            padding-top: 1rem !important;
+            padding-left: 0.85rem !important;
+            padding-right: 0.85rem !important;
         }
+        .chat-container { padding: 1rem; }
+        .chat-bubble { max-width: 96%; font-size: 0.92rem; }
+    }
+    @media (max-width: 700px) {
+        h1 { font-size: 1.72rem !important; }
+        h2 { font-size: 1.1rem !important; }
+        .glass-card, .team-card, .admin-data-card { padding: 1rem !important; }
+        .hero-logo { width: min(180px, 62vw); }
+    }
+    @media (max-width: 640px) {
+        section[data-testid="stSidebar"] { min-width: 84vw !important; }
         section[data-testid="stSidebar"] [data-baseweb="tab"] {
             font-size: 0.8rem !important;
             padding: 0.35rem 0.3rem !important;
@@ -401,9 +376,6 @@ st.markdown("""
         .stButton > button, .stFormSubmitButton > button {
             font-size: 0.7rem !important;
             padding: 0.5rem 0.7rem !important;
-        }
-        .hero-logo {
-            width: min(180px, 62vw);
         }
     }
     </style>
@@ -583,9 +555,9 @@ if not st.session_state.user:
             st.image(LOGO_SOURCE, use_container_width=True)
         st.markdown("""
             <div class="glass-card hero-panel" style="text-align: center;">
-                <h1 style="color:#0F172A !important;">Justice Lens</h1>
+                <h1 style="color:#EAF2FF !important;">Justice Lens</h1>
                 <p style="color:#C5A059 !important; font-weight:700; font-size:1rem; letter-spacing:2px; margin-top:-10px;">SECURE AI CYBER LEGAL DEFENSE</p>
-                <div style="background:#F8FAFC; padding:2rem; border-radius:1rem; border:1px solid #E2E8F0; text-align:left; margin: 2rem 0;">
+                <div style="background:rgba(255,255,255,0.92); color:#0B1B39 !important; padding:2rem; border-radius:1rem; border:1px solid #BBD3F3; text-align:left; margin: 2rem 0;">
                     <h3 style="margin-top:0;">Expert Advocacy</h3>
                     <p>Protect your digital footprint under the <b>Indian IT Act 2000</b>. Our engine provides instant legal reports using context-aware AI retrieval.</p>
                 </div>
