@@ -114,8 +114,9 @@ st.markdown("""
         font-weight: 900 !important;
         font-size: 1.05rem !important;
     }
-    [data-testid="stToolbarActions"], [data-testid="stDecoration"],
-    [data-testid="stStatusWidget"], .st-emotion-cache-zt53z0 {
+    [data-testid="stToolbar"], [data-testid="stToolbarActions"], [data-testid="stDecoration"],
+    [data-testid="stStatusWidget"], [data-testid="stMainMenu"], .st-emotion-cache-zt53z0,
+    button[title="Main menu"], button[aria-label="Main menu"] {
         display: none !important;
         visibility: hidden !important;
     }
