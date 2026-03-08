@@ -293,6 +293,18 @@ st.markdown("""
         border: 1px solid #BED4F2;
         border-bottom-left-radius: 5px;
     }
+    .ai-bubble, .ai-bubble * {
+        color: #0B1B39 !important;
+        opacity: 1 !important;
+    }
+    .ai-bubble p, .ai-bubble li, .ai-bubble span, .ai-bubble strong {
+        color: #0B1B39 !important;
+    }
+    .ai-bubble a {
+        color: #1A58A5 !important;
+        text-decoration: underline !important;
+        font-weight: 700 !important;
+    }
     .role-label {
         font-size: 0.64rem;
         font-weight: 900;
