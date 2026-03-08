@@ -79,14 +79,15 @@ st.markdown("""
     [data-testid="collapsedControl"] button,
     [data-testid="stSidebarCollapsedControl"] button {
         background: #14213D !important;
-        border: 1px solid #1E3A8A !important;
-        border-radius: 10px !important;
-        width: 40px !important;
-        height: 36px !important;
+        border: 3px solid #1D4ED8 !important;
+        border-radius: 999px !important;
+        width: 42px !important;
+        height: 42px !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
-        box-shadow: 0 6px 14px rgba(20, 33, 61, 0.16) !important;
+        box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.18), 0 8px 16px rgba(20, 33, 61, 0.18) !important;
+        padding: 0 !important;
     }
     [data-testid="stSidebarCollapseButton"] button svg,
     [data-testid="collapsedControl"] button svg,
@@ -114,6 +115,22 @@ st.markdown("""
         font-weight: 900 !important;
         font-size: 1.05rem !important;
         line-height: 1 !important;
+    }
+    .start-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 0.6rem;
+        padding: 0.72rem 1.15rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #14213D, #1D4ED8);
+        border: 2px solid rgba(29, 78, 216, 0.45);
+        color: #FFFFFF !important;
+        font-weight: 800;
+        letter-spacing: 0.7px;
+        font-size: 0.8rem !important;
+        text-transform: uppercase;
+        box-shadow: 0 8px 20px rgba(29, 78, 216, 0.25);
     }
     [data-testid="stToolbarActions"] {
         display: none !important;
@@ -572,7 +589,7 @@ if not st.session_state.user:
                     <h3 style="margin-top:0;">Expert Advocacy</h3>
                     <p>Protect your digital footprint under the <b>Indian IT Act 2000</b>. Our engine provides instant legal reports using context-aware AI retrieval.</p>
                 </div>
-                <p style="font-weight:800; color:#94A3B8; font-size:0.8rem !important; letter-spacing:1px;">AUTHENTICATE VIA SIDEBAR TO BEGIN</p>
+                <div class="start-btn">START RESEARCHING</div>
             </div>
         """, unsafe_allow_html=True)
 
