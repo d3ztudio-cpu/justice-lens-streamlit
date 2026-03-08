@@ -8,7 +8,6 @@ import json
 import uuid
 import requests
 import time
-import streamlit.components.v1 as components
 from pinecone import Pinecone
 from langchain_huggingface import HuggingFaceEmbeddings
 
@@ -437,7 +436,6 @@ if "user" not in st.session_state: st.session_state.user = None
 if "chat_history" not in st.session_state: st.session_state.chat_history = []
 if "admin_mode" not in st.session_state: st.session_state.admin_mode = False
 if "view" not in st.session_state: st.session_state.view = "🤖 AI Lawyer"
-if "open_sidebar_request" not in st.session_state: st.session_state.open_sidebar_request = False
 if "start_researching_flow" not in st.session_state: st.session_state.start_researching_flow = False
 
 # --- AUTH SYSTEM ---
@@ -498,32 +496,6 @@ def legal_brain(text, context):
         content = res.json()['choices'][0]['message']['content']
         return content.replace("**", "")
     except: return "⚠️ AI Engine Error."
-
-if st.session_state.open_sidebar_request:
-    components.html(
-        """
-        <script>
-        const doc = window.parent.document;
-        const btn = doc.querySelector('[data-testid="collapsedControl"] button, [data-testid="stSidebarCollapsedControl"] button');
-        if (btn) { btn.click(); }
-        </script>
-        """,
-        height=0,
-    )
-    st.session_state.open_sidebar_request = False
-
-if st.session_state.start_researching_flow:
-    components.html(
-        """
-        <script>
-        const doc = window.parent.document;
-        const btn = doc.querySelector('[data-testid="collapsedControl"] button, [data-testid="stSidebarCollapsedControl"] button');
-        if (btn) { btn.click(); }
-        </script>
-        """,
-        height=0,
-    )
-    st.session_state.start_researching_flow = False
 
 # --- SIDEBAR UI ---
 with st.sidebar:
@@ -603,6 +575,49 @@ if not st.session_state.user:
         with cta_m:
             if st.button("START RESEARCHING", key="start_researching_btn"):
                 st.session_state.start_researching_flow = True
+                st.rerun()
+        if st.session_state.start_researching_flow:
+            st.markdown("### Login to Start Researching")
+            entry_tabs = st.tabs(["Login", "Join"])
+            with entry_tabs[0]:
+                me = st.text_input("Email", key="main_login_email")
+                mp = st.text_input("Password", type="password", key="main_login_pass")
+                if st.button("CONTINUE TO AI", key="main_login_btn"):
+                    valid, u_obj = authenticate(me, mp)
+                    if valid:
+                        if check_ban(u_obj.uid):
+                            st.error("Access Forbidden.")
+                        else:
+                            st.session_state.user = {
+                                "name": u_obj.display_name or me.split('@')[0],
+                                "email": me,
+                                "uid": u_obj.uid
+                            }
+                            st.session_state.view = "🤖 AI Lawyer"
+                            st.session_state.start_researching_flow = False
+                            sync_user(st.session_state.user)
+                            st.rerun()
+                    else:
+                        st.error("Invalid Credentials.")
+            with entry_tabs[1]:
+                mnu = st.text_input("Full Name", key="main_signup_name")
+                meu = st.text_input("Email", key="main_signup_email")
+                mpu = st.text_input("Create Password", type="password", key="main_signup_pass")
+                if st.button("CREATE ACCOUNT", key="main_signup_btn"):
+                    try:
+                        auth.create_user(email=meu, password=mpu, display_name=mnu)
+                        st.success("Account Ready! Use Login.")
+                    except Exception as ex:
+                        st.error(str(ex))
+            if st.button("CONTINUE AS GUEST", key="main_guest_btn"):
+                gid = str(uuid.uuid4())[:8]
+                st.session_state.user = {
+                    "name": f"Guest_{gid}",
+                    "email": "guest@justicelens.io",
+                    "uid": f"guest_{gid}"
+                }
+                st.session_state.view = "🤖 AI Lawyer"
+                st.session_state.start_researching_flow = False
                 st.rerun()
 
 else:
