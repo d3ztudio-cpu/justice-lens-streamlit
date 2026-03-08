@@ -519,6 +519,7 @@ def get_intent_category(user_input):
     1. PHYSICAL: Related to physical crimes (theft, assault).
     2. CYBER_SCENARIO: A real-life cyber problem/victim situation.
     3. CYBER_EXPLAIN: A direct request for legal definitions (e.g. "Explain 70").
+    4. NON_LEGAL: General/site/developer questions not asking cyber legal help.
     Respond with ONLY the category name.
     """
     data = {
@@ -742,6 +743,11 @@ else:
                         category = get_intent_category(user_msg)
                         if "PHYSICAL" in category:
                             ans = "⚠️ This tool handles Cyber Crimes only. For physical theft, file an FIR under IPC."
+                        elif "NON_LEGAL" in category:
+                            ans = (
+                                "ℹ️ This question is outside the cyber-legal assistant scope. "
+                                "Please ask a cybercrime legal query or open `Project Team` for website/team details."
+                            )
                         else:
                             with st.spinner("Querying Legal Database..."):
                                 dataset_evidence = "General context."
