@@ -18,7 +18,7 @@ PINECONE_KEY = st.secrets.get("PINECONE_KEY", "")
 GROQ_API_KEY = st.secrets.get("GROQ_API_KEY", "")
 FIREBASE_WEB_API_KEY = st.secrets.get("FIREBASE_WEB_API_KEY", "AIzaSyAklh23Fu6-P5vNsGDh2-U9titgRvqzJaU")
 INDEX_NAME = "justice-lens"
-LOGO_FALLBACK_URL = "https://dffijjxsicbmyyufqozf.supabase.co/storage/v1/object/public/Elements/JUSTICE%20LENS.jpg"
+LOGO_FALLBACK_URL = "https://i.ibb.co/B57FLnW4/image.png"
 LOCAL_LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.png")
 LOGO_SOURCE = LOCAL_LOGO_PATH if os.path.exists(LOCAL_LOGO_PATH) else LOGO_FALLBACK_URL
 
@@ -86,14 +86,10 @@ st.markdown("""
         justify-content: center !important;
     }
     [data-testid="stSidebarCollapseButton"] button svg {
-        display: none !important;
-    }
-    [data-testid="stSidebarCollapseButton"] button::before {
-        content: "☰";
+        display: block !important;
         color: #14213D !important;
-        font-size: 1.1rem !important;
-        font-weight: 800 !important;
-        line-height: 1 !important;
+        width: 1.1rem !important;
+        height: 1.1rem !important;
     }
     [data-testid="stToolbarActions"] {
         display: none !important;
