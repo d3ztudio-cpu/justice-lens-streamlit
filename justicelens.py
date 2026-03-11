@@ -653,7 +653,7 @@ with st.sidebar:
     st.image(LOGO_SOURCE, use_container_width=True)
     
     if not st.session_state.user:
-        auth_tab = st.tabs(["Login", "Join"])
+        auth_tab = st.tabs(["Login", "Create Account"])
         with auth_tab[0]:
             e_val = st.text_input("Email", key="login_email")
             p_val = st.text_input("Password", type="password", key="login_pass")
@@ -693,7 +693,7 @@ with st.sidebar:
                     st.session_state.admin_mode = True
                     st.rerun()
         
-        opts = ["🤖 AI Lawyer", "Vision & Mission", "Project Team"]
+        opts = ["🤖 AI Lawyer", "Vision & Mission"]
         if st.session_state.admin_mode: opts.append("🚨 Admin Dashboard")
         
         st.session_state.view = st.radio("CORE PORTAL", opts)
@@ -834,28 +834,6 @@ else:
             st.markdown("""<div class="glass-card"><h3 style="color:#C5A059 !important;">Our Vision</h3><p>To establish a digital fortress in India where legal intelligence is accessible to every citizen.</p></div>""", unsafe_allow_html=True)
         with v2:
             st.markdown("""<div class="glass-card"><h3 style="color:#C5A059 !important;">Our Mission</h3><p>Utilizing AI to translate complex legislative acts into actionable, cited legal reports for the public.</p></div>""", unsafe_allow_html=True)
-
-    elif page == "Project Team":
-        st.title("🛡️ The Core Developers")
-        team = [
-            {"n": "Archana V S", "r": "Legal Logic Architect"},
-            {"n": "Dolus K Shyju", "r": "Technical Lead"},
-            {"n": "RoseSaniya P X", "r": "UI Engineering"},
-            {"n": "Sreeraj S P", "r": "Database Design"},
-        ]
-        team_cards = "".join(
-            [
-                f'''
-                <div class="team-card">
-                    <div class="avatar">👤</div>
-                    <div class="team-name">{m["n"]}</div>
-                    <div class="team-role">{m["r"]}</div>
-                </div>
-                '''
-                for m in team
-            ]
-        )
-        st.markdown(f'<div class="team-grid">{team_cards}</div>', unsafe_allow_html=True)
 
     elif page == "🚨 Admin Dashboard" and st.session_state.admin_mode:
         st.title("🚨 System Oversight")
