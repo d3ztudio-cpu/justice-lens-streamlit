@@ -637,7 +637,7 @@ def ask_groq_lawyer(user_input, law_evidence, category):
          PUNISHMENTS: [List jail/compensation]
          CASE HISTORY: [Cite landmark case]
          WIN PROBABILITY: [Percentage] - [Reasoning]
-        ðŸš€ ACTION PLAN:
+        ACTION PLAN:
         1. Notify CERT-In (www.cert-in.org.in) within 6 hours.
         2. File complaint at www.cybercrime.gov.in.
         3. Appoint a Cyber Forensic Auditor.
@@ -720,11 +720,11 @@ def _repair_ai_answer(user_input: str, law_evidence: str, category: str, bad_ans
         {legal_anchor}
         {case_history}
         Rewrite the following draft to STRICTLY follow this exact format (include all headings):
-        âš–ï¸ RELEVANT SECTIONS: ...
-        âš–ï¸ PUNISHMENTS: ...
-        ðŸ“š CASE HISTORY: ...
-        ðŸ“Š WIN PROBABILITY: ...
-        ðŸš€ ACTION PLAN:
+        RELEVANT SECTIONS: ...
+        PUNISHMENTS: ...
+        CASE HISTORY: ...
+        WIN PROBABILITY: ...
+        ACTION PLAN:
         1. ...
         2. ...
         3. ...
@@ -1098,7 +1098,7 @@ else:
                     use_container_width=True
                 )
 
-            st.markdown("### ðŸ‘¥ User Directory")
+            st.markdown("### User Directory")
             if not filtered_users:
                 st.info("No users match the current filter.")
             for ud in filtered_users:
@@ -1116,7 +1116,7 @@ else:
 
                 c_btn1, c_btn2 = st.columns(2)
                 with c_btn1:
-                    b_label = "âœ… UNBAN" if ud["is_banned"] else "ðŸš« BAN"
+                    b_label = "UNBAN" if ud["is_banned"] else "BAN"
                     if st.button(b_label, key=f"ban_{ud['doc_id']}"):
                         u_ref.document(ud["doc_id"]).update({"is_banned": not ud["is_banned"]})
                         st.rerun()
