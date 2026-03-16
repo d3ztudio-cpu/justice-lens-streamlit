@@ -790,7 +790,7 @@ with st.sidebar:
             st.session_state.user = {"name": f"Guest_{gid}", "email": "guest@justicelens.io", "uid": f"guest_{gid}"}
             st.rerun()
     else:
-        st.markdown(f"ðŸ‘¤ Connected: **{st.session_state.user['name']}**")
+        st.markdown(f"Connected: **{st.session_state.user['name']}**")
         
         if st.session_state.user['email'] == "d3ztudio@gmail.com":
             st.markdown('<span style="color:#C5A059; font-weight:900; font-size:0.7rem; letter-spacing:1px;">[ SYSTEM COMMANDER ]</span>', unsafe_allow_html=True)
@@ -1030,15 +1030,15 @@ else:
                 st.rerun()
 
     elif page == "Vision & Mission":
-        st.title("ðŸ“– Our Core Principles")
+        st.title("Our Core Principles")
         v1, v2 = st.columns(2)
         with v1:
             st.markdown("""<div class="glass-card"><h3 style="color:#C5A059 !important;">Our Vision</h3><p>To establish a digital fortress in India where legal intelligence is accessible to every citizen.</p></div>""", unsafe_allow_html=True)
         with v2:
             st.markdown("""<div class="glass-card"><h3 style="color:#C5A059 !important;">Our Mission</h3><p>Utilizing AI to translate complex legislative acts into actionable, cited legal reports for the public.</p></div>""", unsafe_allow_html=True)
 
-    elif page == "ðŸš¨ Admin Dashboard" and st.session_state.admin_mode:
-        st.title("ðŸš¨ System Oversight")
+    elif page == "Admin Dashboard" and st.session_state.admin_mode:
+        st.title("Admin Dashboard")
         if db:
             u_ref = db.collection("artifacts").document("justicelens-law").collection("public").document("data").collection("users")
             user_docs = list(u_ref.stream())
@@ -1121,7 +1121,7 @@ else:
                         u_ref.document(ud["doc_id"]).update({"is_banned": not ud["is_banned"]})
                         st.rerun()
                 with c_btn2:
-                    if st.button("ðŸ—‘ï¸ DELETE", key=f"del_{ud['doc_id']}"):
+                    if st.button("DELETE", key=f"del_{ud['doc_id']}"):
                         try:
                             auth.delete_user(ud["doc_id"])
                         except:
