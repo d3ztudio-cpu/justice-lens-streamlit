@@ -763,7 +763,7 @@ with st.sidebar:
         with auth_tab[0]:
             e_val = st.text_input("Email", key="login_email")
             p_val = st.text_input("Password", type="password", key="login_pass")
-            if st.button("ðŸ‘¤ Authenticate"):
+            if st.button(" Authenticate"):
                 valid, u_obj = authenticate(e_val, p_val)
                 if valid:
                     if check_ban(u_obj.uid): st.error("Access Forbidden.")
@@ -785,7 +785,7 @@ with st.sidebar:
                     st.success("Account Ready! Use Login.")
                 except Exception as ex: st.error(str(ex))
                 
-        if st.button("ðŸ‘¤ Continue as Guest"):
+        if st.button("Guest User"):
             gid = str(uuid.uuid4())[:8]
             st.session_state.user = {"name": f"Guest_{gid}", "email": "guest@justicelens.io", "uid": f"guest_{gid}"}
             st.rerun()
