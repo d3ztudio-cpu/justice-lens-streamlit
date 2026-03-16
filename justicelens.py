@@ -79,7 +79,7 @@ st.markdown("""
         background:
             radial-gradient(1200px 600px at 12% 0%, rgba(67,162,255,0.15), transparent 50%),
             radial-gradient(900px 500px at 100% 12%, rgba(224,180,91,0.10), transparent 48%),
-            linear-gradient(180deg, #f3dce7 0%, #ffffff 45%, #f3dce7 100%) !important;
+            linear-gradient(180deg, #0D96CE 0%, #0E6DB5 45%, #0412B2 100%) !important;
         min-height: 100vh;
     }
     .main .block-container {
