@@ -534,7 +534,7 @@ def get_backend():
 if "user" not in st.session_state: st.session_state.user = None
 if "chat_history" not in st.session_state: st.session_state.chat_history = []
 if "admin_mode" not in st.session_state: st.session_state.admin_mode = False
-if "view" not in st.session_state: st.session_state.view = "🤖 AI Lawyer"
+if "view" not in st.session_state: st.session_state.view = "AI Assistant"
 if "start_researching_flow" not in st.session_state: st.session_state.start_researching_flow = False
 
 # --- AUTH SYSTEM ---
@@ -567,6 +567,13 @@ def check_ban(uid):
     return doc.to_dict().get("is_banned", False) if doc.exists else False
 
 # --- AI LOGIC ---
+def _normalize_intent_category(raw_category: str) -> str:
+    upper = str(raw_category or "").strip().upper()
+    for known in ("PHYSICAL", "CYBER_SCENARIO", "CYBER_EXPLAIN", "NON_LEGAL"):
+        if known in upper:
+            return known
+    return "NON_LEGAL"
+
 def get_intent_category(user_input):
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
@@ -587,7 +594,8 @@ def get_intent_category(user_input):
     }
     try:
         response = requests.post(url, headers=headers, json=data, timeout=10)
-        return response.json()['choices'][0]['message']['content'].strip().upper()
+        raw = response.json()['choices'][0]['message']['content']
+        return _normalize_intent_category(raw)
     except:
         return "PHYSICAL"
 
@@ -648,6 +656,104 @@ def ask_groq_lawyer(user_input, law_evidence, category):
     except:
         return "⚠️ AI Engine Error."
 
+def _validate_ai_answer(category: str, answer: str) -> bool:
+    if not answer or not isinstance(answer, str):
+        return False
+
+    upper = answer.upper()
+
+    if "EXPLAIN" in str(category).upper():
+        banned = ("WIN PROBABILITY", "ACTION PLAN", "CASE HISTORY")
+        if any(x in upper for x in banned):
+            return False
+        required = ("DEFINITION", "PUNISH")
+        return any(x in upper for x in required)
+
+    required_sections = (
+        "RELEVANT SECTIONS",
+        "PUNISHMENTS",
+        "CASE HISTORY",
+        "WIN PROBABILITY",
+        "ACTION PLAN",
+    )
+    return all(x in upper for x in required_sections)
+
+def _repair_ai_answer(user_input: str, law_evidence: str, category: str, bad_answer: str) -> str:
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
+
+    legal_anchor = """
+    INTERNAL REFERENCE (ABSOLUTE TRUTH):
+    - Section 70: Protected Systems. Definition: Unauthorized access to systems declared as critical infrastructure by the Government. Punishment = Up to 10 years.
+    - Section 67A: Sexually Explicit Content. Definition: Publishing or transmitting material containing sexually explicit acts in electronic form. Punishment = 5-7 years + 10 Lakh fine.
+    - Section 66F: Cyber Terrorism. Definition: Acts done with intent to threaten unity, integrity, or security of India via computer. Punishment = LIFE IMPRISONMENT.
+    - Section 66E: Violation of Privacy. Definition: Intentionally capturing or publishing private images of any person without consent. Punishment = 3 years / 2 Lakh fine.
+    - Section 43A: Corporate Data Negligence. Definition: Failure by a body corporate to implement reasonable security practices for sensitive data. Punishment = Compensation ONLY.
+    - Section 66B: Stolen Computer Resource. Punishment = 3 years / 5 Lakh fine.
+    """
+
+    category_upper = str(category).upper()
+    if "EXPLAIN" in category_upper:
+        repair_prompt = f"""
+        {legal_anchor}
+        You are a Precise Legal Reference Tool.
+        Rewrite the following draft to STRICTLY comply:
+        - Output ONLY these three fields, in this order:
+          1) OFFICIAL TITLE:
+          2) DEFINITION:
+          3) EXACT PUNISHMENT:
+        - Do NOT include: Win Probability, Action Plan, Case History, steps, URLs, or extra sections.
+        - Use definitions and punishments exactly as provided in INTERNAL REFERENCE.
+
+        USER QUERY: {user_input}
+        DATABASE EVIDENCE: {law_evidence}
+        DRAFT (FIX THIS): {bad_answer}
+        """
+    else:
+        case_history = """
+        HISTORICAL PRECEDENTS (USE FOR SCENARIOS):
+        - Hacking/Unauthorized Access: State of Tamil Nadu vs. Suhas Katti (2004).
+        - Data Negligence: Shreya Singhal vs. Union of India (2015).
+        - Financial Fraud: CBI vs. Arif Azim (Sony Sambandh Case).
+        """
+        repair_prompt = f"""
+        {legal_anchor}
+        {case_history}
+        Rewrite the following draft to STRICTLY follow this exact format (include all headings):
+        ⚖️ RELEVANT SECTIONS: ...
+        ⚖️ PUNISHMENTS: ...
+        📚 CASE HISTORY: ...
+        📊 WIN PROBABILITY: ...
+        🚀 ACTION PLAN:
+        1. ...
+        2. ...
+        3. ...
+
+        USER QUERY: {user_input}
+        DATABASE EVIDENCE: {law_evidence}
+        DRAFT (FIX THIS): {bad_answer}
+        """
+
+    data = {
+        "model": "llama-3.1-8b-instant",
+        "messages": [{"role": "user", "content": repair_prompt}],
+        "temperature": 0.0,
+    }
+
+    try:
+        response = requests.post(url, headers=headers, json=data, timeout=18)
+        return response.json()["choices"][0]["message"]["content"]
+    except Exception:
+        return bad_answer
+
+def ask_groq_lawyer_validated(user_input: str, law_evidence: str, category: str) -> str:
+    answer = ask_groq_lawyer(user_input, law_evidence, category)
+    if _validate_ai_answer(category, answer):
+        return answer
+
+    repaired = _repair_ai_answer(user_input, law_evidence, category, answer)
+    return repaired if _validate_ai_answer(category, repaired) else answer
+
 # --- SIDEBAR UI ---
 with st.sidebar:
     st.image(LOGO_SOURCE, use_container_width=True)
@@ -657,16 +763,17 @@ with st.sidebar:
         with auth_tab[0]:
             e_val = st.text_input("Email", key="login_email")
             p_val = st.text_input("Password", type="password", key="login_pass")
-            if st.button("AUTHENTICATE"):
+            if st.button("👤 Authenticate"):
                 valid, u_obj = authenticate(e_val, p_val)
                 if valid:
                     if check_ban(u_obj.uid): st.error("Access Forbidden.")
                     else:
                         st.session_state.user = {"name": u_obj.display_name or e_val.split('@')[0], "email": e_val, "uid": u_obj.uid}
-                        st.session_state.view = "🤖 AI Lawyer"
+                        st.session_state.view = "AI Assistant"
                         sync_user(st.session_state.user)
                         st.rerun()
-                else: st.error("Invalid Credentials.")
+                else:
+                    st.error("Invalid Credentials.")
         
         with auth_tab[1]:
             nu = st.text_input("Full Name")
@@ -693,10 +800,10 @@ with st.sidebar:
                     st.session_state.admin_mode = True
                     st.rerun()
         
-        opts = ["🤖 AI Lawyer", "Vision & Mission"]
+        opts = [" AI Assistant", "Vision & Mission"]
         if st.session_state.admin_mode: opts.append("🚨 Admin Dashboard")
         
-        st.session_state.view = st.radio("CORE PORTAL", opts)
+        st.session_state.view = st.radio("CORE PORTAL", [x.strip() for x in opts])
         
         st.markdown("---")
         if st.button("TERMINATE SESSION"):
@@ -744,7 +851,7 @@ if not st.session_state.user:
                                 "email": me,
                                 "uid": u_obj.uid
                             }
-                            st.session_state.view = "🤖 AI Lawyer"
+                            st.session_state.view = "AI Assistant"
                             st.session_state.start_researching_flow = False
                             sync_user(st.session_state.user)
                             st.rerun()
@@ -767,65 +874,66 @@ if not st.session_state.user:
                     "email": "guest@justicelens.io",
                     "uid": f"guest_{gid}"
                 }
-                st.session_state.view = "🤖 AI Lawyer"
+                st.session_state.view = "AI Assistant"
                 st.session_state.start_researching_flow = False
                 st.rerun()
 
 else:
     page = st.session_state.view
 
-    if page == "🤖 AI Lawyer":
-        st.title("⚖️ Expert AI Consultation")
-        st.markdown('<div class="chat-container"><div class="bubble-container">', unsafe_allow_html=True)
-        if not st.session_state.chat_history:
-            st.markdown('<div style="display:flex;flex-direction:column;align-items:flex-start;"><div class="role-label">JUSTICE LENS</div><div class="chat-bubble ai-bubble">Describe your cybercrime scenario (e.g., fraudulent banking, social media threat) for a legal breakdown.</div></div>', unsafe_allow_html=True)
-        
+    if page == "AI Assistant":
+        top_l, top_r = st.columns([3, 1])
+        with top_l:
+            st.title("⚖️ Justice Lens")
+            st.caption("Cyber-law assistant for IT Act 2000 scenarios and section explanations.")
+        with top_r:
+            if st.button("🧹 Clear chat", use_container_width=True):
+                st.session_state.chat_history = []
+                st.rerun()
+
         for chat in st.session_state.chat_history:
-            side = "flex-end" if chat["role"] == "user" else "flex-start"
-            lbl = "YOU" if chat["role"] == "user" else "JUSTICE LENS"
-            bub = "user-bubble" if chat["role"] == "user" else "ai-bubble"
-            st.markdown(f'''
-                <div style="display:flex; flex-direction:column; align-items: {side}; width: 100%;">
-                    <div class="role-label">{lbl}</div>
-                    <div class="chat-bubble {bub}">{chat["content"]}</div>
-                </div>
-            ''', unsafe_allow_html=True)
-        st.markdown('</div></div>', unsafe_allow_html=True)
-        
-        with st.form("query_form", clear_on_submit=True):
-            user_msg = st.text_input("Enter scenario...", placeholder="Describe situation here...")
-            if st.form_submit_button("ANALYZE LEGAL CONTEXT"):
-                if user_msg:
-                    st.session_state.chat_history.append({"role": "user", "content": user_msg})
-                    with st.spinner("Analyzing Scope..."):
-                        category = get_intent_category(user_msg)
-                        if "PHYSICAL" in category:
-                            ans = "⚠️ This tool handles Cyber Crimes only. For physical theft, file an FIR under IPC."
-                        elif "NON_LEGAL" in category:
-                            ans = (
-                                "ℹ️ Sorry, I don't have that information. Could you please provide more context about your cyber crime query?"
-                            )
-                        else:
-                            with st.spinner("Querying Legal Database..."):
-                                dataset_evidence = "General context."
-                                try:
-                                    idx, emb = get_backend()
-                                    if idx and emb:
-                                        v = emb.embed_query(user_msg)
-                                        m = idx.query(vector=v, top_k=5, include_metadata=True)
-                                        dataset_evidence = " ".join(
-                                            [x.get('metadata', {}).get('text', '') for x in m.get('matches', [])]
-                                        ) or "General context."
-                                except:
-                                    pass
-                                ans = ask_groq_lawyer(user_msg, dataset_evidence, category)
-                    st.session_state.chat_history.append({"role": "assistant", "content": ans})
-                    if db:
-                        db.collection("artifacts").document("justicelens-law").collection("public").document("data").collection("logs").add({
-                            "uid": st.session_state.user['uid'], "user": st.session_state.user['name'],
-                            "query": user_msg, "report": ans, "timestamp": utc_now()
-                        })
-                    st.rerun()
+            role = "user" if chat.get("role") == "user" else "assistant"
+            with st.chat_message(role):
+                st.markdown(chat.get("content", ""))
+
+        user_msg = st.chat_input("Describe a cyber incident, or ask e.g. “Explain Section 66F”")
+        if user_msg:
+            st.session_state.chat_history.append({"role": "user", "content": user_msg})
+
+            with st.spinner("Analyzing scope..."):
+                category = get_intent_category(user_msg)
+
+            if category == "PHYSICAL":
+                ans = "⚠️ This tool handles cyber crimes only. For other types of crimes, file an FIR under IPC."
+            elif category == "NON_LEGAL":
+                ans = (
+                    "ℹ️ I can only help with cyber-law topics (IT Act / cybercrime). "
+                    "Ask a legal question about a cyber issue and I’ll help."
+                )
+            else:
+                with st.spinner("Querying legal database..."):
+                    dataset_evidence = "General context."
+                    try:
+                        idx, emb = get_backend()
+                        if idx and emb:
+                            v = emb.embed_query(user_msg)
+                            m = idx.query(vector=v, top_k=5, include_metadata=True)
+                            dataset_evidence = " ".join(
+                                [x.get("metadata", {}).get("text", "") for x in m.get("matches", [])]
+                            ) or "General context."
+                    except Exception:
+                        pass
+
+                with st.spinner("Generating legal report..."):
+                    ans = ask_groq_lawyer_validated(user_msg, dataset_evidence, category)
+
+            st.session_state.chat_history.append({"role": "assistant", "content": ans})
+            if db:
+                db.collection("artifacts").document("justicelens-law").collection("public").document("data").collection("logs").add({
+                    "uid": st.session_state.user['uid'], "user": st.session_state.user['name'],
+                    "query": user_msg, "report": ans, "timestamp": utc_now()
+                })
+            st.rerun()
 
     elif page == "Vision & Mission":
         st.title("📖 Our Core Principles")
