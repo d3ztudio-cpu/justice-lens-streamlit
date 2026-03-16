@@ -9,22 +9,20 @@ import json
 import uuid
 import requests
 import time
+from pinecone import Pinecone
+from langchain_huggingface import HuggingFaceEmbeddings
 
 # ==========================================
-# CONFIGURATION & API KEYS
+# âš™ï¸ CONFIGURATION & API KEYS
 # ==========================================
 PINECONE_KEY = st.secrets.get("PINECONE_KEY", "")
 GROQ_API_KEY = st.secrets.get("GROQ_API_KEY", "")
 FIREBASE_WEB_API_KEY = st.secrets.get("FIREBASE_WEB_API_KEY", "AIzaSyAklh23Fu6-P5vNsGDh2-U9titgRvqzJaU")
 INDEX_NAME = "justice-lens"
-EMBED_MODEL_NAME = st.secrets.get("EMBED_MODEL_NAME", "sentence-transformers/all-MiniLM-L6-v2")
-ADMIN_EMAILS_RAW = st.secrets.get("ADMIN_EMAILS", "d3ztudio@gmail.com")
-ADMIN_PIN = str(st.secrets.get("ADMIN_PIN", "1923"))
 LOGO_FALLBACK_URL = "https://i.ibb.co/B57FLnW4/image.png"
 LOCAL_LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.png")
 LOGO_SOURCE = LOCAL_LOGO_PATH if os.path.exists(LOCAL_LOGO_PATH) else LOGO_FALLBACK_URL
 APP_TZ = ZoneInfo("Asia/Kolkata")
-ADMIN_EMAILS = {e.strip().lower() for e in str(ADMIN_EMAILS_RAW).split(",") if e.strip()}
 
 def utc_now():
     return datetime.now(timezone.utc)
@@ -42,7 +40,7 @@ def format_app_time(dt_obj, fmt='%d %b, %H:%M'):
 # --- PAGE CONFIG ---
 st.set_page_config(
     page_title="Justice Lens | Expert Cyber Legal AI",
-    page_icon=None,
+    page_icon="âš–ï¸",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -53,18 +51,17 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
     
     :root {
-        --bg: #070B1A;
-        --bg-soft: #0B1433;
-        --panel: rgba(11, 18, 38, 0.86);
-        --panel-2: rgba(15, 25, 52, 0.92);
-        --text: #EAF2FF;
-        --muted: #A7B4D1;
-        --line: rgba(148, 163, 184, 0.18);
-        --border: rgba(148, 163, 184, 0.18);
-        --accent: #14B8A6;
-        --accent-2: #3B82F6;
-        --gold: #F2C77A;
-        --good-shadow: 0 18px 44px rgba(0, 0, 0, 0.42);
+        --bg: #0412B2;
+        --bg-soft: #0D96CE;
+        --panel: #0412B2;
+        --panel-2: #0E6DB5;
+        --text: #000000;
+        --muted: #9FB2D9;
+        --line: #223B6B;
+        --accent: #43A2FF;
+        --accent-2: #7FC4FF;
+        --gold: #E0B45B;
+        --good-shadow: 0 16px 38px rgba(3, 9, 22, 0.45);
     }
 
     html, body, [data-testid="stMarkdownContainer"] p,
@@ -80,10 +77,9 @@ st.markdown("""
 
     .stApp {
         background:
-            radial-gradient(1100px 520px at 10% 0%, rgba(20,184,166,0.18), transparent 55%),
-            radial-gradient(900px 540px at 100% 10%, rgba(59,130,246,0.18), transparent 55%),
-            radial-gradient(800px 420px at 70% 110%, rgba(242,199,122,0.10), transparent 55%),
-            linear-gradient(180deg, #070B1A 0%, #0B1433 50%, #070B1A 100%) !important;
+            radial-gradient(1200px 600px at 12% 0%, rgba(67,162,255,0.15), transparent 50%),
+            radial-gradient(900px 500px at 100% 12%, rgba(224,180,91,0.10), transparent 48%),
+            linear-gradient(180deg, #0D96CE 0%, #0E6DB5 45%, #0412B2 100%) !important;
         min-height: 100vh;
     }
     .main .block-container {
@@ -99,8 +95,8 @@ st.markdown("""
     [data-testid="stSidebarCollapseButton"] button,
     [data-testid="collapsedControl"] button,
     [data-testid="stSidebarCollapsedControl"] button {
-        background: rgba(11, 18, 38, 0.85) !important;
-        border: 1px solid rgba(148, 163, 184, 0.24) !important;
+        background: #0412B2 !important;
+        border: 1px solid #2C5A98 !important;
         border-radius: 999px !important;
         width: 36px !important;
         height: 36px !important;
@@ -163,10 +159,10 @@ st.markdown("""
 
     section[data-testid="stSidebar"] {
         background:
-            radial-gradient(120% 80% at 0% 0%, rgba(20,184,166,0.14), transparent 55%),
-            linear-gradient(180deg, #070B1A 0%, #0B1433 100%) !important;
-        border-right: 1px solid rgba(148, 163, 184, 0.16);
-        box-shadow: inset -1px 0 0 rgba(148, 163, 184, 0.08);
+            radial-gradient(120% 80% at 0% 0%, rgba(67,162,255,0.20), transparent 50%),
+            linear-gradient(180deg, #08162F 0%, #0B1C3A 100%) !important;
+        border-right: 1px solid #1E386A;
+        box-shadow: inset -1px 0 0 rgba(127,196,255,0.10);
     }
     section[data-testid="stSidebar"] * {
         color: #F2F7FF !important;
@@ -262,10 +258,10 @@ st.markdown("""
     .stTextInput > div > div > input,
     textarea, .stTextArea textarea, [data-baseweb="input"] input {
         border-radius: 10px !important;
-        border: 1px solid rgba(148, 163, 184, 0.24) !important;
-        background: rgba(255,255,255,0.96) !important;
-        color: #0B1226 !important;
-        caret-color: #0B1226 !important;
+        border: 1px solid #375C97 !important;
+        background: #F7FAFF !important;
+        color: #0412B2 !important;
+        caret-color: #0A1A37 !important;
     }
     .stTextInput > div > div > input::placeholder {
         color: #6B7FA7 !important;
@@ -279,21 +275,21 @@ st.markdown("""
     .stButton > button, .stFormSubmitButton > button {
         width: 100%;
         border-radius: 10px;
-        border: 1px solid rgba(148, 163, 184, 0.22);
+        border: 1px solid rgba(127,196,255,0.32);
         padding: 0.58rem 1rem;
         font-weight: 800;
-        background: linear-gradient(135deg, rgba(20,184,166,0.95) 0%, rgba(59,130,246,0.95) 100%);
+        background: linear-gradient(135deg, #1A58A5 0%, #43A2FF 100%);
         color: #FFFFFF !important;
         text-transform: uppercase;
         letter-spacing: 0.9px;
         font-size: 0.74rem !important;
-        box-shadow: 0 10px 24px rgba(59,130,246,0.20);
+        box-shadow: 0 8px 20px rgba(67,162,255,0.22);
         transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
     }
     .stButton > button:hover, .stFormSubmitButton > button:hover {
         transform: translateY(-2px);
         filter: brightness(1.05);
-        box-shadow: 0 14px 30px rgba(59,130,246,0.26);
+        box-shadow: 0 12px 24px rgba(67,162,255,0.26);
     }
 
     .chat-container {
@@ -316,25 +312,25 @@ st.markdown("""
         to { opacity: 1; transform: translateY(0); }
     }
     .user-bubble {
-        background: linear-gradient(135deg, rgba(20,184,166,0.95), rgba(59,130,246,0.95));
+        background: linear-gradient(135deg, #1A58A5, #43A2FF);
         color: #FFFFFF !important;
         border-bottom-right-radius: 5px;
     }
     .ai-bubble {
-        background: rgba(11, 18, 38, 0.75);
-        color: #EAF2FF !important;
-        border: 1px solid rgba(148, 163, 184, 0.22);
+        background: rgba(255,255,255,0.93);
+        color: #0B1B39 !important;
+        border: 1px solid #BED4F2;
         border-bottom-left-radius: 5px;
     }
     .ai-bubble, .ai-bubble * {
-        color: #EAF2FF !important;
+        color: #0B1B39 !important;
         opacity: 1 !important;
     }
     .ai-bubble p, .ai-bubble li, .ai-bubble span, .ai-bubble strong {
-        color: #EAF2FF !important;
+        color: #0B1B39 !important;
     }
     .ai-bubble a {
-        color: #A5D8FF !important;
+        color: #1A58A5 !important;
         text-decoration: underline !important;
         font-weight: 700 !important;
     }
@@ -363,7 +359,7 @@ st.markdown("""
     }
 
     .stProgress > div > div > div > div {
-        background: linear-gradient(90deg, rgba(20,184,166,0.95), rgba(59,130,246,0.95)) !important;
+        background: linear-gradient(90deg, #43A2FF, #7FC4FF) !important;
     }
     [data-testid="stRadio"] label {
         padding: 0.45rem 0.6rem;
@@ -424,31 +420,20 @@ st.markdown("""
         margin-top: 0.7rem;
         padding: 0.75rem 1.24rem;
         border-radius: 999px;
-        background: linear-gradient(135deg, rgba(20,184,166,0.95), rgba(59,130,246,0.95));
-        border: 2px solid rgba(20,184,166,0.30);
+        background: linear-gradient(135deg, #1A58A5, #43A2FF);
+        border: 2px solid rgba(127,196,255,0.42);
         color: #FFFFFF !important;
         font-weight: 800;
         letter-spacing: 0.8px;
         font-size: 0.8rem !important;
         text-transform: uppercase;
-        box-shadow: 0 10px 26px rgba(59,130,246,0.22);
-    }
-    .light-panel {
-        background: rgba(7, 11, 26, 0.40) !important;
-        border: 1px solid rgba(148, 163, 184, 0.18) !important;
-        border-radius: 16px !important;
-        padding: 1.6rem !important;
-        text-align: left !important;
-        margin: 1.6rem 0 !important;
+        box-shadow: 0 8px 20px rgba(67,162,255,0.26);
     }
     .light-panel, .light-panel p, .light-panel b {
-        color: #EAF2FF !important;
-    }
-    .light-panel p {
-        opacity: 0.9 !important;
+        color: #0B1B39 !important;
     }
     .light-panel h3 {
-        color: var(--gold) !important;
+        color: #A57316 !important;
     }
 
     [data-testid="stExpander"] summary p {
@@ -503,26 +488,22 @@ def init_backend():
         with splash.container():
             st.markdown(f"""
                 <div style="text-align:center; padding:80px 20px; background:white; border-radius:1rem; border:1px solid var(--border); margin: 50px auto; max-width: 600px; box-shadow: 0 10px 40px rgba(0,0,0,0.05);">
-                    <h2 style="color:#0F172A; margin-bottom:10px; font-weight:900;">JUSTICE LENS</h2>
-                    <p style="color:var(--gold); font-weight: 700; margin-bottom: 25px; font-size: 0.95rem; letter-spacing: 1px;">ESTABLISHING SECURE CONNECTION...</p>
+                    <h2 style="color:#0F172A; margin-bottom:10px; font-weight:900;"> JUSTICE LENS</h2>
+                    <p style="color:#C5A059; font-weight: 700; margin-bottom: 25px; font-size: 0.95rem; letter-spacing: 1px;">ESTABLISHING SECURE CONNECTION...</p>
                 </div>
             """, unsafe_allow_html=True)
             
             bar = st.progress(0, text="Verifying Database...")
-            idx = None
-            embed_model = None
-
-            if PINECONE_KEY:
-                from pinecone import Pinecone
-                pc = Pinecone(api_key=PINECONE_KEY)
-                idx = pc.Index(INDEX_NAME)
+            pc = Pinecone(api_key=PINECONE_KEY)
+            idx = pc.Index(INDEX_NAME)
+            time.sleep(0.2)
             
             bar.progress(50, text="Synchronizing AI Engine...")
-            if PINECONE_KEY:
-                from sentence_transformers import SentenceTransformer
-                embed_model = SentenceTransformer(EMBED_MODEL_NAME)
+            embed_model = HuggingFaceEmbeddings(model_name="nlpaueb/legal-bert-base-uncased")
+            time.sleep(0.2)
             
             bar.progress(100, text="AI Online.")
+            time.sleep(0.4)
             
         splash.empty()
         return idx, embed_model
@@ -549,33 +530,12 @@ def get_backend():
         pinecone_index, legal_embeddings = init_backend()
     return pinecone_index, legal_embeddings
 
-def embed_query(embeddings_model, text):
-    if embeddings_model is None:
-        return None
-    if hasattr(embeddings_model, "embed_query"):
-        return embeddings_model.embed_query(text)
-    if hasattr(embeddings_model, "encode"):
-        return embeddings_model.encode(text).tolist()
-    return None
-
 # --- SESSION STATE ---
 if "user" not in st.session_state: st.session_state.user = None
 if "chat_history" not in st.session_state: st.session_state.chat_history = []
 if "admin_mode" not in st.session_state: st.session_state.admin_mode = False
 if "view" not in st.session_state: st.session_state.view = "AI Assistant"
 if "start_researching_flow" not in st.session_state: st.session_state.start_researching_flow = False
-
-# Normalize legacy labels (from older UI versions)
-_view = str(st.session_state.view or "")
-_view = _view.strip()
-if _view in {"AI Assistant", "Vision & Mission", "Admin Dashboard"}:
-    st.session_state.view = _view
-elif "Admin Dashboard" in _view:
-    st.session_state.view = "Admin Dashboard"
-elif "Vision" in _view:
-    st.session_state.view = "Vision & Mission"
-else:
-    st.session_state.view = "AI Assistant"
 
 # --- AUTH SYSTEM ---
 def authenticate(email, password):
@@ -677,7 +637,7 @@ def ask_groq_lawyer(user_input, law_evidence, category):
          PUNISHMENTS: [List jail/compensation]
          CASE HISTORY: [Cite landmark case]
          WIN PROBABILITY: [Percentage] - [Reasoning]
-         ACTION PLAN:
+        ðŸš€ ACTION PLAN:
         1. Notify CERT-In (www.cert-in.org.in) within 6 hours.
         2. File complaint at www.cybercrime.gov.in.
         3. Appoint a Cyber Forensic Auditor.
@@ -694,7 +654,7 @@ def ask_groq_lawyer(user_input, law_evidence, category):
         response = requests.post(url, headers=headers, json=data, timeout=18)
         return response.json()['choices'][0]['message']['content']
     except:
-        return "AI Engine Error."
+        return "âš ï¸ AI Engine Error."
 
 def _validate_ai_answer(category: str, answer: str) -> bool:
     if not answer or not isinstance(answer, str):
@@ -760,11 +720,11 @@ def _repair_ai_answer(user_input: str, law_evidence: str, category: str, bad_ans
         {legal_anchor}
         {case_history}
         Rewrite the following draft to STRICTLY follow this exact format (include all headings):
-        RELEVANT SECTIONS: ...
-        PUNISHMENTS: ...
-        CASE HISTORY: ...
-        WIN PROBABILITY: ...
-        ACTION PLAN:
+        âš–ï¸ RELEVANT SECTIONS: ...
+        âš–ï¸ PUNISHMENTS: ...
+        ðŸ“š CASE HISTORY: ...
+        ðŸ“Š WIN PROBABILITY: ...
+        ðŸš€ ACTION PLAN:
         1. ...
         2. ...
         3. ...
@@ -832,20 +792,18 @@ with st.sidebar:
     else:
         st.markdown(f"Connected: **{st.session_state.user['name']}**")
         
-        is_admin_user = str(st.session_state.user.get("email", "")).lower() in ADMIN_EMAILS
-        if is_admin_user:
-            st.markdown('<span style="color:var(--gold); font-weight:900; font-size:0.7rem; letter-spacing:1px;">[ ADMIN ]</span>', unsafe_allow_html=True)
+        if st.session_state.user['email'] == "d3ztudio@gmail.com":
+            st.markdown('<span style="color:#C5A059; font-weight:900; font-size:0.7rem; letter-spacing:1px;">[ SYSTEM COMMANDER ]</span>', unsafe_allow_html=True)
             if not st.session_state.admin_mode:
-                pin = st.text_input("Admin PIN", type="password", placeholder="Enter PIN")
-                if pin and pin == ADMIN_PIN:
+                pin = st.text_input("PIN", type="password", placeholder="Enter PIN")
+                if pin == "1923": 
                     st.session_state.admin_mode = True
                     st.rerun()
         
-        opts = ["AI Assistant", "Vision & Mission"]
-        if is_admin_user:
-            opts.append("Admin Dashboard")
+        opts = [" AI Assistant", "Vision & Mission"]
+        if st.session_state.admin_mode: opts.append("Admin Dashboard")
         
-        st.session_state.view = st.radio("CORE PORTAL", opts)
+        st.session_state.view = st.radio("CORE PORTAL", [x.strip() for x in opts])
         
         st.markdown("---")
         if st.button("TERMINATE SESSION"):
@@ -864,8 +822,8 @@ if not st.session_state.user:
         st.markdown("""
             <div class="glass-card hero-panel" style="text-align: center;">
                 <h1 style="color:#EAF2FF !important;">Justice Lens</h1>
-                <p style="color:var(--gold) !important; font-weight:700; font-size:1rem; letter-spacing:2px; margin-top:-10px;">SECURE AI CYBER LEGAL DEFENSE</p>
-                <div class="light-panel">
+                <p style="color:#C5A059 !important; font-weight:700; font-size:1rem; letter-spacing:2px; margin-top:-10px;">SECURE AI CYBER LEGAL DEFENSE</p>
+                <div class="light-panel" style="background:rgba(255,255,255,0.92); padding:2rem; border-radius:1rem; border:1px solid #BBD3F3; text-align:left; margin: 2rem 0;">
                     <h3 style="margin-top:0;">Expert Advocacy</h3>
                     <p>Protect your digital footprint under the <b>Indian IT Act 2000</b>. Our engine provides instant legal reports using context-aware AI retrieval.</p>
                 </div>
@@ -947,11 +905,11 @@ else:
                 category = get_intent_category(user_msg)
 
             if category == "PHYSICAL":
-                ans = "This tool handles cyber crimes only. For other types of crimes, file an FIR under IPC."
+                ans = "⚠️ This tool handles cyber crimes only. For other types of crimes, file an FIR under IPC."
             elif category == "NON_LEGAL":
                 ans = (
-                    "I can only help with cyber-law topics (IT Act / cybercrime). "
-                    "Ask a legal question about a cyber issue and I'll help."
+                    "ℹ️ I can only help with cyber-law topics (IT Act / cybercrime). "
+                    "Ask a legal question about a cyber issue and I’ll help."
                 )
             else:
                 with st.spinner("Querying legal database..."):
@@ -959,12 +917,11 @@ else:
                     try:
                         idx, emb = get_backend()
                         if idx and emb:
-                            v = embed_query(emb, user_msg)
-                            if v:
-                                m = idx.query(vector=v, top_k=5, include_metadata=True)
-                                dataset_evidence = " ".join(
-                                    [x.get("metadata", {}).get("text", "") for x in m.get("matches", [])]
-                                ) or "General context."
+                            v = emb.embed_query(user_msg)
+                            m = idx.query(vector=v, top_k=5, include_metadata=True)
+                            dataset_evidence = " ".join(
+                                [x.get("metadata", {}).get("text", "") for x in m.get("matches", [])]
+                            ) or "General context."
                     except Exception:
                         pass
 
@@ -989,10 +946,10 @@ else:
         # Header
         top_l, top_r = st.columns([3, 1])
         with top_l:
-            st.title("Justice Lens")
+            st.title("⚖️ Justice Lens")
             st.caption("Your Cyber-law assistant.")
         with top_r:
-            if st.button("Clear chat", use_container_width=True):
+            if st.button("🧹 Clear chat", use_container_width=True):
                 history.clear()
                 st.rerun()
 
@@ -1035,8 +992,8 @@ else:
             if not history:
                 st.markdown("""
                     <div class="glass-card" style="text-align:center; padding: 1.4rem 1.2rem;">
-                        <h2 style="margin:0; color:var(--text) !important;">Welcome to Justice Lens</h2>
-                        <p style="margin:0.35rem 0 0; color:var(--gold) !important; font-weight:700;">Start with a scenario or ask an IT Act section.</p>
+                        <h2 style="margin:0; color:#EAF2FF !important;">Welcome to Justice Lens</h2>
+                        <p style="margin:0.35rem 0 0; color:#C5A059 !important; font-weight:700;">Start with a scenario or ask an IT Act section.</p>
                     </div>
                 """, unsafe_allow_html=True)
 
@@ -1067,7 +1024,7 @@ else:
                 with st.chat_message(role):
                     st.markdown(chat.get("content", ""))
 
-            user_msg = st.chat_input('Describe a cyber incident, or ask e.g. "Explain Section 66F"')
+            user_msg = st.chat_input("Describe a cyber incident, or ask e.g. “Explain Section 66F”")
             if user_msg:
                 _handle_user_message(user_msg)
                 st.rerun()
@@ -1076,15 +1033,11 @@ else:
         st.title("Our Core Principles")
         v1, v2 = st.columns(2)
         with v1:
-            st.markdown("""<div class="glass-card"><h3 style="color:var(--gold) !important;">Our Vision</h3><p>To establish a digital fortress in India where legal intelligence is accessible to every citizen.</p></div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="glass-card"><h3 style="color:#C5A059 !important;">Our Vision</h3><p>To establish a digital fortress in India where legal intelligence is accessible to every citizen.</p></div>""", unsafe_allow_html=True)
         with v2:
-            st.markdown("""<div class="glass-card"><h3 style="color:var(--gold) !important;">Our Mission</h3><p>Utilizing AI to translate complex legislative acts into actionable, cited legal reports for the public.</p></div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="glass-card"><h3 style="color:#C5A059 !important;">Our Mission</h3><p>Utilizing AI to translate complex legislative acts into actionable, cited legal reports for the public.</p></div>""", unsafe_allow_html=True)
 
-    elif page == "Admin Dashboard":
-        if not st.session_state.admin_mode:
-            st.title("Admin Dashboard")
-            st.info("Admin access is locked. Enter the Admin PIN in the sidebar to continue.")
-            st.stop()
+    elif page == "Admin Dashboard" and st.session_state.admin_mode:
         st.title("Admin Dashboard")
         if db:
             u_ref = db.collection("artifacts").document("justicelens-law").collection("public").document("data").collection("users")
@@ -1145,7 +1098,7 @@ else:
                     use_container_width=True
                 )
 
-            st.markdown("### User Directory")
+            st.markdown("### ðŸ‘¥ User Directory")
             if not filtered_users:
                 st.info("No users match the current filter.")
             for ud in filtered_users:
@@ -1163,7 +1116,7 @@ else:
 
                 c_btn1, c_btn2 = st.columns(2)
                 with c_btn1:
-                    b_label = "UNBAN" if ud["is_banned"] else "BAN"
+                    b_label = "âœ… UNBAN" if ud["is_banned"] else "ðŸš« BAN"
                     if st.button(b_label, key=f"ban_{ud['doc_id']}"):
                         u_ref.document(ud["doc_id"]).update({"is_banned": not ud["is_banned"]})
                         st.rerun()
@@ -1181,3 +1134,4 @@ else:
         else:
             st.error("Database not available.")
                     
+
