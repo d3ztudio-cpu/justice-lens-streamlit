@@ -279,7 +279,7 @@ st.markdown("""
         padding: 0.58rem 1rem;
         font-weight: 800;
         background: linear-gradient(135deg, #1A58A5 0%, #43A2FF 100%);
-        color: #000000 !important;
+        color: #FFFFFF !important;
         text-transform: uppercase;
         letter-spacing: 0.9px;
         font-size: 0.74rem !important;
