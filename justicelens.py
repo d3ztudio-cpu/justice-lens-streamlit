@@ -95,7 +95,7 @@ st.markdown("""
     [data-testid="stSidebarCollapseButton"] button,
     [data-testid="collapsedControl"] button,
     [data-testid="stSidebarCollapsedControl"] button {
-        background: #0E2448 !important;
+        background: #0412B2 !important;
         border: 1px solid #2C5A98 !important;
         border-radius: 999px !important;
         width: 36px !important;
@@ -180,12 +180,12 @@ st.markdown("""
         background: rgba(255,255,255,0.97) !important;
         color: #0A1A37 !important;
         border: 1px solid #A7C2E7 !important;
-        border-radius: 11px !important;
+        border-radius: 25px !important;
         padding: 0.58rem 0.76rem !important;
     }
     section[data-testid="stSidebar"] [data-baseweb="input"] {
         align-items: center !important;
-        border-radius: 11px !important;
+        border-radius: 25px !important;
         overflow: hidden !important;
     }
     section[data-testid="stSidebar"] [data-baseweb="input"] > div {
@@ -260,8 +260,8 @@ st.markdown("""
         border-radius: 10px !important;
         border: 1px solid #375C97 !important;
         background: #F7FAFF !important;
-        color: #0A1A37 !important;
-        caret-color: #0A1A37 !important;
+        color: #0412B2 !important;
+        caret-color: #0412B2 !important;
     }
     .stTextInput > div > div > input::placeholder {
         color: #6B7FA7 !important;
@@ -454,7 +454,7 @@ st.markdown("""
             padding-left: 0.85rem !important;
             padding-right: 0.85rem !important;
         }
-        .chat-container { padding: 1rem; }
+        .chat-container { padding: 5rem; }
         .chat-bubble { max-width: 96%; font-size: 0.92rem; }
         .team-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
