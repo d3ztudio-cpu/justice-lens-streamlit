@@ -1,0 +1,19 @@
+﻿services:
+  - type: web
+    name: justice-lens
+    env: docker
+    dockerfilePath: backend/Dockerfile
+    dockerContext: .
+    autoDeploy: true
+    healthCheckPath: /health
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: PINECONE_KEY
+        sync: false
+      - key: PINECONE_INDEX_NAME
+        value: justice-lens
+      - key: CORS_ORIGINS
+        value: http://localhost:5173
+      - key: SERVE_FRONTEND
+        value: "true"
