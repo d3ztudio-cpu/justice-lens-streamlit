@@ -79,7 +79,7 @@ st.markdown("""
         background:
             radial-gradient(1200px 600px at 12% 0%, rgba(67,162,255,0.15), transparent 50%),
             radial-gradient(900px 500px at 100% 12%, rgba(224,180,91,0.10), transparent 48%),
-            linear-gradient(180deg, #061022 0%, #091730 45%, #08162D 100%) !important;
+            linear-gradient(180deg, #061022 0%, #ffffff 45%, #08162D 100%) !important;
         min-height: 100vh;
     }
     .main .block-container {
@@ -885,7 +885,7 @@ else:
         top_l, top_r = st.columns([3, 1])
         with top_l:
             st.title("⚖️ Justice Lens")
-            st.caption("Cyber-law assistant for IT Act 2000 scenarios and section explanations.")
+            st.caption("Your Cyber-law assistant.")
         with top_r:
             if st.button("🧹 Clear chat", use_container_width=True):
                 st.session_state.chat_history = []
