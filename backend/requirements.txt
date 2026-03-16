@@ -1,8 +1,0 @@
-﻿fastapi
-uvicorn[standard]
-requests
-firebase_admin
-pinecone
-langchain-huggingface
-sentence-transformers
-pydantic

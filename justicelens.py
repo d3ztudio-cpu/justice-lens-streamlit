@@ -1,4 +1,4 @@
-import streamlit as st
+﻿import streamlit as st
 import pandas as pd
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
@@ -13,7 +13,7 @@ from pinecone import Pinecone
 from langchain_huggingface import HuggingFaceEmbeddings
 
 # ==========================================
-# ⚙️ CONFIGURATION & API KEYS
+# âš™ï¸ CONFIGURATION & API KEYS
 # ==========================================
 PINECONE_KEY = st.secrets.get("PINECONE_KEY", "")
 GROQ_API_KEY = st.secrets.get("GROQ_API_KEY", "")
@@ -40,7 +40,7 @@ def format_app_time(dt_obj, fmt='%d %b, %H:%M'):
 # --- PAGE CONFIG ---
 st.set_page_config(
     page_title="Justice Lens | Expert Cyber Legal AI",
-    page_icon="⚖️",
+    page_icon="âš–ï¸",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -488,7 +488,7 @@ def init_backend():
         with splash.container():
             st.markdown(f"""
                 <div style="text-align:center; padding:80px 20px; background:white; border-radius:1rem; border:1px solid var(--border); margin: 50px auto; max-width: 600px; box-shadow: 0 10px 40px rgba(0,0,0,0.05);">
-                    <h2 style="color:#0F172A; margin-bottom:10px; font-weight:900;">⚖️ JUSTICE LENS</h2>
+                    <h2 style="color:#0F172A; margin-bottom:10px; font-weight:900;">âš–ï¸ JUSTICE LENS</h2>
                     <p style="color:#C5A059; font-weight: 700; margin-bottom: 25px; font-size: 0.95rem; letter-spacing: 1px;">ESTABLISHING SECURE CONNECTION...</p>
                 </div>
             """, unsafe_allow_html=True)
@@ -633,11 +633,11 @@ def ask_groq_lawyer(user_input, law_evidence, category):
         {legal_anchor}
         {case_history}
         You are an Expert Cyber Law Consultant. Use this EXACT format:
-        ⚖️ RELEVANT SECTIONS: [Cite sections]
-        ⚖️ PUNISHMENTS: [List jail/compensation]
-        📚 CASE HISTORY: [Cite landmark case]
-        📊 WIN PROBABILITY: [Percentage] - [Reasoning]
-        🚀 ACTION PLAN:
+        âš–ï¸ RELEVANT SECTIONS: [Cite sections]
+        âš–ï¸ PUNISHMENTS: [List jail/compensation]
+        ðŸ“š CASE HISTORY: [Cite landmark case]
+        ðŸ“Š WIN PROBABILITY: [Percentage] - [Reasoning]
+        ðŸš€ ACTION PLAN:
         1. Notify CERT-In (www.cert-in.org.in) within 6 hours.
         2. File complaint at www.cybercrime.gov.in.
         3. Appoint a Cyber Forensic Auditor.
@@ -654,7 +654,7 @@ def ask_groq_lawyer(user_input, law_evidence, category):
         response = requests.post(url, headers=headers, json=data, timeout=18)
         return response.json()['choices'][0]['message']['content']
     except:
-        return "⚠️ AI Engine Error."
+        return "âš ï¸ AI Engine Error."
 
 def _validate_ai_answer(category: str, answer: str) -> bool:
     if not answer or not isinstance(answer, str):
@@ -720,11 +720,11 @@ def _repair_ai_answer(user_input: str, law_evidence: str, category: str, bad_ans
         {legal_anchor}
         {case_history}
         Rewrite the following draft to STRICTLY follow this exact format (include all headings):
-        ⚖️ RELEVANT SECTIONS: ...
-        ⚖️ PUNISHMENTS: ...
-        📚 CASE HISTORY: ...
-        📊 WIN PROBABILITY: ...
-        🚀 ACTION PLAN:
+        âš–ï¸ RELEVANT SECTIONS: ...
+        âš–ï¸ PUNISHMENTS: ...
+        ðŸ“š CASE HISTORY: ...
+        ðŸ“Š WIN PROBABILITY: ...
+        ðŸš€ ACTION PLAN:
         1. ...
         2. ...
         3. ...
@@ -763,7 +763,7 @@ with st.sidebar:
         with auth_tab[0]:
             e_val = st.text_input("Email", key="login_email")
             p_val = st.text_input("Password", type="password", key="login_pass")
-            if st.button("👤 Authenticate"):
+            if st.button("ðŸ‘¤ Authenticate"):
                 valid, u_obj = authenticate(e_val, p_val)
                 if valid:
                     if check_ban(u_obj.uid): st.error("Access Forbidden.")
@@ -785,12 +785,12 @@ with st.sidebar:
                     st.success("Account Ready! Use Login.")
                 except Exception as ex: st.error(str(ex))
                 
-        if st.button("👤 Continue as Guest"):
+        if st.button("ðŸ‘¤ Continue as Guest"):
             gid = str(uuid.uuid4())[:8]
             st.session_state.user = {"name": f"Guest_{gid}", "email": "guest@justicelens.io", "uid": f"guest_{gid}"}
             st.rerun()
     else:
-        st.markdown(f"👤 Connected: **{st.session_state.user['name']}**")
+        st.markdown(f"ðŸ‘¤ Connected: **{st.session_state.user['name']}**")
         
         if st.session_state.user['email'] == "d3ztudio@gmail.com":
             st.markdown('<span style="color:#C5A059; font-weight:900; font-size:0.7rem; letter-spacing:1px;">[ SYSTEM COMMANDER ]</span>', unsafe_allow_html=True)
@@ -801,7 +801,7 @@ with st.sidebar:
                     st.rerun()
         
         opts = [" AI Assistant", "Vision & Mission"]
-        if st.session_state.admin_mode: opts.append("🚨 Admin Dashboard")
+        if st.session_state.admin_mode: opts.append("ðŸš¨ Admin Dashboard")
         
         st.session_state.view = st.radio("CORE PORTAL", [x.strip() for x in opts])
         
@@ -880,25 +880,26 @@ if not st.session_state.user:
 
 else:
     page = st.session_state.view
-
     if page == "AI Assistant":
-        top_l, top_r = st.columns([3, 1])
-        with top_l:
-            st.title("⚖️ Justice Lens")
-            st.caption("Your Cyber-law assistant.")
-        with top_r:
-            if st.button("🧹 Clear chat", use_container_width=True):
-                st.session_state.chat_history = []
-                st.rerun()
+        # --- PROJECTS (lightweight, UI-only) ---
+        if "projects" not in st.session_state:
+            # Migrate existing chat_history into a default project
+            existing = list(st.session_state.chat_history) if st.session_state.get("chat_history") else []
+            st.session_state.projects = {"Default": existing}
+        if "active_project" not in st.session_state:
+            st.session_state.active_project = "Default"
+        if st.session_state.active_project not in st.session_state.projects:
+            st.session_state.projects[st.session_state.active_project] = []
 
-        for chat in st.session_state.chat_history:
-            role = "user" if chat.get("role") == "user" else "assistant"
-            with st.chat_message(role):
-                st.markdown(chat.get("content", ""))
+        active = st.session_state.active_project
+        history = st.session_state.projects[active]
+        # Keep backward compatibility for other parts of the app
+        st.session_state.chat_history = history
 
-        user_msg = st.chat_input("Describe a cyber incident, or ask e.g. “Explain Section 66F”")
-        if user_msg:
-            st.session_state.chat_history.append({"role": "user", "content": user_msg})
+        def _handle_user_message(user_msg: str):
+            if not user_msg:
+                return
+            history.append({"role": "user", "content": user_msg})
 
             with st.spinner("Analyzing scope..."):
                 category = get_intent_category(user_msg)
@@ -927,24 +928,117 @@ else:
                 with st.spinner("Generating legal report..."):
                     ans = ask_groq_lawyer_validated(user_msg, dataset_evidence, category)
 
-            st.session_state.chat_history.append({"role": "assistant", "content": ans})
+            history.append({"role": "assistant", "content": ans})
+
             if db:
-                db.collection("artifacts").document("justicelens-law").collection("public").document("data").collection("logs").add({
-                    "uid": st.session_state.user['uid'], "user": st.session_state.user['name'],
-                    "query": user_msg, "report": ans, "timestamp": utc_now()
-                })
-            st.rerun()
+                try:
+                    db.collection("artifacts").document("justicelens-law").collection("public").document("data").collection("logs").add({
+                        "uid": st.session_state.user["uid"],
+                        "user": st.session_state.user["name"],
+                        "query": user_msg,
+                        "report": ans,
+                        "timestamp": utc_now(),
+                        "project": active,
+                    })
+                except Exception:
+                    pass
+
+        # Header
+        top_l, top_r = st.columns([3, 1])
+        with top_l:
+            st.title("⚖️ Justice Lens")
+            st.caption("Your Cyber-law assistant.")
+        with top_r:
+            if st.button("🧹 Clear chat", use_container_width=True):
+                history.clear()
+                st.rerun()
+
+        main_col, right_col = st.columns([4, 1], gap="large")
+
+        # Right panel (Projects)
+        with right_col:
+            st.markdown("### Projects")
+            new_name = st.text_input("New project", placeholder="e.g. Incident Notes", key="jl_new_project")
+            if st.button("Create", use_container_width=True, key="jl_create_project"):
+                name = (new_name or "").strip()
+                if name and name not in st.session_state.projects:
+                    st.session_state.projects[name] = []
+                    st.session_state.active_project = name
+                    st.rerun()
+
+            project_names = list(st.session_state.projects.keys())
+            if project_names:
+                try:
+                    current_index = project_names.index(st.session_state.active_project)
+                except ValueError:
+                    current_index = 0
+                chosen = st.radio(
+                    "Select",
+                    project_names,
+                    index=current_index,
+                    label_visibility="collapsed",
+                    key="jl_project_radio",
+                )
+                if chosen != st.session_state.active_project:
+                    st.session_state.active_project = chosen
+                    st.rerun()
+
+            st.markdown("---")
+            st.caption("Tip: Use Projects to separate different incident chats.")
+
+        # Main chat area
+        with main_col:
+            # Welcome tiles when empty
+            if not history:
+                st.markdown("""
+                    <div class="glass-card" style="text-align:center; padding: 1.4rem 1.2rem;">
+                        <h2 style="margin:0; color:#EAF2FF !important;">Welcome to Justice Lens</h2>
+                        <p style="margin:0.35rem 0 0; color:#C5A059 !important; font-weight:700;">Start with a scenario or ask an IT Act section.</p>
+                    </div>
+                """, unsafe_allow_html=True)
+
+                t1, t2 = st.columns(2)
+                with t1:
+                    if st.button("Report UPI scam", use_container_width=True):
+                        st.session_state.jl_pending_msg = "I was scammed via UPI. What sections apply?"
+                        st.rerun()
+                    if st.button("Account hacked", use_container_width=True):
+                        st.session_state.jl_pending_msg = "My account was hacked and my data leaked. What should I do?"
+                        st.rerun()
+                with t2:
+                    if st.button("Explain Section 66F", use_container_width=True):
+                        st.session_state.jl_pending_msg = "Explain Section 66F"
+                        st.rerun()
+                    if st.button("Privacy violation", use_container_width=True):
+                        st.session_state.jl_pending_msg = "Someone posted my private photos without consent. What are the punishments?"
+                        st.rerun()
+
+            # Process any pending message (from tiles)
+            pending = st.session_state.pop("jl_pending_msg", None)
+            if pending:
+                _handle_user_message(pending)
+                st.rerun()
+
+            for chat in history:
+                role = "user" if chat.get("role") == "user" else "assistant"
+                with st.chat_message(role):
+                    st.markdown(chat.get("content", ""))
+
+            user_msg = st.chat_input("Describe a cyber incident, or ask e.g. “Explain Section 66F”")
+            if user_msg:
+                _handle_user_message(user_msg)
+                st.rerun()
 
     elif page == "Vision & Mission":
-        st.title("📖 Our Core Principles")
+        st.title("ðŸ“– Our Core Principles")
         v1, v2 = st.columns(2)
         with v1:
             st.markdown("""<div class="glass-card"><h3 style="color:#C5A059 !important;">Our Vision</h3><p>To establish a digital fortress in India where legal intelligence is accessible to every citizen.</p></div>""", unsafe_allow_html=True)
         with v2:
             st.markdown("""<div class="glass-card"><h3 style="color:#C5A059 !important;">Our Mission</h3><p>Utilizing AI to translate complex legislative acts into actionable, cited legal reports for the public.</p></div>""", unsafe_allow_html=True)
 
-    elif page == "🚨 Admin Dashboard" and st.session_state.admin_mode:
-        st.title("🚨 System Oversight")
+    elif page == "ðŸš¨ Admin Dashboard" and st.session_state.admin_mode:
+        st.title("ðŸš¨ System Oversight")
         if db:
             u_ref = db.collection("artifacts").document("justicelens-law").collection("public").document("data").collection("users")
             user_docs = list(u_ref.stream())
@@ -1004,7 +1098,7 @@ else:
                     use_container_width=True
                 )
 
-            st.markdown("### 👥 User Directory")
+            st.markdown("### ðŸ‘¥ User Directory")
             if not filtered_users:
                 st.info("No users match the current filter.")
             for ud in filtered_users:
@@ -1022,12 +1116,12 @@ else:
 
                 c_btn1, c_btn2 = st.columns(2)
                 with c_btn1:
-                    b_label = "✅ UNBAN" if ud["is_banned"] else "🚫 BAN"
+                    b_label = "âœ… UNBAN" if ud["is_banned"] else "ðŸš« BAN"
                     if st.button(b_label, key=f"ban_{ud['doc_id']}"):
                         u_ref.document(ud["doc_id"]).update({"is_banned": not ud["is_banned"]})
                         st.rerun()
                 with c_btn2:
-                    if st.button("🗑️ DELETE", key=f"del_{ud['doc_id']}"):
+                    if st.button("ðŸ—‘ï¸ DELETE", key=f"del_{ud['doc_id']}"):
                         try:
                             auth.delete_user(ud["doc_id"])
                         except:
@@ -1040,3 +1134,4 @@ else:
         else:
             st.error("Database not available.")
                     
+
