@@ -2,17 +2,17 @@
 
 from dataclasses import dataclass
 
-from langchain_huggingface import HuggingFaceEmbeddings
-from pinecone import Pinecone
-
 
 @dataclass(frozen=True)
 class RAG:
     pinecone_index: object
-    embeddings: HuggingFaceEmbeddings
+    embeddings: object
 
     @classmethod
     def create(cls, *, pinecone_api_key: str, index_name: str) -> "RAG":
+        from pinecone import Pinecone
+        from langchain_huggingface import HuggingFaceEmbeddings
+
         pc = Pinecone(api_key=pinecone_api_key)
         index = pc.Index(index_name)
         embeddings = HuggingFaceEmbeddings(model_name="nlpaueb/legal-bert-base-uncased")
@@ -34,4 +34,9 @@ class NullRAG:
 def build_rag(*, pinecone_api_key: str, index_name: str):
     if not pinecone_api_key:
         return NullRAG()
-    return RAG.create(pinecone_api_key=pinecone_api_key, index_name=index_name)
+
+    try:
+        return RAG.create(pinecone_api_key=pinecone_api_key, index_name=index_name)
+    except Exception:
+        # If embeddings deps fail to install/import on a host, keep the API up.
+        return NullRAG()
