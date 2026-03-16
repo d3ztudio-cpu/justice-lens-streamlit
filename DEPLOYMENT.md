@@ -1,48 +1,36 @@
 ﻿# Hosting (website) options
 
-You can deploy this in two ways:
+If your frontend is on **Cloudflare Pages**, it is static and cannot run Python.
+So your app must be:
+- **Frontend:** Cloudflare Pages (`frontend/`)
+- **Backend:** another host (Render/Fly/Railway/etc) running `backend/main.py`
 
-## 1) Single deploy (easiest): backend serves the UI
+## Cloudflare Pages (frontend)
 
-This repo includes:
-- `backend/` FastAPI API
-- `frontend/` static UI
+Build settings:
+- Framework preset: `None`
+- Root directory (advanced): `frontend`
+- Build command: (empty)
+- Build output directory: `.`
 
-If you set `SERVE_FRONTEND=true`, FastAPI serves `frontend/` at `/` and your API is at `/api/*`.
+After deploy, open your Pages URL.
 
-### Render (recommended for beginners)
+## Backend (FastAPI)
 
-1) Push this repo to GitHub.
-2) Go to Render → New → Blueprint.
-3) Select your repo. Render will detect `render.yaml` and create the service.
-4) In Render → service → Environment, set:
-   - `GROQ_API_KEY`
-   - `PINECONE_KEY` (optional)
-   - `CORS_ORIGINS` (set to your Render URL, e.g. `https://justice-lens.onrender.com`)
-   - `SERVE_FRONTEND=true`
-5) Deploy. Open your Render URL.
+Deploy using `backend/Dockerfile`.
+Set environment variables in your backend host:
+- `GROQ_API_KEY` (required)
+- `PINECONE_KEY` (optional)
+- `PINECONE_INDEX_NAME` (optional; default `justice-lens`)
+- `CORS_ORIGINS` (set to your Pages URL, e.g. `https://justice-lens-streamlit.pages.dev`)
 
-## 2) Split deploy: host frontend + backend separately
+Optional (Firebase auth):
+- `FIREBASE_SERVICE_ACCOUNT_JSON` or `FIREBASE_SERVICE_ACCOUNT_PATH`
 
-### Backend
-Deploy `backend/` using `backend/Dockerfile` and set `CORS_ORIGINS` to your frontend domain.
+## Connect frontend to backend
 
-### Frontend
-Deploy `frontend/` to Vercel/Netlify/GitHub Pages and set API base:
-- Edit `frontend/app.js` `DEFAULT_API_BASE`, OR
-- Use `?apiBase=https://your-api.example`.
+On your deployed website, click **API** (top bar) and paste your backend URL, e.g. `https://your-api.onrender.com`.
 
-## Local run (2 terminals)
+Or add to your website URL:
 
-Backend:
-```bash
-pip install -r backend/requirements.txt
-python -m uvicorn backend.main:app --reload --port 8000
-```
-
-Frontend:
-```bash
-python -m http.server 5173 --directory frontend
-```
-
-Open: `http://localhost:5173`
+`?apiBase=https://your-api.onrender.com`

@@ -51,11 +51,14 @@
         <header class="topbar">
           <div class="title">AI Chat</div>
           <div class="actions">
+            <button class="btn ghost" id="apiBtn">API</button>
             <button class="btn ghost" id="clearBtn">Clear</button>
           </div>
         </header>
 
         <section class="content">
+          <div class="banner" id="banner" style="display:none"></div>
+
           <div class="welcome" id="welcome">
             <h1>Welcome to Justice Lens</h1>
             <p>Describe a cyber incident or ask for an IT Act section explanation.</p>
@@ -113,6 +116,35 @@
           </div>
         </div>
       </aside>
+    </div>
+
+    <div class="modal" id="apiModal" aria-hidden="true">
+      <div class="modal-overlay" id="apiOverlay"></div>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="apiTitle">
+        <div class="modal-head">
+          <div>
+            <div class="modal-title" id="apiTitle">API Settings</div>
+            <div class="modal-sub">Set your backend URL (FastAPI). No trailing slash.</div>
+          </div>
+          <button class="btn ghost small" id="apiClose">Close</button>
+        </div>
+
+        <label class="modal-label" for="apiInput">Backend base URL</label>
+        <input
+          class="modal-input"
+          id="apiInput"
+          type="url"
+          placeholder="https://your-api.onrender.com"
+        />
+        <div class="modal-help">
+          Leave empty to use <code>/api</code> on the same domain (works if your host serves the frontend too, or you use a proxy).
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn" id="apiReset">Reset</button>
+          <button class="btn primary" id="apiSave">Save</button>
+        </div>
+      </div>
     </div>
 
     <script src="./app.js"></script>

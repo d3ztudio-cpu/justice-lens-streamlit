@@ -26,7 +26,7 @@ app = FastAPI(title="Justice Lens API", version="0.1.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins or ["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -101,3 +101,4 @@ def _mount_frontend_if_enabled() -> None:
 
 
 _mount_frontend_if_enabled()
+

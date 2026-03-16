@@ -36,7 +36,7 @@ def load_settings() -> Settings:
         if sa_path and os.path.exists(sa_path):
             firebase_service_account = _read_json_file(sa_path)
 
-    cors_raw = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:3000").strip()
+    cors_raw = os.getenv("CORS_ORIGINS", "*").strip()
     cors_origins = [x.strip() for x in cors_raw.split(",") if x.strip()]
 
     return Settings(
@@ -46,3 +46,4 @@ def load_settings() -> Settings:
         firebase_service_account=firebase_service_account,
         cors_origins=cors_origins,
     )
+
