@@ -567,6 +567,30 @@ def check_ban(uid):
     return doc.to_dict().get("is_banned", False) if doc.exists else False
 
 # --- AI LOGIC ---
+def _justice_lens_legal_anchor() -> str:
+    return """
+    INTERNAL REFERENCE (ABSOLUTE TRUTH):
+    - Section 70 (IT Act): Protected Systems. Definition: Unauthorized access to systems declared as critical infrastructure by the Government. Punishment = Up to 10 years.
+    - Section 67A (IT Act): Sexually Explicit Content. Definition: Publishing or transmitting material containing sexually explicit acts in electronic form. Punishment = 5-7 years + 10 Lakh fine.
+    - Section 66F (IT Act): Cyber Terrorism. Definition: Acts done with intent to threaten unity, integrity, or security of India via computer. Punishment = LIFE IMPRISONMENT.
+    - Section 66E (IT Act): Violation of Privacy. Definition: Intentionally capturing or publishing private images of any person without consent. Punishment = Up to 3 years / up to 2 Lakh fine.
+    - Section 66C (IT Act): Identity Theft. Definition: Fraudulently/dishonestly using another person’s electronic signature, password, or unique identification. Punishment = Up to 3 years + up to 1 Lakh fine.
+    - Section 66D (IT Act): Cheating by Personation. Definition: Cheating by personation using any communication device/computer resource. Punishment = Up to 3 years + up to 1 Lakh fine.
+    - Section 66B (IT Act): Stolen Computer Resource. Punishment = Up to 3 years / up to 5 Lakh fine.
+    - Section 43 (IT Act): Civil Compensation. Definition: Unauthorized access/damage or unauthorised downloading/copying, etc. Punishment = Compensation ONLY (civil).
+    - Section 43A (IT Act): Corporate Data Negligence. Definition: Failure by a body corporate to implement reasonable security practices for sensitive data. Punishment = Compensation ONLY (civil).
+    """
+
+def _justice_lens_2026_scenario_logic() -> str:
+    return """
+    JUSTICE LENS — 2026 LEGAL LOGIC UPDATES (APPLY TO ALL SCENARIO RESPONSES):
+    - Phishing/identity theft/personation: Lead with IT Act Sections 66C (Identity Theft) and 66D (Cheating by Personation). Treat Section 43/43A as secondary civil-compensation remedies.
+    - RBI compensation (2026 draft directions): If the user’s monetary loss is <= ₹50,000, explicitly mention they may be eligible for 85% compensation (capped at ₹25,000) if they report to the bank AND the 1930 helpline within 5 days (advise confirming current bank/RBI circular applicability).
+    - Golden Hour: In ACTION PLAN, emphasize that financial fraud should be reported within the first 2 hours via the 1930 helpline or CFCFRMS (via cybercrime.gov.in) to maximize lien/freeze chances.
+    - Liability nuance: Do NOT claim “0% liability” as a blanket rule. Clarify victim is not liable for hacker’s subsequent scams, but has a duty to report promptly and secure the breach (passwords/2FA/session revokes) to mitigate further harm.
+    - Evidence strategy (primary): Advise preserving Email Headers, UPI Transaction IDs, and URL Metadata, and referencing Section 65B (Indian Evidence Act) for admissibility of electronic records.
+    """
+
 def _normalize_intent_category(raw_category: str) -> str:
     upper = str(raw_category or "").strip().upper()
     for known in ("PHYSICAL", "CYBER_SCENARIO", "CYBER_EXPLAIN", "NON_LEGAL"):
@@ -610,15 +634,7 @@ def ask_groq_lawyer(user_input, law_evidence, category):
     - Financial Fraud: CBI vs. Arif Azim (Sony Sambandh Case).
     """
 
-    legal_anchor = """
-    INTERNAL REFERENCE (ABSOLUTE TRUTH):
-    - Section 70: Protected Systems. Definition: Unauthorized access to systems declared as critical infrastructure by the Government. Punishment = Up to 10 years.
-    - Section 67A: Sexually Explicit Content. Definition: Publishing or transmitting material containing sexually explicit acts in electronic form. Punishment = 5-7 years + 10 Lakh fine.
-    - Section 66F: Cyber Terrorism. Definition: Acts done with intent to threaten unity, integrity, or security of India via computer. Punishment = LIFE IMPRISONMENT.
-    - Section 66E: Violation of Privacy. Definition: Intentionally capturing or publishing private images of any person without consent. Punishment = 3 years / 2 Lakh fine.
-    - Section 43A: Corporate Data Negligence. Definition: Failure by a body corporate to implement reasonable security practices for sensitive data. Punishment = Compensation ONLY.
-    - Section 66B: Stolen Computer Resource. Punishment = 3 years / 5 Lakh fine.
-    """
+    legal_anchor = _justice_lens_legal_anchor()
 
     if "EXPLAIN" in category:
         system_prompt = f"""
@@ -632,15 +648,16 @@ def ask_groq_lawyer(user_input, law_evidence, category):
         system_prompt = f"""
         {legal_anchor}
         {case_history}
+        {_justice_lens_2026_scenario_logic()}
         You are an Expert Cyber Law Consultant. Use this EXACT format:
          RELEVANT SECTIONS: [Cite sections]
          PUNISHMENTS: [List jail/compensation]
          CASE HISTORY: [Cite landmark case]
          WIN PROBABILITY: [Percentage] - [Reasoning]
         ACTION PLAN:
-        1. Notify CERT-In (www.cert-in.org.in) within 6 hours.
-        2. File complaint at www.cybercrime.gov.in.
-        3. Appoint a Cyber Forensic Auditor.
+        1. (Golden Hour) If ANY money moved/was attempted (UPI/card/netbanking): report within 2 hours via 1930 or cybercrime.gov.in (CFCFRMS) and ask your bank to place a lien/freeze + block instruments; also report to bank within 5 days for compensation eligibility where applicable.
+        2. Secure the breach immediately: change passwords, enable 2FA, revoke sessions/devices, reset UPI PINs, and monitor accounts to mitigate further harm.
+        3. Preserve primary evidence for Section 65B: Email headers, UPI transaction IDs, URL metadata (full URL + redirects), screenshots/chats/call logs; then file the cybercrime.gov.in complaint and (if an organization) report to CERT-In within required timelines; consider a forensic auditor for large loss.
         """
 
     full_prompt = f"{system_prompt}\nUSER QUERY: {user_input}\nDATABASE EVIDENCE: {law_evidence}"
@@ -682,15 +699,7 @@ def _repair_ai_answer(user_input: str, law_evidence: str, category: str, bad_ans
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
 
-    legal_anchor = """
-    INTERNAL REFERENCE (ABSOLUTE TRUTH):
-    - Section 70: Protected Systems. Definition: Unauthorized access to systems declared as critical infrastructure by the Government. Punishment = Up to 10 years.
-    - Section 67A: Sexually Explicit Content. Definition: Publishing or transmitting material containing sexually explicit acts in electronic form. Punishment = 5-7 years + 10 Lakh fine.
-    - Section 66F: Cyber Terrorism. Definition: Acts done with intent to threaten unity, integrity, or security of India via computer. Punishment = LIFE IMPRISONMENT.
-    - Section 66E: Violation of Privacy. Definition: Intentionally capturing or publishing private images of any person without consent. Punishment = 3 years / 2 Lakh fine.
-    - Section 43A: Corporate Data Negligence. Definition: Failure by a body corporate to implement reasonable security practices for sensitive data. Punishment = Compensation ONLY.
-    - Section 66B: Stolen Computer Resource. Punishment = 3 years / 5 Lakh fine.
-    """
+    legal_anchor = _justice_lens_legal_anchor()
 
     category_upper = str(category).upper()
     if "EXPLAIN" in category_upper:
@@ -719,6 +728,7 @@ def _repair_ai_answer(user_input: str, law_evidence: str, category: str, bad_ans
         repair_prompt = f"""
         {legal_anchor}
         {case_history}
+        {_justice_lens_2026_scenario_logic()}
         Rewrite the following draft to STRICTLY follow this exact format (include all headings):
         RELEVANT SECTIONS: ...
         PUNISHMENTS: ...
@@ -1134,4 +1144,3 @@ else:
         else:
             st.error("Database not available.")
                     
-
