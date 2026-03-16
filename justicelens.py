@@ -51,11 +51,11 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
     
     :root {
-        --bg: #071228;
-        --bg-soft: #0D1B35;
-        --panel: #0F1F3D;
-        --panel-2: #13274B;
-        --text: #E6EEFF;
+        --bg: #0412B2;
+        --bg-soft: #0D96CE;
+        --panel: #0412B2;
+        --panel-2: #0E6DB5;
+        --text: #000000;
         --muted: #9FB2D9;
         --line: #223B6B;
         --accent: #43A2FF;
