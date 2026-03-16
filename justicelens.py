@@ -261,7 +261,7 @@ st.markdown("""
         border: 1px solid #375C97 !important;
         background: #F7FAFF !important;
         color: #0412B2 !important;
-        caret-color: #0412B2 !important;
+        caret-color: #0A1A37 !important;
     }
     .stTextInput > div > div > input::placeholder {
         color: #6B7FA7 !important;
@@ -454,7 +454,7 @@ st.markdown("""
             padding-left: 0.85rem !important;
             padding-right: 0.85rem !important;
         }
-        .chat-container { padding: 5rem; }
+        .chat-container { padding: 1rem; }
         .chat-bubble { max-width: 96%; font-size: 0.92rem; }
         .team-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
@@ -473,8 +473,8 @@ st.markdown("""
             padding: 0.35rem 0.3rem !important;
         }
         .stButton > button, .stFormSubmitButton > button {
-            font-size: 0.7rem !important;
-            padding: 0.5rem 0.7rem !important;
+            font-size: 0.9rem !important;
+            padding: 0.5rem 0.9rem !important;
         }
     }
     </style>
