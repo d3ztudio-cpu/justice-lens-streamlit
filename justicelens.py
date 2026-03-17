@@ -9,6 +9,7 @@ import json
 import uuid
 import requests
 import time
+import re
 from pinecone import Pinecone
 from langchain_huggingface import HuggingFaceEmbeddings
 
@@ -581,6 +582,51 @@ def _justice_lens_legal_anchor() -> str:
     - Section 43A (IT Act): Corporate Data Negligence. Definition: Failure by a body corporate to implement reasonable security practices for sensitive data. Punishment = Compensation ONLY (civil).
     """
 
+def _justice_lens_case_history() -> str:
+    return """
+    HISTORICAL PRECEDENTS (USE FOR SCENARIOS):
+    - Hacking/Unauthorized Access: State of Tamil Nadu vs. Suhas Katti (2004).
+    - Privacy Violations: Justice K.S. Puttaswamy (Retd.) vs. Union of India (2017).
+    - Financial Fraud: CBI vs. Arif Azim (Sony Sambandh Case).
+    """
+
+def _contains_any(haystack: str, needles: tuple[str, ...]) -> bool:
+    h = str(haystack or "").lower()
+    return any(n.lower() in h for n in needles)
+
+def _is_phishing_portal_or_deepfake(user_input: str) -> bool:
+    return _contains_any(user_input, (
+        "phishing", "phish", "fake login", "spoof", "credential harvest", "otp page", "login page", "portal", "malicious link",
+        "deepfake", "synthetic", "ai-generated", "ai generated", "morphed", "voice clone", "face swap", "impersonation video",
+        "sgi", "synthetically generated",
+    ))
+
+def _is_loan_identity_theft(user_input: str) -> bool:
+    return _contains_any(user_input, (
+        "loan", "emi", "nbfc", "lender", "personal loan", "credit card", "cibil", "experian", "credit score",
+        "account opened", "opened a loan", "taken in my name", "taken on my name", "identity theft loan",
+    ))
+
+def _justice_lens_dynamic_scenario_rules(user_input: str) -> str:
+    rules = []
+
+    if _is_phishing_portal_or_deepfake(user_input):
+        rules.append("""
+        - 2026 Intermediary Takedown Rules: If the user mentions an active phishing portal or deepfake content, you MUST mention the IT Amendment Rules 2026.
+          State that intermediaries/hosting platforms must remove unlawful "Synthetically Generated Information" (SGI) within 3 hours of a valid order/notice to maintain their "Safe Harbor" immunity under Section 79.
+          Include this as a concrete takedown step in ACTION PLAN.
+        """)
+
+    if _is_loan_identity_theft(user_input):
+        rules.append("""
+        - Loan identity-theft recovery (CIBIL/RBI): If a loan/credit product is taken in the victim's name, ACTION PLAN MUST include:
+          (a) Raise a dispute on the CIBIL/Experian portal (resolution required within 30 days).
+          (b) If the lender does not resolve the identity theft claim within 30 days, escalate to the RBI Ombudsman via the CMS Portal (cms.rbi.org.in).
+          WIN PROBABILITY MUST be calibrated to 40–60% and must acknowledge that reversing a financial loan has a heavy burden of proof (Police FIR + forensic audit/lender investigation) to establish non-authorization.
+        """)
+
+    return "\n".join(rules).strip()
+
 def _justice_lens_2026_scenario_logic() -> str:
     return """
     JUSTICE LENS — 2026 LEGAL LOGIC UPDATES (APPLY TO ALL SCENARIO RESPONSES):
@@ -590,6 +636,83 @@ def _justice_lens_2026_scenario_logic() -> str:
     - Liability nuance: Do NOT claim “0% liability” as a blanket rule. Clarify victim is not liable for hacker’s subsequent scams, but has a duty to report promptly and secure the breach (passwords/2FA/session revokes) to mitigate further harm.
     - Evidence strategy (primary): Advise preserving Email Headers, UPI Transaction IDs, and URL Metadata, and referencing Section 65B (Indian Evidence Act) for admissibility of electronic records.
     """
+
+def _ensure_intermediary_takedown_mention(answer: str) -> str:
+    if not answer:
+        return answer
+
+    already_mentions = (
+        _contains_any(answer, ("it amendment rules 2026", "intermediary", "intermediaries")) and
+        _contains_any(answer, ("3 hour", "three hour")) and
+        _contains_any(answer, ("section 79", "safe harbor", "safe harbour"))
+    )
+    if already_mentions:
+        return answer
+
+    insertion = (
+        '4. (Intermediary takedown) For an active phishing portal/deepfake: cite the IT Amendment Rules 2026—'
+        'intermediaries must remove unlawful "Synthetically Generated Information" (SGI) within 3 hours of a valid order/notice '
+        'to retain "Safe Harbor" under Section 79; file a takedown/abuse report with the host/platform and seek a cyber-cell order if needed.'
+    )
+
+    if "ACTION PLAN:" in answer:
+        # Append as an extra step to preserve the required format.
+        return answer.rstrip() + "\n" + insertion
+
+    return answer.rstrip() + "\n\n" + insertion
+
+def _enforce_loan_dispute_requirements(answer: str) -> str:
+    if not answer:
+        return answer
+
+    updated = answer
+
+    updated = re.sub(
+        r"(?im)^WIN PROBABILITY:\s*.*$",
+        "WIN PROBABILITY: 40–60% - Criminal sections (66C/66D) are usually clear on paper, but reversing/cancelling a loan requires strong proof of non-authorization (Police FIR + lender investigation/forensic audit) to satisfy the lender and credit bureaus.",
+        updated,
+        count=1,
+    )
+
+    loan_steps = []
+    if not (_contains_any(updated, ("cibil", "experian")) and _contains_any(updated, ("30 day", "30-day", "30 days"))):
+        loan_steps.append("Raise a dispute on the CIBIL/Experian portal (resolution required within 30 days).")
+    if not (_contains_any(updated, ("cms.rbi.org.in", "rbi ombudsman", "cms portal")) and _contains_any(updated, ("30 day", "30-day", "30 days"))):
+        loan_steps.append("If the lender does not resolve the identity theft claim within 30 days, escalate to the RBI Ombudsman via the CMS Portal (cms.rbi.org.in).")
+
+    if not loan_steps:
+        return updated
+
+    if "ACTION PLAN:" in updated:
+        # Add as additional numbered steps without renumbering existing items.
+        suffix_lines = []
+        start_n = 4
+        for i, s in enumerate(loan_steps):
+            suffix_lines.append(f"{start_n + i}. (Loan dispute) {s}")
+        return updated.rstrip() + "\n" + "\n".join(suffix_lines)
+
+    return updated.rstrip() + "\n\n" + "\n".join(f"- {s}" for s in loan_steps)
+
+def _apply_high_priority_refinements(user_input: str, category: str, answer: str) -> str:
+    if not answer or "EXPLAIN" in str(category).upper():
+        return answer
+
+    updated = answer
+
+    # Guardrail: Shreya Singhal (2015) is not a negligence/hacking precedent.
+    updated = re.sub(
+        r"(?im)^(.*\bDATA\s+NEGLIGENCE\s*:\s*)Shreya\s+Singhal\s+vs\.\s+Union\s+of\s+India\s*\(2015\)\.?\s*$",
+        r"\1Justice K.S. Puttaswamy (Retd.) vs. Union of India (2017).",
+        updated,
+    )
+
+    if _is_loan_identity_theft(user_input):
+        updated = _enforce_loan_dispute_requirements(updated)
+
+    if _is_phishing_portal_or_deepfake(user_input):
+        updated = _ensure_intermediary_takedown_mention(updated)
+
+    return updated
 
 def _normalize_intent_category(raw_category: str) -> str:
     upper = str(raw_category or "").strip().upper()
@@ -627,12 +750,7 @@ def ask_groq_lawyer(user_input, law_evidence, category):
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
 
-    case_history = """
-    HISTORICAL PRECEDENTS (USE FOR SCENARIOS):
-    - Hacking/Unauthorized Access: State of Tamil Nadu vs. Suhas Katti (2004).
-    - Data Negligence: Shreya Singhal vs. Union of India (2015).
-    - Financial Fraud: CBI vs. Arif Azim (Sony Sambandh Case).
-    """
+    case_history = _justice_lens_case_history()
 
     legal_anchor = _justice_lens_legal_anchor()
 
@@ -645,10 +763,12 @@ def ask_groq_lawyer(user_input, law_evidence, category):
         - Use the definitions exactly as provided in the INTERNAL REFERENCE.
         """
     else:
+        dynamic_rules = _justice_lens_dynamic_scenario_rules(user_input)
         system_prompt = f"""
         {legal_anchor}
         {case_history}
         {_justice_lens_2026_scenario_logic()}
+        {dynamic_rules}
         You are an Expert Cyber Law Consultant. Use this EXACT format:
          RELEVANT SECTIONS: [Cite sections]
          PUNISHMENTS: [List jail/compensation]
@@ -719,16 +839,13 @@ def _repair_ai_answer(user_input: str, law_evidence: str, category: str, bad_ans
         DRAFT (FIX THIS): {bad_answer}
         """
     else:
-        case_history = """
-        HISTORICAL PRECEDENTS (USE FOR SCENARIOS):
-        - Hacking/Unauthorized Access: State of Tamil Nadu vs. Suhas Katti (2004).
-        - Data Negligence: Shreya Singhal vs. Union of India (2015).
-        - Financial Fraud: CBI vs. Arif Azim (Sony Sambandh Case).
-        """
+        case_history = _justice_lens_case_history()
+        dynamic_rules = _justice_lens_dynamic_scenario_rules(user_input)
         repair_prompt = f"""
         {legal_anchor}
         {case_history}
         {_justice_lens_2026_scenario_logic()}
+        {dynamic_rules}
         Rewrite the following draft to STRICTLY follow this exact format (include all headings):
         RELEVANT SECTIONS: ...
         PUNISHMENTS: ...
@@ -759,10 +876,11 @@ def _repair_ai_answer(user_input: str, law_evidence: str, category: str, bad_ans
 def ask_groq_lawyer_validated(user_input: str, law_evidence: str, category: str) -> str:
     answer = ask_groq_lawyer(user_input, law_evidence, category)
     if _validate_ai_answer(category, answer):
-        return answer
+        return _apply_high_priority_refinements(user_input, category, answer)
 
     repaired = _repair_ai_answer(user_input, law_evidence, category, answer)
-    return repaired if _validate_ai_answer(category, repaired) else answer
+    final = repaired if _validate_ai_answer(category, repaired) else answer
+    return _apply_high_priority_refinements(user_input, category, final)
 
 # --- SIDEBAR UI ---
 with st.sidebar:
