@@ -35,8 +35,6 @@ st.markdown(
     """
     <style>
     /* --- High-priority bugfix CSS (loaded before justicelens.py) --- */
-
-    /* Force sidebar toggle icons to render as Material Symbols (prevents text like double_arrow_right). */
     [data-testid="stSidebarCollapseButton"] span,
     [data-testid="collapsedControl"] span,
     [data-testid="stSidebarCollapsedControl"] span,
