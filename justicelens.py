@@ -46,7 +46,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# --- PREMIUM NEAT & LOGO-MATCHED UI (Navy & Gold) ---
+# --- Minimalist Professional UI Theme (Slate + Cyber Cyan) ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
@@ -481,6 +481,153 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
+# --- Minimalist overrides (applied after legacy CSS) ---
+st.markdown(
+    """
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    :root{
+        --jl-bg: #F8FAFC;
+        --jl-card: #FFFFFF;
+        --jl-text: #0F172A;
+        --jl-muted: #475569;
+        --jl-border: #E2E8F0;
+        --jl-primary: #06B6D4;
+        --jl-primary-2: #0891B2;
+        --jl-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+        --jl-shadow-sm: 0 6px 18px rgba(15, 23, 42, 0.05);
+        --jl-radius: 14px;
+    }
+
+    html, body, .stApp, [data-testid="stAppViewContainer"]{
+        background: var(--jl-bg) !important;
+    }
+
+    html, body, [data-testid="stMarkdownContainer"] p,
+    .stMarkdown, label, li, h1, h2, h3, h4, h5, h6, div, span{
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif !important;
+        color: var(--jl-text) !important;
+    }
+
+    .main .block-container{
+        padding-top: 1.25rem !important;
+        padding-bottom: 3rem !important;
+        max-width: 1120px !important;
+    }
+
+    /* Sidebar */
+    section[data-testid="stSidebar"]{
+        background: #FFFFFF !important;
+        border-right: 1px solid var(--jl-border) !important;
+    }
+
+    /* Buttons */
+    .stButton > button, .stFormSubmitButton > button{
+        background: var(--jl-primary) !important;
+        border: 1px solid rgba(6, 182, 212, 0.35) !important;
+        color: #FFFFFF !important;
+        border-radius: 12px !important;
+        padding: 0.58rem 0.9rem !important;
+        font-weight: 700 !important;
+        box-shadow: var(--jl-shadow-sm) !important;
+        transition: transform 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
+    }
+    .stButton > button:hover, .stFormSubmitButton > button:hover{
+        background: var(--jl-primary-2) !important;
+        transform: translateY(-1px);
+        box-shadow: var(--jl-shadow) !important;
+    }
+
+    /* Inputs */
+    input, textarea, [data-baseweb="select"] > div{
+        background: #FFFFFF !important;
+        border: 1px solid var(--jl-border) !important;
+        border-radius: 12px !important;
+        color: var(--jl-text) !important;
+        box-shadow: none !important;
+    }
+
+    /* Hero + cards */
+    .jl-hero{
+        background: var(--jl-card);
+        border: 1px solid var(--jl-border);
+        border-radius: var(--jl-radius);
+        padding: 1.35rem 1.3rem;
+        box-shadow: var(--jl-shadow);
+        text-align: center;
+    }
+    .jl-hero .title{
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin: 0;
+    }
+    .jl-hero .subtitle{
+        margin-top: 0.35rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--jl-muted) !important;
+    }
+    .jl-card{
+        background: var(--jl-card);
+        border: 1px solid var(--jl-border);
+        border-radius: var(--jl-radius);
+        padding: 1rem 1rem;
+        box-shadow: var(--jl-shadow-sm);
+    }
+    .jl-feature{
+        background: var(--jl-card);
+        border: 1px solid var(--jl-border);
+        border-radius: var(--jl-radius);
+        padding: 1rem 1rem;
+        box-shadow: var(--jl-shadow-sm);
+        height: 100%;
+    }
+    .jl-feature .kicker{
+        font-size: 0.78rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--jl-muted) !important;
+        margin-bottom: 0.25rem;
+        font-weight: 700;
+    }
+    .jl-feature .headline{
+        font-size: 1.05rem;
+        font-weight: 800;
+        margin: 0.1rem 0 0.35rem 0;
+    }
+    .jl-feature .desc{
+        margin: 0;
+        color: var(--jl-muted) !important;
+        line-height: 1.55;
+        font-size: 0.95rem;
+    }
+
+    /* Chat */
+    [data-testid="stChatMessage"]{
+        border: 1px solid var(--jl-border) !important;
+        border-radius: 16px !important;
+        padding: 0.35rem 0.6rem !important;
+        box-shadow: var(--jl-shadow-sm) !important;
+        background: #FFFFFF !important;
+        margin-bottom: 0.55rem !important;
+    }
+    [data-testid="stChatInput"] textarea{
+        border-radius: 14px !important;
+        border: 1px solid var(--jl-border) !important;
+        box-shadow: var(--jl-shadow-sm) !important;
+    }
+
+    @media (max-width: 700px){
+        .jl-hero .title{ font-size: 1.65rem; }
+        .main .block-container{ padding-left: 0.9rem !important; padding-right: 0.9rem !important; }
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 # --- BOOTSTRAP / INITIALIZATION ---
 @st.cache_resource(show_spinner=False)
 def init_backend():
@@ -488,9 +635,9 @@ def init_backend():
         splash = st.empty()
         with splash.container():
             st.markdown(f"""
-                <div style="text-align:center; padding:80px 20px; background:white; border-radius:1rem; border:1px solid var(--border); margin: 50px auto; max-width: 600px; box-shadow: 0 10px 40px rgba(0,0,0,0.05);">
-                    <h2 style="color:#0F172A; margin-bottom:10px; font-weight:900;"> JUSTICE LENS</h2>
-                    <p style="color:#C5A059; font-weight: 700; margin-bottom: 25px; font-size: 0.95rem; letter-spacing: 1px;">ESTABLISHING SECURE CONNECTION...</p>
+                <div style="text-align:center; padding:80px 20px; background:var(--jl-card); border-radius:1rem; border:1px solid var(--jl-border); margin: 50px auto; max-width: 600px; box-shadow: var(--jl-shadow);">
+                    <h2 style="color:var(--jl-text); margin-bottom:10px; font-weight:900;">JUSTICE LENS</h2>
+                    <p style="color:var(--jl-muted); font-weight: 700; margin-bottom: 25px; font-size: 0.95rem; letter-spacing: 0.5px;">Establishing secure connection…</p>
                 </div>
             """, unsafe_allow_html=True)
             
@@ -917,21 +1064,39 @@ with st.sidebar:
             gid = str(uuid.uuid4())[:8]
             st.session_state.user = {"name": f"Guest_{gid}", "email": "guest@justicelens.io", "uid": f"guest_{gid}"}
             st.rerun()
+
+        st.markdown("---")
+        st.caption("Resources")
+        public_pages = ["AI Assistant", "About", "Terms", "Cyber Rules 2026"]
+        try:
+            default_index = public_pages.index(st.session_state.view)
+        except ValueError:
+            default_index = 0
+        public_choice = st.radio(
+            "Resources",
+            public_pages,
+            index=default_index,
+            key="jl_public_nav",
+            label_visibility="collapsed",
+        )
+        if public_choice != st.session_state.view:
+            st.session_state.view = public_choice
+            st.rerun()
     else:
         st.markdown(f"Connected: **{st.session_state.user['name']}**")
         
         if st.session_state.user['email'] == "d3ztudio@gmail.com":
-            st.markdown('<span style="color:#C5A059; font-weight:900; font-size:0.7rem; letter-spacing:1px;">[ SYSTEM COMMANDER ]</span>', unsafe_allow_html=True)
+            st.markdown('<span style="color:var(--jl-primary); font-weight:800; font-size:0.7rem; letter-spacing:0.12em;">SYSTEM COMMANDER</span>', unsafe_allow_html=True)
             if not st.session_state.admin_mode:
                 pin = st.text_input("PIN", type="password", placeholder="Enter PIN")
                 if pin == "1923": 
                     st.session_state.admin_mode = True
                     st.rerun()
         
-        opts = [" AI Assistant", "Vision & Mission"]
+        opts = ["AI Assistant", "Vision & Mission", "About", "Terms", "Cyber Rules 2026"]
         if st.session_state.admin_mode: opts.append("Admin Dashboard")
         
-        st.session_state.view = st.radio("CORE PORTAL", [x.strip() for x in opts])
+        st.session_state.view = st.radio("NAVIGATION", [x.strip() for x in opts])
         
         st.markdown("---")
         if st.button("TERMINATE SESSION"):
@@ -942,69 +1107,165 @@ with st.sidebar:
 
 # --- MAIN CONTENT ---
 if not st.session_state.user:
-    col1, col2, col3 = st.columns([1, 8, 1])
-    with col2:
-        l1, l2, l3 = st.columns([1, 2, 1])
-        with l2:
-            st.image(LOGO_SOURCE, width=300)
-        st.markdown("""
-            <div class="glass-card hero-panel" style="text-align: center;">
-                <h1 style="color:#EAF2FF !important;">Justice Lens</h1>
-                <p style="color:#C5A059 !important; font-weight:700; font-size:1rem; letter-spacing:2px; margin-top:-10px;">SECURE AI CYBER LEGAL DEFENSE</p>
-                <div class="light-panel" style="background:rgba(255,255,255,0.92); padding:2rem; border-radius:1rem; border:1px solid #BBD3F3; text-align:left; margin: 2rem 0;">
-                    <h3 style="margin-top:0;">Expert Advocacy</h3>
-                    <p>Protect your digital footprint under the <b>Indian IT Act 2000</b>. Our engine provides instant legal reports using context-aware AI retrieval.</p>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
-        cta_l, cta_m, cta_r = st.columns([2, 3, 2])
-        with cta_m:
-            if st.button("START RESEARCHING", key="start_researching_btn"):
-                st.session_state.start_researching_flow = True
-                st.rerun()
-        if st.session_state.start_researching_flow:
-            st.markdown("### Login to Start Researching")
-            entry_tabs = st.tabs(["Login", "Join"])
-            with entry_tabs[0]:
-                me = st.text_input("Email", key="main_login_email")
-                mp = st.text_input("Password", type="password", key="main_login_pass")
-                if st.button("CONTINUE TO AI", key="main_login_btn"):
-                    valid, u_obj = authenticate(me, mp)
-                    if valid:
-                        if check_ban(u_obj.uid):
-                            st.error("Access Forbidden.")
+    if st.session_state.view in ("About", "Terms", "Cyber Rules 2026"):
+        l_pad, main, r_pad = st.columns([1, 8, 1])
+        with main:
+            with st.container():
+                st.markdown(
+                    f"""
+                    <div class="jl-hero">
+                        <div class="title">{st.session_state.view}</div>
+                        <div class="subtitle">Justice Lens resources</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            st.write("")
+
+            if st.session_state.view == "About":
+                st.markdown(
+                    """
+                    <div class="jl-card">
+                        <h3 style="margin-top:0;">What this is</h3>
+                        <p style="color: var(--jl-muted) !important; margin-bottom:0;">
+                            Justice Lens is a cyber-law assistant designed to produce structured, scenario-ready legal summaries
+                            (sections, punishments, case history, win probability, action plan) for common cyber incidents in India.
+                        </p>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            elif st.session_state.view == "Terms":
+                st.markdown(
+                    """
+                    <div class="jl-card">
+                        <h3 style="margin-top:0;">Important</h3>
+                        <ul>
+                            <li>This is informational guidance, not a substitute for a licensed lawyer.</li>
+                            <li>Verify timelines and requirements with your bank, platform, and current government notifications.</li>
+                            <li>Do not share passwords, OTPs, or sensitive personal data in chat.</li>
+                        </ul>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            else:  # Cyber Rules 2026
+                st.markdown(
+                    """
+                    <div class="jl-card">
+                        <h3 style="margin-top:0;">Cyber Rules 2026</h3>
+                        <p style="color: var(--jl-muted) !important; margin-bottom:0;">
+                            For active phishing portals or deepfake/SGI content, Justice Lens includes a takedown step referencing the
+                            IT Amendment Rules 2026 and intermediary obligations to act within 3 hours on a valid order/notice to retain
+                            Section 79 safe-harbor protections.
+                        </p>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+    else:
+        l_pad, main, r_pad = st.columns([1, 8, 1])
+        with main:
+            logo_l, logo_m, logo_r = st.columns([3, 2, 3])
+            with logo_m:
+                st.image(LOGO_SOURCE, use_container_width=True)
+
+            with st.container():
+                st.markdown(
+                    """
+                    <div class="jl-hero">
+                        <div class="title">Justice Lens</div>
+                        <div class="subtitle">Minimalist cyber-law AI for incident response and verified legal logic.</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+            st.write("")
+            f1, f2, f3 = st.columns(3)
+            with f1:
+                st.markdown(
+                    """
+                    <div class="jl-feature">
+                        <div class="kicker">Always On</div>
+                        <div class="headline">24/7 Support</div>
+                        <p class="desc">Rapid triage, evidence preservation, and next-step guidance when time matters.</p>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            with f2:
+                st.markdown(
+                    """
+                    <div class="jl-feature">
+                        <div class="kicker">Grounded</div>
+                        <div class="headline">Verified Legal Logic</div>
+                        <p class="desc">Responses structured around IT Act sections, punishments, and scenario-ready action plans.</p>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            with f3:
+                st.markdown(
+                    """
+                    <div class="jl-feature">
+                        <div class="kicker">Tactical</div>
+                        <div class="headline">Incident Response</div>
+                        <p class="desc">Golden-hour steps, takedowns, and escalation paths tailored to common cyber incidents.</p>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+            st.write("")
+            cta_l, cta_m, cta_r = st.columns([2, 3, 2])
+            with cta_m:
+                if st.button("Start", key="start_researching_btn", use_container_width=True):
+                    st.session_state.start_researching_flow = True
+                    st.rerun()
+            if st.session_state.start_researching_flow:
+                st.markdown("### Login to Start Researching")
+                entry_tabs = st.tabs(["Login", "Join"])
+                with entry_tabs[0]:
+                    me = st.text_input("Email", key="main_login_email")
+                    mp = st.text_input("Password", type="password", key="main_login_pass")
+                    if st.button("CONTINUE TO AI", key="main_login_btn"):
+                        valid, u_obj = authenticate(me, mp)
+                        if valid:
+                            if check_ban(u_obj.uid):
+                                st.error("Access Forbidden.")
+                            else:
+                                st.session_state.user = {
+                                    "name": u_obj.display_name or me.split('@')[0],
+                                    "email": me,
+                                    "uid": u_obj.uid
+                                }
+                                st.session_state.view = "AI Assistant"
+                                st.session_state.start_researching_flow = False
+                                sync_user(st.session_state.user)
+                                st.rerun()
                         else:
-                            st.session_state.user = {
-                                "name": u_obj.display_name or me.split('@')[0],
-                                "email": me,
-                                "uid": u_obj.uid
-                            }
-                            st.session_state.view = "AI Assistant"
-                            st.session_state.start_researching_flow = False
-                            sync_user(st.session_state.user)
-                            st.rerun()
-                    else:
-                        st.error("Invalid Credentials.")
-            with entry_tabs[1]:
-                mnu = st.text_input("Full Name", key="main_signup_name")
-                meu = st.text_input("Email", key="main_signup_email")
-                mpu = st.text_input("Create Password", type="password", key="main_signup_pass")
-                if st.button("CREATE ACCOUNT", key="main_signup_btn"):
-                    try:
-                        auth.create_user(email=meu, password=mpu, display_name=mnu)
-                        st.success("Account Ready! Use Login.")
-                    except Exception as ex:
-                        st.error(str(ex))
-            if st.button("CONTINUE AS GUEST", key="main_guest_btn"):
-                gid = str(uuid.uuid4())[:8]
-                st.session_state.user = {
-                    "name": f"Guest_{gid}",
-                    "email": "guest@justicelens.io",
-                    "uid": f"guest_{gid}"
-                }
-                st.session_state.view = "AI Assistant"
-                st.session_state.start_researching_flow = False
-                st.rerun()
+                            st.error("Invalid Credentials.")
+                with entry_tabs[1]:
+                    mnu = st.text_input("Full Name", key="main_signup_name")
+                    meu = st.text_input("Email", key="main_signup_email")
+                    mpu = st.text_input("Create Password", type="password", key="main_signup_pass")
+                    if st.button("CREATE ACCOUNT", key="main_signup_btn"):
+                        try:
+                            auth.create_user(email=meu, password=mpu, display_name=mnu)
+                            st.success("Account Ready! Use Login.")
+                        except Exception as ex:
+                            st.error(str(ex))
+                if st.button("CONTINUE AS GUEST", key="main_guest_btn"):
+                    gid = str(uuid.uuid4())[:8]
+                    st.session_state.user = {
+                        "name": f"Guest_{gid}",
+                        "email": "guest@justicelens.io",
+                        "uid": f"guest_{gid}"
+                    }
+                    st.session_state.view = "AI Assistant"
+                    st.session_state.start_researching_flow = False
+                    st.rerun()
 
 else:
     page = st.session_state.view
@@ -1071,15 +1332,59 @@ else:
                 except Exception:
                     pass
 
-        # Header
-        top_l, top_r = st.columns([3, 1])
-        with top_l:
-            st.title("⚖️ Justice Lens")
-            st.caption("Your Cyber-law assistant.")
-        with top_r:
-            if st.button("🧹 Clear chat", use_container_width=True):
+        # Header (minimal hero + utility actions)
+        _, clear_col = st.columns([5, 1])
+        with clear_col:
+            if st.button("Clear chat", use_container_width=True):
                 history.clear()
                 st.rerun()
+
+        with st.container():
+            st.markdown(
+                """
+                <div class="jl-hero">
+                    <div class="title">Justice Lens</div>
+                    <div class="subtitle">Professional cyber-law assistant for scenarios and IT Act references.</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        st.write("")
+        g1, g2, g3 = st.columns(3)
+        with g1:
+            st.markdown(
+                """
+                <div class="jl-feature">
+                    <div class="kicker">Always On</div>
+                    <div class="headline">24/7 Support</div>
+                    <p class="desc">Fast guidance for reporting, preserving evidence, and immediate containment.</p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with g2:
+            st.markdown(
+                """
+                <div class="jl-feature">
+                    <div class="kicker">Grounded</div>
+                    <div class="headline">Verified Legal Logic</div>
+                    <p class="desc">Structured outputs: relevant sections, punishments, case history, win probability, action plan.</p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with g3:
+            st.markdown(
+                """
+                <div class="jl-feature">
+                    <div class="kicker">Tactical</div>
+                    <div class="headline">Incident Response</div>
+                    <p class="desc">Golden-hour steps and escalation paths (bank, cyber cell, intermediaries).</p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
         main_col, right_col = st.columns([4, 1], gap="large")
 
@@ -1119,9 +1424,9 @@ else:
             # Welcome tiles when empty
             if not history:
                 st.markdown("""
-                    <div class="glass-card" style="text-align:center; padding: 1.4rem 1.2rem;">
-                        <h2 style="margin:0; color:#EAF2FF !important;">Welcome to Justice Lens</h2>
-                        <p style="margin:0.35rem 0 0; color:#C5A059 !important; font-weight:700;">Start with a scenario or ask an IT Act section.</p>
+                    <div class="jl-card" style="text-align:center;">
+                        <h2 style="margin:0;">Welcome</h2>
+                        <p style="margin:0.35rem 0 0; color: var(--jl-muted) !important; font-weight:600;">Start with a scenario or ask for an IT Act section explanation.</p>
                     </div>
                 """, unsafe_allow_html=True)
 
@@ -1161,9 +1466,55 @@ else:
         st.title("Our Core Principles")
         v1, v2 = st.columns(2)
         with v1:
-            st.markdown("""<div class="glass-card"><h3 style="color:#C5A059 !important;">Our Vision</h3><p>To establish a digital fortress in India where legal intelligence is accessible to every citizen.</p></div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="jl-card"><h3 style="margin-top:0;">Our Vision</h3><p style="color: var(--jl-muted) !important;">To make cyber-law guidance accessible and actionable for every citizen.</p></div>""", unsafe_allow_html=True)
         with v2:
-            st.markdown("""<div class="glass-card"><h3 style="color:#C5A059 !important;">Our Mission</h3><p>Utilizing AI to translate complex legislative acts into actionable, cited legal reports for the public.</p></div>""", unsafe_allow_html=True)
+            st.markdown("""<div class="jl-card"><h3 style="margin-top:0;">Our Mission</h3><p style="color: var(--jl-muted) !important;">Use AI + retrieval to translate cyber provisions into structured, cited, scenario-ready steps.</p></div>""", unsafe_allow_html=True)
+
+    elif page == "About":
+        st.title("About")
+        st.markdown(
+            """
+            <div class="jl-card">
+                <h3 style="margin-top:0;">Justice Lens</h3>
+                <p style="color: var(--jl-muted) !important; margin-bottom:0;">
+                    A cyber-law assistant that generates structured outputs (sections, punishments, case history, win probability,
+                    action plan) and emphasizes evidence preservation and escalation paths.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    elif page == "Terms":
+        st.title("Terms")
+        st.markdown(
+            """
+            <div class="jl-card">
+                <ul>
+                    <li>This tool provides informational guidance only and is not legal advice.</li>
+                    <li>For emergencies or high-stakes matters, consult a qualified lawyer and contact authorities.</li>
+                    <li>Avoid sharing passwords, OTPs, card CVV, or sensitive personal data in chat.</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    elif page == "Cyber Rules 2026":
+        st.title("Cyber Rules 2026")
+        st.markdown(
+            """
+            <div class="jl-card">
+                <h3 style="margin-top:0;">Intermediary takedown (2026)</h3>
+                <p style="color: var(--jl-muted) !important; margin-bottom:0;">
+                    When a scenario involves an active phishing portal or deepfake/SGI content, the assistant includes a takedown step
+                    referencing the IT Amendment Rules 2026 and the 3-hour removal expectation for intermediaries on a valid order/notice,
+                    tied to Section 79 safe-harbor.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
     elif page == "Admin Dashboard" and st.session_state.admin_mode:
         st.title("Admin Dashboard")
