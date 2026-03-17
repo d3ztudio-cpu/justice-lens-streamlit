@@ -39,12 +39,15 @@ def format_app_time(dt_obj, fmt='%d %b, %H:%M'):
         return "N/A"
 
 # --- PAGE CONFIG ---
-st.set_page_config(
-    page_title="Justice Lens | Expert Cyber Legal AI",
-    page_icon="⚖️",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
+# Streamlit requires `set_page_config` to be the first Streamlit call.
+# When running via `app.py`, that file sets the config first and sets an env var to skip this.
+if not os.environ.get("JUSTICE_LENS_SKIP_PAGE_CONFIG"):
+    st.set_page_config(
+        page_title="Justice Lens | Expert Cyber Legal AI",
+        page_icon="⚖️",
+        layout="wide",
+        initial_sidebar_state="expanded",
+    )
 
 # --- Minimalist Professional UI Theme (Slate + Cyber Cyan) ---
 st.markdown("""
