@@ -14,7 +14,7 @@ from pinecone import Pinecone
 from langchain_huggingface import HuggingFaceEmbeddings
 
 # ==========================================
-# âš™ï¸ CONFIGURATION & API KEYS
+# ⚙️ CONFIGURATION & API KEYS
 # ==========================================
 PINECONE_KEY = st.secrets.get("PINECONE_KEY", "")
 GROQ_API_KEY = st.secrets.get("GROQ_API_KEY", "")
@@ -41,7 +41,7 @@ def format_app_time(dt_obj, fmt='%d %b, %H:%M'):
 # --- PAGE CONFIG ---
 st.set_page_config(
     page_title="Justice Lens | Expert Cyber Legal AI",
-    page_icon="âš–ï¸",
+    page_icon="⚖️",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -485,7 +485,7 @@ st.markdown("""
 st.markdown(
     """
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Public+Sans:wght@400;500;600;700;800&display=swap');
 
     :root{
         --jl-bg: #F8FAFC;
@@ -506,13 +506,13 @@ st.markdown(
 
     html, body, [data-testid="stMarkdownContainer"] p,
     .stMarkdown, label, li, h1, h2, h3, h4, h5, h6, div, span{
-        font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif !important;
+        font-family: "Public Sans", Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif !important;
         color: var(--jl-text) !important;
     }
 
     .main .block-container{
         padding-top: 1.25rem !important;
-        padding-bottom: 3rem !important;
+        padding-bottom: 5.5rem !important;
         max-width: 1120px !important;
     }
 
@@ -521,13 +521,26 @@ st.markdown(
         background: #FFFFFF !important;
         border-right: 1px solid var(--jl-border) !important;
     }
+    [data-testid="stSidebarContent"]{
+        padding-top: 0.5rem !important;
+    }
+    section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
+    section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] span,
+    section[data-testid="stSidebar"] label{
+        color: var(--jl-text) !important;
+    }
+    .jl-sidebar-connected{
+        color: var(--jl-text) !important;
+        font-weight: 600;
+        padding: 0.15rem 0 0.25rem 0;
+    }
 
     /* Buttons */
     .stButton > button, .stFormSubmitButton > button{
         background: var(--jl-primary) !important;
         border: 1px solid rgba(6, 182, 212, 0.35) !important;
         color: #FFFFFF !important;
-        border-radius: 12px !important;
+        border-radius: 10px !important;
         padding: 0.58rem 0.9rem !important;
         font-weight: 700 !important;
         box-shadow: var(--jl-shadow-sm) !important;
@@ -536,7 +549,7 @@ st.markdown(
     .stButton > button:hover, .stFormSubmitButton > button:hover{
         background: var(--jl-primary-2) !important;
         transform: translateY(-1px);
-        box-shadow: var(--jl-shadow) !important;
+        box-shadow: 0 12px 26px rgba(15, 23, 42, 0.10) !important;
     }
 
     /* Inputs */
@@ -546,6 +559,11 @@ st.markdown(
         border-radius: 12px !important;
         color: var(--jl-text) !important;
         box-shadow: none !important;
+    }
+    input:focus, textarea:focus{
+        border-color: rgba(6, 182, 212, 0.65) !important;
+        box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.16) !important;
+        outline: none !important;
     }
 
     /* Hero + cards */
@@ -583,6 +601,8 @@ st.markdown(
         padding: 1rem 1rem;
         box-shadow: var(--jl-shadow-sm);
         height: 100%;
+        display: flex;
+        flex-direction: column;
     }
     .jl-feature .kicker{
         font-size: 0.78rem;
@@ -602,6 +622,7 @@ st.markdown(
         color: var(--jl-muted) !important;
         line-height: 1.55;
         font-size: 0.95rem;
+        flex: 1;
     }
 
     /* Chat */
@@ -612,6 +633,11 @@ st.markdown(
         box-shadow: var(--jl-shadow-sm) !important;
         background: #FFFFFF !important;
         margin-bottom: 0.55rem !important;
+    }
+    [data-testid="stChatInput"]{
+        max-width: 920px;
+        margin-left: auto;
+        margin-right: auto;
     }
     [data-testid="stChatInput"] textarea{
         border-radius: 14px !important;
@@ -938,7 +964,7 @@ def ask_groq_lawyer(user_input, law_evidence, category):
         response = requests.post(url, headers=headers, json=data, timeout=18)
         return response.json()['choices'][0]['message']['content']
     except:
-        return "âš ï¸ AI Engine Error."
+        return "⚠️ AI Engine Error."
 
 def _validate_ai_answer(category: str, answer: str) -> bool:
     if not answer or not isinstance(answer, str):
@@ -1083,7 +1109,10 @@ with st.sidebar:
             st.session_state.view = public_choice
             st.rerun()
     else:
-        st.markdown(f"Connected: **{st.session_state.user['name']}**")
+        st.markdown(
+            f"<div class='jl-sidebar-connected'>Connected: <b>{st.session_state.user['name']}</b></div>",
+            unsafe_allow_html=True,
+        )
         
         if st.session_state.user['email'] == "d3ztudio@gmail.com":
             st.markdown('<span style="color:var(--jl-primary); font-weight:800; font-size:0.7rem; letter-spacing:0.12em;">SYSTEM COMMANDER</span>', unsafe_allow_html=True)
@@ -1454,7 +1483,8 @@ else:
 
             for chat in history:
                 role = "user" if chat.get("role") == "user" else "assistant"
-                with st.chat_message(role):
+                avatar = "🧑‍💼" if role == "user" else "⚖️"
+                with st.chat_message(role, avatar=avatar):
                     st.markdown(chat.get("content", ""))
 
             user_msg = st.chat_input("Describe a cyber incident, or ask e.g. “Explain Section 66F”")
