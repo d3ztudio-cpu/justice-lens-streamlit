@@ -486,6 +486,7 @@ st.markdown(
     """
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Public+Sans:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0');
 
     :root{
         --jl-bg: #F8FAFC;
@@ -535,8 +536,24 @@ st.markdown(
         padding: 0.15rem 0 0.25rem 0;
     }
 
+    /* Fix sidebar toggle icon text (Material Symbols) */
+    .material-symbols-rounded,
+    [data-testid="stSidebarCollapseButton"] span,
+    [data-testid="collapsedControl"] span,
+    [data-testid="stSidebarCollapsedControl"] span,
+    [data-testid="stSidebarCollapseButton"] i,
+    [data-testid="collapsedControl"] i,
+    [data-testid="stSidebarCollapsedControl"] i,
+    [class^="st-emotion-cache-"] .material-symbols-rounded{
+        font-family: "Material Symbols Rounded" !important;
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        line-height: 1;
+    }
+
     /* Buttons */
-    .stButton > button, .stFormSubmitButton > button{
+    .stButton > button, .stFormSubmitButton > button, .stDownloadButton > button{
         background: var(--jl-primary) !important;
         border: 1px solid rgba(6, 182, 212, 0.35) !important;
         color: #FFFFFF !important;
@@ -546,7 +563,7 @@ st.markdown(
         box-shadow: var(--jl-shadow-sm) !important;
         transition: transform 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
     }
-    .stButton > button:hover, .stFormSubmitButton > button:hover{
+    .stButton > button:hover, .stFormSubmitButton > button:hover, .stDownloadButton > button:hover{
         background: var(--jl-primary-2) !important;
         transform: translateY(-1px);
         box-shadow: 0 12px 26px rgba(15, 23, 42, 0.10) !important;
@@ -643,6 +660,36 @@ st.markdown(
         border-radius: 14px !important;
         border: 1px solid var(--jl-border) !important;
         box-shadow: var(--jl-shadow-sm) !important;
+    }
+
+    /* Border containers as white cards (Admin) */
+    div[data-testid="stVerticalBlockBorderWrapper"]{
+        background: var(--jl-card) !important;
+        border: 1px solid var(--jl-border) !important;
+        border-radius: var(--jl-radius) !important;
+        box-shadow: var(--jl-shadow-sm) !important;
+    }
+
+    .jl-badge{
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.2rem 0.55rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        border: 1px solid var(--jl-border);
+        background: #F1F5F9;
+    }
+    .jl-badge-active{
+        border-color: rgba(34, 197, 94, 0.35);
+        background: rgba(34, 197, 94, 0.10);
+        color: #166534 !important;
+    }
+    .jl-badge-banned{
+        border-color: rgba(239, 68, 68, 0.35);
+        background: rgba(239, 68, 68, 0.10);
+        color: #991B1B !important;
     }
 
     @media (max-width: 700px){
@@ -1419,34 +1466,34 @@ else:
 
         # Right panel (Projects)
         with right_col:
-            st.markdown("### Projects")
-            new_name = st.text_input("New project", placeholder="e.g. Incident Notes", key="jl_new_project")
-            if st.button("Create", use_container_width=True, key="jl_create_project"):
-                name = (new_name or "").strip()
-                if name and name not in st.session_state.projects:
-                    st.session_state.projects[name] = []
-                    st.session_state.active_project = name
-                    st.rerun()
+            with st.container(border=True):
+                st.markdown("### Projects")
+                new_name = st.text_input("New project", placeholder="e.g. Incident Notes", key="jl_new_project")
+                if st.button("Create", use_container_width=True, key="jl_create_project"):
+                    name = (new_name or "").strip()
+                    if name and name not in st.session_state.projects:
+                        st.session_state.projects[name] = []
+                        st.session_state.active_project = name
+                        st.rerun()
 
-            project_names = list(st.session_state.projects.keys())
-            if project_names:
-                try:
-                    current_index = project_names.index(st.session_state.active_project)
-                except ValueError:
-                    current_index = 0
-                chosen = st.radio(
-                    "Select",
-                    project_names,
-                    index=current_index,
-                    label_visibility="collapsed",
-                    key="jl_project_radio",
-                )
-                if chosen != st.session_state.active_project:
-                    st.session_state.active_project = chosen
-                    st.rerun()
+                project_names = list(st.session_state.projects.keys())
+                if project_names:
+                    try:
+                        current_index = project_names.index(st.session_state.active_project)
+                    except ValueError:
+                        current_index = 0
+                    chosen = st.radio(
+                        "Select",
+                        project_names,
+                        index=current_index,
+                        label_visibility="collapsed",
+                        key="jl_project_radio",
+                    )
+                    if chosen != st.session_state.active_project:
+                        st.session_state.active_project = chosen
+                        st.rerun()
 
-            st.markdown("---")
-            st.caption("Tip: Use Projects to separate different incident chats.")
+                st.caption("Tip: Use Projects to separate different incident chats.")
 
         # Main chat area
         with main_col:
@@ -1568,13 +1615,15 @@ else:
             active_users = total_users - banned_users
             guest_users = sum(1 for x in users if str(x["email"]).lower() == "guest@justicelens.io")
 
-            s1, s2, s3, s4 = st.columns(4)
-            s1.metric("Total Users", total_users)
-            s2.metric("Active Users", active_users)
-            s3.metric("Banned Users", banned_users)
-            s4.metric("Guest Users", guest_users)
+            m1, m2, m3, m4 = st.columns(4)
+            m1.metric(label="Total Users", value=str(total_users), delta="—")
+            m2.metric(label="Active Users", value=str(active_users), delta="—")
+            m3.metric(label="Banned Users", value=str(banned_users), delta="—")
+            m4.metric(label="Guest Users", value=str(guest_users), delta="—")
 
-            f1, f2 = st.columns([2, 1])
+            st.divider()
+
+            f1, f2 = st.columns([3, 1])
             with f1:
                 search_q = st.text_input("Search user (name/email)", key="admin_user_search")
             with f2:
@@ -1600,46 +1649,49 @@ else:
                     } for x in users
                 ])
                 st.download_button(
-                    "DOWNLOAD USER LIST (CSV)",
+                    "Download user list (CSV)",
                     data=export_df.to_csv(index=False),
                     file_name="justice_lens_users.csv",
                     mime="text/csv",
                     use_container_width=True
                 )
 
+            st.divider()
             st.markdown("### User Directory")
             if not filtered_users:
                 st.info("No users match the current filter.")
             for ud in filtered_users:
                 last_active = format_app_time(ud["last_active"], '%d %b, %H:%M IST')
-                status_color = "#ef4444" if ud["is_banned"] else "#22c55e"
+                status_text = "BANNED" if ud["is_banned"] else "ACTIVE"
+                badge_class = "jl-badge-banned" if ud["is_banned"] else "jl-badge-active"
 
-                st.markdown(f"""
-                    <div class="admin-data-card">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <div><b>{ud['name']}</b><p>{ud['email']}</p><p>Last Active: {last_active}</p></div>
-                            <div><span class="status-badge" style="background:{status_color}; color:white !important;">{'BANNED' if ud['is_banned'] else 'ACTIVE'}</span></div>
-                        </div>
-                    </div>
-                """, unsafe_allow_html=True)
+                with st.container(border=True):
+                    info_col, ban_col, del_col = st.columns([4, 1, 1])
+                    with info_col:
+                        st.markdown(
+                            f"**{ud['name']}** <span class='jl-badge {badge_class}'>{status_text}</span>",
+                            unsafe_allow_html=True,
+                        )
+                        st.caption(ud["email"] or "—")
+                        st.caption(f"Last active: {last_active}")
 
-                c_btn1, c_btn2 = st.columns(2)
-                with c_btn1:
-                    b_label = "UNBAN" if ud["is_banned"] else "BAN"
-                    if st.button(b_label, key=f"ban_{ud['doc_id']}"):
-                        u_ref.document(ud["doc_id"]).update({"is_banned": not ud["is_banned"]})
-                        st.rerun()
-                with c_btn2:
-                    if st.button("DELETE", key=f"del_{ud['doc_id']}"):
-                        try:
-                            auth.delete_user(ud["doc_id"])
-                        except:
-                            pass
-                        try:
-                            u_ref.document(ud["doc_id"]).delete()
+                    with ban_col:
+                        b_label = "Unban" if ud["is_banned"] else "Ban"
+                        if st.button(b_label, key=f"ban_{ud['doc_id']}", use_container_width=True):
+                            u_ref.document(ud["doc_id"]).update({"is_banned": not ud["is_banned"]})
                             st.rerun()
-                        except Exception as e:
-                            st.error(f"Error: {e}")
+
+                    with del_col:
+                        if st.button("Delete", key=f"del_{ud['doc_id']}", use_container_width=True, type="secondary"):
+                            try:
+                                auth.delete_user(ud["doc_id"])
+                            except Exception:
+                                pass
+                            try:
+                                u_ref.document(ud["doc_id"]).delete()
+                                st.rerun()
+                            except Exception as e:
+                                st.error(f"Error: {e}")
         else:
             st.error("Database not available.")
                     
