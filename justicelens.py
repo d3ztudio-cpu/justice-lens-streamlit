@@ -535,8 +535,28 @@ st.markdown(
     }
     .jl-sidebar-connected{
         color: var(--jl-text) !important;
-        font-weight: 600;
-        padding: 0.15rem 0 0.25rem 0;
+        background: rgba(15, 23, 42, 0.04) !important;
+        border: 1px solid var(--jl-border) !important;
+        border-radius: 10px !important;
+        font-weight: 700;
+        padding: 0.35rem 0.55rem;
+        display: inline-block;
+    }
+    .jl-sidebar-connected::selection,
+    .jl-sidebar-connected *::selection{
+        background: rgba(6, 182, 212, 0.22);
+        color: var(--jl-text) !important;
+    }
+
+    /* Remove fullscreen/view controls */
+    button[title="View fullscreen"],
+    button[aria-label="View fullscreen"],
+    button[title*="fullscreen" i],
+    button[aria-label*="fullscreen" i],
+    [data-testid="stFullScreenButton"]{
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
     }
 
     /* Fix sidebar toggle icon text (Material Symbols) */
@@ -1160,7 +1180,7 @@ with st.sidebar:
             st.rerun()
     else:
         st.markdown(
-            f"<div class='jl-sidebar-connected'>Connected: <b>{st.session_state.user['name']}</b></div>",
+            f"<div class='jl-sidebar-connected'>Connected to: <b>{st.session_state.user['name']}</b></div>",
             unsafe_allow_html=True,
         )
         

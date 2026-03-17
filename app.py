@@ -125,6 +125,17 @@ st.markdown(
         width: 100% !important;
         box-sizing: border-box !important;
     }
+
+    /* Remove fullscreen/view controls */
+    button[title="View fullscreen"],
+    button[aria-label="View fullscreen"],
+    button[title*="fullscreen" i],
+    button[aria-label*="fullscreen" i],
+    [data-testid="stFullScreenButton"]{
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -147,6 +158,9 @@ components.html(
           el.style.fontFamily = FONT;
           el.style.fontVariationSettings = '"FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24';
           el.style.lineHeight = "1";
+          /* Fallback if font fails: replace ligature text with clean glyph. */
+          if (t === "double_arrow_right") el.textContent = "»";
+          if (t === "double_arrow_left") el.textContent = "«";
         }
 
         function scan(root) {
@@ -166,8 +180,59 @@ components.html(
           }
         });
 
+        function ensureSidebarToggle() {
+          if (!doc.body) return;
+          const id = "jl-sidebar-toggle";
+          let btn = doc.getElementById(id);
+          if (!btn) {
+            btn = doc.createElement("button");
+            btn.id = id;
+            btn.type = "button";
+            btn.setAttribute("aria-label", "Toggle sidebar");
+            btn.style.position = "fixed";
+            btn.style.top = "72px";
+            btn.style.left = "14px";
+            btn.style.zIndex = "2147483647";
+            btn.style.width = "44px";
+            btn.style.height = "44px";
+            btn.style.borderRadius = "999px";
+            btn.style.border = "1px solid rgba(226, 232, 240, 1)";
+            btn.style.background = "#06B6D4";
+            btn.style.color = "#FFFFFF";
+            btn.style.boxShadow = "0 10px 26px rgba(15, 23, 42, 0.14)";
+            btn.style.cursor = "pointer";
+            btn.style.fontSize = "18px";
+            btn.style.fontWeight = "800";
+            btn.style.lineHeight = "1";
+            btn.style.display = "inline-flex";
+            btn.style.alignItems = "center";
+            btn.style.justifyContent = "center";
+
+            btn.addEventListener("mouseenter", () => { btn.style.background = "#0891B2"; });
+            btn.addEventListener("mouseleave", () => { btn.style.background = "#06B6D4"; });
+
+            btn.addEventListener("click", () => {
+              const openBtn =
+                doc.querySelector('[data-testid="collapsedControl"] button') ||
+                doc.querySelector('[data-testid="stSidebarCollapsedControl"] button');
+              const closeBtn = doc.querySelector('[data-testid="stSidebarCollapseButton"] button');
+              if (openBtn) openBtn.click();
+              else if (closeBtn) closeBtn.click();
+            });
+
+            doc.body.appendChild(btn);
+          }
+
+          const isCollapsed =
+            Boolean(doc.querySelector('[data-testid="collapsedControl"]')) ||
+            Boolean(doc.querySelector('[data-testid="stSidebarCollapsedControl"]'));
+          btn.textContent = isCollapsed ? "»" : "«";
+        }
+
         scan(doc);
+        ensureSidebarToggle();
         if (doc.body) obs.observe(doc.body, { subtree: true, childList: true, characterData: true });
+        setInterval(ensureSidebarToggle, 500);
       })();
     </script>
     """,
