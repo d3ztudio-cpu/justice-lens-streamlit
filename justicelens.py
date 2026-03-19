@@ -1,4 +1,4 @@
-import streamlit as st
+﻿import streamlit as st
 import pandas as pd
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
@@ -1071,7 +1071,7 @@ else:
             # Welcome tiles when empty
             if not history:
                 st.markdown("""
-                    <div class="jl-card" style="text-align:center; margin-bottom: 1.5rem;">
+                    <div class="jl-card" style="text-align:center; margin-bottom: 2rem;">
                         <h2 style="margin:0;">Welcome</h2>
                         <p style="margin:0.35rem 0 0; color: var(--jl-muted) !important; font-weight:600;">Start with a scenario or ask for an IT Act section explanation.</p>
                     </div>
