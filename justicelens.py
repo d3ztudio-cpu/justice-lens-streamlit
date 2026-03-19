@@ -645,23 +645,23 @@ st.markdown(
         flex-direction: column;
     }
     .jl-feature .kicker{
-        font-size: 0.72rem;
+        font-size: 0.78rem;
         letter-spacing: 0.08em;
         text-transform: uppercase;
         color: var(--jl-muted) !important;
-        margin-bottom: 0.5rem;
-        font-weight: 800;
+        margin-bottom: 0.25rem;
+        font-weight: 700;
     }
     .jl-feature .headline{
-        font-size: 1.1rem;
+        font-size: 1.05rem;
         font-weight: 800;
         margin: 0.1rem 0 0.35rem 0;
     }
     .jl-feature .desc{
         margin: 0;
         color: var(--jl-muted) !important;
-        line-height: 1.6;
-        font-size: 0.92rem;
+        line-height: 1.55;
+        font-size: 0.95rem;
         flex: 1;
     }
 
@@ -1499,8 +1499,8 @@ else:
         # Right panel (Projects)
         with right_col:
             with st.container(border=True):
-                st.markdown("### Projects")
-                new_name = st.text_input("New project", placeholder="e.g. Incident Notes", key="jl_new_project")
+                st.markdown("### Chats")
+                new_name = st.text_input("New Chats", placeholder="e.g. Incident Notes", key="jl_new_project")
                 if st.button("Create", use_container_width=True, key="jl_create_project"):
                     name = (new_name or "").strip()
                     if name and name not in st.session_state.projects:
@@ -1525,7 +1525,7 @@ else:
                         st.session_state.active_project = chosen
                         st.rerun()
 
-                st.caption("Tip: Use Projects to separate different incident chats.")
+                st.caption("Tip: Use Chats to separate different incident chats.")
 
         # Main chat area
         with main_col:
