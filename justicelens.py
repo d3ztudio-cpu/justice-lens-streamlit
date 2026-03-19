@@ -49,7 +49,7 @@ if not os.environ.get("JUSTICE_LENS_SKIP_PAGE_CONFIG"):
         initial_sidebar_state="expanded",
     )
 
-# --- Minimalist overrides (applied after legacy CSS) ---
+# --- Justice Lens: Deep Dive Theme ---
 st.markdown(
     """
     <style>
@@ -57,15 +57,15 @@ st.markdown(
     @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0');
 
     :root{
-        --jl-bg: #F8FAFC;
-        --jl-card: #FFFFFF;
-        --jl-text: #0F172A;
-        --jl-muted: #475569;
-        --jl-border: #E2E8F0;
-        --jl-primary: #06B6D4;
-        --jl-primary-2: #0891B2;
-        --jl-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
-        --jl-shadow-sm: 0 6px 18px rgba(15, 23, 42, 0.05);
+        --jl-bg: #0D1117;
+        --jl-card: #161B22;
+        --jl-text: #C9D1D9;
+        --jl-muted: #8B949E;
+        --jl-border: #30363D;
+        --jl-primary: #58A6FF;
+        --jl-primary-2: #388BFD;
+        --jl-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        --jl-shadow-sm: 0 6px 18px rgba(0, 0, 0, 0.15);
         --jl-radius: 14px;
     }
 
@@ -88,7 +88,7 @@ st.markdown(
 
     /* Sidebar */
     section[data-testid="stSidebar"]{
-        background: #FFFFFF !important;
+        background: var(--jl-card) !important;
         border-right: 1px solid var(--jl-border) !important;
     }
     [data-testid="stSidebarContent"]{
@@ -101,7 +101,7 @@ st.markdown(
     }
     .jl-sidebar-connected{
         color: var(--jl-text) !important;
-        background: rgba(15, 23, 42, 0.04) !important;
+        background: rgba(88, 166, 255, 0.1) !important;
         border: 1px solid var(--jl-border) !important;
         border-radius: 10px !important;
         font-weight: 700;
@@ -110,7 +110,7 @@ st.markdown(
     }
     .jl-sidebar-connected::selection,
     .jl-sidebar-connected *::selection{
-        background: rgba(6, 182, 212, 0.22);
+        background: rgba(88, 166, 255, 0.22);
         color: var(--jl-text) !important;
     }
 
@@ -135,7 +135,7 @@ st.markdown(
     /* Buttons */
     .stButton > button, .stFormSubmitButton > button, .stDownloadButton > button{
         background: var(--jl-primary) !important;
-        border: 1px solid rgba(6, 182, 212, 0.35) !important;
+        border: 1px solid rgba(88, 166, 255, 0.35) !important;
         color: #FFFFFF !important;
         border-radius: 10px !important;
         padding: 0.58rem 0.9rem !important;
@@ -146,20 +146,20 @@ st.markdown(
     .stButton > button:hover, .stFormSubmitButton > button:hover, .stDownloadButton > button:hover{
         background: var(--jl-primary-2) !important;
         transform: translateY(-1px);
-        box-shadow: 0 12px 26px rgba(15, 23, 42, 0.10) !important;
+        box-shadow: 0 12px 26px rgba(0, 0, 0, 0.2) !important;
     }
 
     /* Inputs */
     input, textarea, [data-baseweb="select"] > div{
-        background: #FFFFFF !important;
+        background: #0D1117 !important;
         border: 1px solid var(--jl-border) !important;
         border-radius: 12px !important;
         color: var(--jl-text) !important;
         box-shadow: none !important;
     }
     input:focus, textarea:focus{
-        border-color: rgba(6, 182, 212, 0.65) !important;
-        box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.16) !important;
+        border-color: var(--jl-primary) !important;
+        box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2) !important;
         outline: none !important;
     }
 
@@ -228,7 +228,7 @@ st.markdown(
         border-radius: 16px !important;
         padding: 1.5rem 1.75rem !important;
         box-shadow: var(--jl-shadow-sm) !important;
-        background: #FFFFFF !important;
+        background: var(--jl-card) !important;
         margin-bottom: 1.2rem !important;
     }
     [data-testid="stChatMessage"] p,
@@ -249,6 +249,7 @@ st.markdown(
         box-shadow: var(--jl-shadow-sm) !important;
         font-size: 1.1rem !important;
         padding: 0.85rem 1rem !important;
+        background-color: var(--jl-card) !important;
     }
 
     /* Border containers as white cards (Admin) */
@@ -268,17 +269,17 @@ st.markdown(
         font-size: 0.78rem;
         font-weight: 700;
         border: 1px solid var(--jl-border);
-        background: #F1F5F9;
+        background: #30363D;
     }
     .jl-badge-active{
         border-color: rgba(34, 197, 94, 0.35);
         background: rgba(34, 197, 94, 0.10);
-        color: #166534 !important;
+        color: #3FB950 !important;
     }
     .jl-badge-banned{
         border-color: rgba(239, 68, 68, 0.35);
         background: rgba(239, 68, 68, 0.10);
-        color: #991B1B !important;
+        color: #F85149 !important;
     }
 
     @media (max-width: 700px){
