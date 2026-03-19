@@ -96,6 +96,14 @@ st.markdown("""
         to { opacity: 1; transform: translateY(0); }
     }
 
+    /* Completely squash raw text ligatures like 'keyboard_double_arrow_right' */
+    [data-testid="stSidebarCollapseButton"],
+    [data-testid="collapsedControl"],
+    [data-testid="stSidebarCollapsedControl"] {
+        font-size: 0px !important;
+        color: transparent !important;
+    }
+
     [data-testid="stSidebarCollapseButton"] button,
     [data-testid="collapsedControl"] button,
     [data-testid="stSidebarCollapsedControl"] button {
@@ -109,6 +117,8 @@ st.markdown("""
         justify-content: center !important;
         box-shadow: 0 4px 10px rgba(2, 9, 22, 0.24) !important;
         padding: 0 !important;
+        font-size: 0px !important;
+        color: transparent !important;
     }
     /* Hide native inner text and icons to prevent raw text display */
     [data-testid="stSidebarCollapseButton"] button *,
@@ -117,6 +127,8 @@ st.markdown("""
         display: none !important;
         visibility: hidden !important;
         opacity: 0 !important;
+        font-size: 0px !important;
+        color: transparent !important;
     }
     /* Expand/Open Button Background (Double Arrow Right) */
     [data-testid="collapsedControl"] button,
@@ -666,7 +678,7 @@ st.markdown(
     [data-testid="stChatMessage"] li,
     [data-testid="stChatMessage"] span,
     [data-testid="stChatMessage"] div[data-testid="stMarkdownContainer"] {
-        font-size: 5.2rem !important;
+        font-size: 1.15rem !important;
         line-height: 1.7 !important;
     }
     [data-testid="stChatInput"]{ 
