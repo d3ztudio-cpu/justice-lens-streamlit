@@ -674,7 +674,7 @@ st.markdown(
         background: #FFFFFF !important;
         margin-bottom: 0.8rem !important;
     }
-    [data-testid="stChatInput"]{
+    [data-testid="stChatInput"]{ 
         max-width: 920px;
         margin-left: auto;
         margin-right: auto;
