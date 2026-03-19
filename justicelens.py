@@ -739,7 +739,6 @@ if "user" not in st.session_state: st.session_state.user = None
 if "chat_history" not in st.session_state: st.session_state.chat_history = []
 if "admin_mode" not in st.session_state: st.session_state.admin_mode = False
 if "view" not in st.session_state: st.session_state.view = "AI Assistant"
-if "start_researching_flow" not in st.session_state: st.session_state.start_researching_flow = False
 
 # --- AUTH SYSTEM ---
 def authenticate(email, password):
@@ -1275,49 +1274,52 @@ if not st.session_state.user:
                     """,
                     unsafe_allow_html=True,
                 )
-            if st.session_state.start_researching_flow:
-                st.markdown("### Login to Start Researching")
-                entry_tabs = st.tabs(["Login", "Join"])
-                with entry_tabs[0]:
-                    me = st.text_input("Email", key="main_login_email")
-                    mp = st.text_input("Password", type="password", key="main_login_pass")
-                    if st.button("AUTHENTICATE ", key="main_login_btn"):
-                        valid, u_obj = authenticate(me, mp)
-                        if valid:
-                            if check_ban(u_obj.uid):
-                                st.error("Access Forbidden.")
+            
+            st.write("")
+            login_pad_l, login_main, login_pad_r = st.columns([1, 2, 1])
+            with login_main:
+                st.markdown("<h3 style='text-align: center; margin-bottom: 1rem;'>Login to Start Researching</h3>", unsafe_allow_html=True)
+                with st.container(border=True):
+                    entry_tabs = st.tabs(["Login", "Join"])
+                    with entry_tabs[0]:
+                        me = st.text_input("Email", key="main_login_email")
+                        mp = st.text_input("Password", type="password", key="main_login_pass")
+                        if st.button("AUTHENTICATE ", key="main_login_btn", use_container_width=True):
+                            valid, u_obj = authenticate(me, mp)
+                            if valid:
+                                if check_ban(u_obj.uid):
+                                    st.error("Access Forbidden.")
+                                else:
+                                    st.session_state.user = {
+                                        "name": u_obj.display_name or me.split('@')[0],
+                                        "email": me,
+                                        "uid": u_obj.uid
+                                    }
+                                    st.session_state.view = "AI Assistant"
+                                    sync_user(st.session_state.user)
+                                    st.rerun()
                             else:
-                                st.session_state.user = {
-                                    "name": u_obj.display_name or me.split('@')[0],
-                                    "email": me,
-                                    "uid": u_obj.uid
-                                }
-                                st.session_state.view = "AI Assistant"
-                                st.session_state.start_researching_flow = False
-                                sync_user(st.session_state.user)
-                                st.rerun()
-                        else:
-                            st.error("Invalid Credentials.")
-                with entry_tabs[1]:
-                    mnu = st.text_input("Full Name", key="main_signup_name")
-                    meu = st.text_input("Email", key="main_signup_email")
-                    mpu = st.text_input("Create Password", type="password", key="main_signup_pass")
-                    if st.button("CREATE ACCOUNT", key="main_signup_btn"):
-                        try:
-                            auth.create_user(email=meu, password=mpu, display_name=mnu)
-                            st.success("Account Ready! Use Login.")
-                        except Exception as ex:
-                            st.error(str(ex))
-                if st.button("GUEST USER", key="main_guest_btn"):
-                    gid = str(uuid.uuid4())[:8]
-                    st.session_state.user = {
-                        "name": f"Guest_{gid}",
-                        "email": "guest@justicelens.io",
-                        "uid": f"guest_{gid}"
-                    }
-                    st.session_state.view = "AI Assistant"
-                    st.session_state.start_researching_flow = False
-                    st.rerun()
+                                st.error("Invalid Credentials.")
+                    with entry_tabs[1]:
+                        mnu = st.text_input("Full Name", key="main_signup_name")
+                        meu = st.text_input("Email", key="main_signup_email")
+                        mpu = st.text_input("Create Password", type="password", key="main_signup_pass")
+                        if st.button("CREATE ACCOUNT", key="main_signup_btn", use_container_width=True):
+                            try:
+                                auth.create_user(email=meu, password=mpu, display_name=mnu)
+                                st.success("Account Ready! Use Login.")
+                            except Exception as ex:
+                                st.error(str(ex))
+                    st.write("")
+                    if st.button("GUEST USER", key="main_guest_btn", use_container_width=True):
+                        gid = str(uuid.uuid4())[:8]
+                        st.session_state.user = {
+                            "name": f"Guest_{gid}",
+                            "email": "guest@justicelens.io",
+                            "uid": f"guest_{gid}"
+                        }
+                        st.session_state.view = "AI Assistant"
+                        st.rerun()
 
 else:
     page = st.session_state.view
