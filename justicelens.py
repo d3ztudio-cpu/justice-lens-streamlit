@@ -1071,17 +1071,18 @@ else:
             # Welcome tiles when empty
             if not history:
                 st.markdown("""
-                    <div class="jl-card" style="text-align:center;">
+                    <div class="jl-card" style="text-align:center; margin-bottom: 1.5rem;">
                         <h2 style="margin:0;">Welcome</h2>
                         <p style="margin:0.35rem 0 0; color: var(--jl-muted) !important; font-weight:600;">Start with a scenario or ask for an IT Act section explanation.</p>
                     </div>
                 """, unsafe_allow_html=True)
 
-                t1, t2 = st.columns(2)
+                t1, t2 = st.columns(2, gap="large")
                 with t1:
                     if st.button("Report UPI scam", use_container_width=True):
                         st.session_state.jl_pending_msg = "I was scammed via UPI. What sections apply?"
                         st.rerun()
+                    st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
                     if st.button("Account hacked", use_container_width=True):
                         st.session_state.jl_pending_msg = "My account was hacked and my data leaked. What should I do?"
                         st.rerun()
@@ -1089,6 +1090,7 @@ else:
                     if st.button("Explain Section 66F", use_container_width=True):
                         st.session_state.jl_pending_msg = "Explain Section 66F"
                         st.rerun()
+                    st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
                     if st.button("Privacy violation", use_container_width=True):
                         st.session_state.jl_pending_msg = "Someone posted my private photos without consent. What are the punishments?"
                         st.rerun()
