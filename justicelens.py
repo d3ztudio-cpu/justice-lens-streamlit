@@ -669,10 +669,10 @@ st.markdown(
     [data-testid="stChatMessage"]{
         border: 1px solid var(--jl-border) !important;
         border-radius: 16px !important;
-        padding: 0.35rem 0.6rem !important;
+        padding: 1rem 1.25rem !important;
         box-shadow: var(--jl-shadow-sm) !important;
         background: #FFFFFF !important;
-        margin-bottom: 0.55rem !important;
+        margin-bottom: 0.8rem !important;
     }
     [data-testid="stChatInput"]{
         max-width: 920px;
