@@ -297,10 +297,10 @@ st.markdown("""
     }
 
     .chat-container {
-        max-width: 1180px;
+        max-width: 980px;
         margin: 0 auto;
         padding: 1.4rem;
-        border-radius: 18px;
+        border-radius: 30px;
     }
     .bubble-container { display: flex; flex-direction: column; gap: 1.2rem; }
     .chat-bubble {
