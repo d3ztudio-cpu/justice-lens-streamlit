@@ -110,30 +110,34 @@ st.markdown("""
         box-shadow: 0 4px 10px rgba(2, 9, 22, 0.24) !important;
         padding: 0 !important;
     }
-    [data-testid="stSidebarCollapseButton"] button svg,
-    [data-testid="collapsedControl"] button svg,
-    [data-testid="stSidebarCollapsedControl"] button svg {
-        color: #DCEAFF !important;
-        width: 0.92rem !important;
-        height: 0.92rem !important;
+    /* Hide native inner text and icons to prevent raw text display */
+    [data-testid="stSidebarCollapseButton"] button *,
+    [data-testid="collapsedControl"] button *,
+    [data-testid="stSidebarCollapsedControl"] button * {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
     }
-    [data-testid="stSidebarCollapseButton"] button svg path,
-    [data-testid="collapsedControl"] button svg path,
-    [data-testid="stSidebarCollapsedControl"] button svg path {
-        stroke: #DCEAFF !important;
-        fill: #DCEAFF !important;
+    /* Expand/Open Button Background (Double Arrow Right) */
+    [data-testid="collapsedControl"] button,
+    [data-testid="stSidebarCollapsedControl"] button {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23DCEAFF' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13 17l5-5-5-5M6 17l5-5-5-5'/%3E%3C/svg%3E") !important;
+        background-position: center !important;
+        background-repeat: no-repeat !important;
+        background-size: 18px 18px !important;
+    }
+    /* Collapse/Close Button Background (Chevron Left) */
+    [data-testid="stSidebarCollapseButton"] button {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23DCEAFF' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 18l-6-6 6-6'/%3E%3C/svg%3E") !important;
+        background-position: center !important;
+        background-repeat: no-repeat !important;
+        background-size: 18px 18px !important;
     }
     [data-testid="stSidebarCollapseButton"] button:hover,
     [data-testid="collapsedControl"] button:hover,
     [data-testid="stSidebarCollapsedControl"] button:hover {
         transform: translateY(-1px);
-        filter: brightness(1.02);
-    }
-    [data-testid="collapsedControl"] button p,
-    [data-testid="stSidebarCollapsedControl"] button p {
-        color: #DCEAFF !important;
-        font-weight: 900 !important;
-        font-size: 0.95rem !important;
+        filter: brightness(1.15);
     }
     [data-testid="stDecoration"], [data-testid="stStatusWidget"],
     [data-testid="stMainMenu"], .st-emotion-cache-zt53z0,
@@ -557,22 +561,6 @@ st.markdown(
         display: none !important;
         visibility: hidden !important;
         pointer-events: none !important;
-    }
-
-    /* Fix sidebar toggle icon text (Material Symbols) */
-    .material-symbols-rounded,
-    [data-testid="stSidebarCollapseButton"] span,
-    [data-testid="collapsedControl"] span,
-    [data-testid="stSidebarCollapsedControl"] span,
-    [data-testid="stSidebarCollapseButton"] i,
-    [data-testid="collapsedControl"] i,
-    [data-testid="stSidebarCollapsedControl"] i,
-    [class^="st-emotion-cache-"] .material-symbols-rounded{
-        font-family: "Material Symbols Rounded" !important;
-        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        line-height: 1;
     }
 
     /* Buttons */
