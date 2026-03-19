@@ -645,23 +645,23 @@ st.markdown(
         flex-direction: column;
     }
     .jl-feature .kicker{
-        font-size: 0.78rem;
+        font-size: 0.72rem;
         letter-spacing: 0.08em;
         text-transform: uppercase;
         color: var(--jl-muted) !important;
-        margin-bottom: 0.25rem;
-        font-weight: 700;
+        margin-bottom: 0.5rem;
+        font-weight: 800;
     }
     .jl-feature .headline{
-        font-size: 1.05rem;
+        font-size: 1.1rem;
         font-weight: 800;
         margin: 0.1rem 0 0.35rem 0;
     }
     .jl-feature .desc{
         margin: 0;
         color: var(--jl-muted) !important;
-        line-height: 1.55;
-        font-size: 0.95rem;
+        line-height: 1.6;
+        font-size: 0.92rem;
         flex: 1;
     }
 
@@ -1364,7 +1364,7 @@ if not st.session_state.user:
                             st.success("Account Ready! Use Login.")
                         except Exception as ex:
                             st.error(str(ex))
-                if st.button("CONTINUE AS GUEST", key="main_guest_btn"):
+                if st.button("GUEST USER", key="main_guest_btn"):
                     gid = str(uuid.uuid4())[:8]
                     st.session_state.user = {
                         "name": f"Guest_{gid}",
