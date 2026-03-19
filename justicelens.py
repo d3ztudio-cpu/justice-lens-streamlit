@@ -673,7 +673,7 @@ st.markdown(
         box-shadow: var(--jl-shadow-sm) !important;
         background: #FFFFFF !important;
         margin-bottom: 0.8rem !important;
-    }
+    } 
     [data-testid="stChatInput"]{ 
         max-width: 920px;
         margin-left: auto;
