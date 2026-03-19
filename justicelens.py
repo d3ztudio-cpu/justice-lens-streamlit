@@ -1033,6 +1033,8 @@ else:
                 unsafe_allow_html=True,
             )
 
+        st.markdown("<div style='height: 1.5rem;'></div>", unsafe_allow_html=True)
+
         main_col, right_col = st.columns([4, 1], gap="large")
 
         # Right panel (Projects)
