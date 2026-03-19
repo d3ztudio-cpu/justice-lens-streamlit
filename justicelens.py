@@ -300,7 +300,7 @@ st.markdown("""
         max-width: 980px;
         margin: 0 auto;
         padding: 1.4rem;
-        border-radius: 30px;
+        border-radius: 100px0px;
     }
     .bubble-container { display: flex; flex-direction: column; gap: 1.2rem; }
     .chat-bubble {
