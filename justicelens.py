@@ -669,11 +669,18 @@ st.markdown(
     [data-testid="stChatMessage"]{
         border: 1px solid var(--jl-border) !important;
         border-radius: 16px !important;
-        padding: 1rem 1.25rem !important;
+        padding: 1.5rem 1.75rem !important;
         box-shadow: var(--jl-shadow-sm) !important;
         background: #FFFFFF !important;
-        margin-bottom: 0.8rem !important;
-    } 
+        margin-bottom: 1.2rem !important;
+    }
+    [data-testid="stChatMessage"] p,
+    [data-testid="stChatMessage"] li,
+    [data-testid="stChatMessage"] span,
+    [data-testid="stChatMessage"] div[data-testid="stMarkdownContainer"] {
+        font-size: 5.2rem !important;
+        line-height: 1.7 !important;
+    }
     [data-testid="stChatInput"]{ 
         max-width: 920px;
         margin-left: auto;
@@ -683,6 +690,8 @@ st.markdown(
         border-radius: 14px !important;
         border: 1px solid var(--jl-border) !important;
         box-shadow: var(--jl-shadow-sm) !important;
+        font-size: 1.1rem !important;
+        padding: 0.85rem 1rem !important;
     }
 
     /* Border containers as white cards (Admin) */
