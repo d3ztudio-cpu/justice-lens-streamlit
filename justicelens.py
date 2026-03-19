@@ -886,8 +886,8 @@ if not st.session_state.user:
                     """
                     <div class="jl-feature">
                         <div class="kicker">Always On</div>
-                        <div class="headline">24/7 Support</div>
-                        <p class="desc">Rapid triage, evidence preservation, and next-step guidance when time matters.</p>
+                        <div class="headline">24/7 Incident Support</div>
+                        <p class="desc">Get immediate, automated guidance for reporting cybercrimes, preserving critical digital evidence, and containing the incident to prevent further harm.</p>
                     </div>
                     """,
                     unsafe_allow_html=True,
@@ -897,8 +897,8 @@ if not st.session_state.user:
                     """
                     <div class="jl-feature">
                         <div class="kicker">Grounded</div>
-                        <div class="headline">Verified Legal Logic</div>
-                        <p class="desc">Responses structured around IT Act sections, punishments, and scenario-ready action plans.</p>
+                        <div class="headline">Verified Legal Framework</div>
+                        <p class="desc">Our AI provides responses structured around specific IT Act sections, official punishments, and relevant case law, ensuring the guidance is grounded and reliable.</p>
                     </div>
                     """,
                     unsafe_allow_html=True,
@@ -908,8 +908,8 @@ if not st.session_state.user:
                     """
                     <div class="jl-feature">
                         <div class="kicker">Tactical</div>
-                        <div class="headline">Incident Response</div>
-                        <p class="desc">Golden-hour steps, takedowns, and escalation paths tailored to common cyber incidents.</p>
+                        <div class="headline">Actionable Response Plans</div>
+                        <p class="desc">Receive clear, step-by-step action plans, including golden-hour reporting, evidence collection, and strategic escalation paths for banks and authorities.</p>
                     </div>
                     """,
                     unsafe_allow_html=True,
@@ -1004,8 +1004,8 @@ else:
                 """
                 <div class="jl-feature">
                     <div class="kicker">Always On</div>
-                    <div class="headline">24/7 Support</div>
-                    <p class="desc">Fast guidance for reporting, preserving evidence, and immediate containment.</p>
+                    <div class="headline">24/7 Incident Support</div>
+                    <p class="desc">Get immediate, automated guidance for reporting cybercrimes, preserving critical digital evidence, and containing the incident to prevent further harm.</p>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -1015,8 +1015,8 @@ else:
                 """
                 <div class="jl-feature">
                     <div class="kicker">Grounded</div>
-                    <div class="headline">Verified Legal Logic</div>
-                    <p class="desc">Structured outputs: relevant sections, punishments, case history, win probability, action plan.</p>
+                    <div class="headline">Verified Legal Framework</div>
+                    <p class="desc">Our AI provides responses structured around specific IT Act sections, official punishments, and relevant case law, ensuring the guidance is grounded and reliable.</p>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -1026,8 +1026,8 @@ else:
                 """
                 <div class="jl-feature">
                     <div class="kicker">Tactical</div>
-                    <div class="headline">Incident Response</div>
-                    <p class="desc">Golden-hour steps and escalation paths (bank, cyber cell, intermediaries).</p>
+                    <div class="headline">Actionable Response Plans</div>
+                    <p class="desc">Receive clear, step-by-step action plans, including golden-hour reporting, evidence collection, and strategic escalation paths for banks and authorities.</p>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -1117,21 +1117,44 @@ else:
 
     elif page == "Vision & Mission":
         st.title("Our Core Principles")
-        v1, v2 = st.columns(2)
-        with v1:
-            st.markdown("""<div class="jl-card"><h3 style="margin-top:0;">Our Vision</h3><p style="color: var(--jl-muted) !important;">To make cyber-law guidance accessible and actionable for every citizen.</p></div>""", unsafe_allow_html=True)
-        with v2:
-            st.markdown("""<div class="jl-card"><h3 style="margin-top:0;">Our Mission</h3><p style="color: var(--jl-muted) !important;">Use AI + retrieval to translate cyber provisions into structured, cited, scenario-ready steps.</p></div>""", unsafe_allow_html=True)
+        st.markdown(
+            """
+            <div class="jl-card" style="margin-bottom: 1.5rem;">
+                <h3 style="margin-top:0;">Our Vision</h3>
+                <p style="color: var(--jl-muted) !important; margin-bottom:0;">
+                    To create a future where every citizen and organization can navigate the complexities of Indian cyber law with clarity and confidence. We envision a digitally secure India where access to preliminary legal guidance for cyber incidents is immediate, accessible, and universally available, empowering individuals to protect their rights and digital identity.
+                </p>
+            </div>
+            <div class="jl-card">
+                <h3 style="margin-top:0;">Our Mission</h3>
+                <p style="color: var(--jl-muted) !important; margin-bottom:0;">
+                    Our mission is to democratize cyber law knowledge. We leverage state-of-the-art AI, grounded in a meticulously curated database of the Indian IT Act and case law, to provide structured, actionable, and context-aware guidance. We are committed to delivering a reliable first-response tool that helps users understand their situation, preserve critical evidence, and take the right initial steps during the golden hour of a cyber incident.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
     elif page == "About":
         st.title("About")
         st.markdown(
             """
             <div class="jl-card">
-                <h3 style="margin-top:0;">Justice Lens</h3>
+                <h3 style="margin-top:0;">What is Justice Lens?</h3>
+                <p style="color: var(--jl-muted) !important;">
+                    Justice Lens is an advanced cyber-law assistant engineered to provide immediate, structured, and actionable insights into common cyber incidents within the Indian legal framework.
+                </p>
+                <h3 style="margin-top:1.5rem;">How it Works</h3>
                 <p style="color: var(--jl-muted) !important; margin-bottom:0;">
-                    A cyber-law assistant that generates structured outputs (sections, punishments, case history, win probability,
-                    action plan) and emphasizes evidence preservation and escalation paths.
+                    Our system leverages a powerful AI engine coupled with a curated database of Indian cyber law, including the IT Act of 2000 and subsequent amendments. When you describe a scenario, the AI performs a multi-step analysis:
+                </p>
+                <ol style="color: var(--jl-muted) !important;">
+                    <li><strong>Intent Classification:</strong> It first determines the nature of your query to understand if it's a real-world scenario, a request for a legal explanation, or a general question.</li>
+                    <li><strong>Database Retrieval:</strong> It then queries its legal knowledge base, which includes statutory provisions, landmark case law, and dynamic rules updated for 2026, to find the most relevant legal precedents and sections.</li>
+                    <li><strong>Structured Response Generation:</strong> Finally, it synthesizes this information into a clear, structured report, including an action plan and evidence preservation steps.</li>
+                </ol>
+                <p style="color: var(--jl-muted) !important; margin-top:1rem; margin-bottom:0;">
+                   This process ensures that the guidance is not only rapid but also grounded in verified legal logic, empowering users to make informed decisions during the critical hours following a cyber incident.
                 </p>
             </div>
             """,
@@ -1143,11 +1166,22 @@ else:
         st.markdown(
             """
             <div class="jl-card">
-                <ul>
-                    <li>This tool provides informational guidance only and is not legal advice.</li>
-                    <li>For emergencies or high-stakes matters, consult a qualified lawyer and contact authorities.</li>
-                    <li>Avoid sharing passwords, OTPs, card CVV, or sensitive personal data in chat.</li>
-                </ul>
+                <h3 style="margin-top:0;">1. Scope of Guidance</h3>
+                <p style="color: var(--jl-muted) !important; margin-bottom:0;">
+                    The information provided by Justice Lens is for informational and educational purposes only. The analysis is generated by an AI system based on a database of Indian cyber laws and is intended to serve as a preliminary guide for understanding potential legal avenues and immediate response actions.
+                </p>
+                <h3 style="margin-top:1.5rem;">2. Not a Substitute for Legal Counsel</h3>
+                <p style="color: var(--jl-muted) !important; margin-bottom:0;">
+                    Justice Lens is not a law firm and does not provide legal advice. The information generated by the AI does not constitute a lawyer-client relationship. For any serious legal issue, you must consult with a qualified, licensed legal professional.
+                </p>
+                <h3 style="margin-top:1.5rem;">3. Data Privacy and Security</h3>
+                <p style="color: var(--jl-muted) !important; margin-bottom:0;">
+                    Do not share any sensitive personal information in the chat, including but not limited to passwords, OTPs, financial account numbers, or government-issued identification numbers. The system is designed for scenario analysis, not for the transmission of confidential data.
+                </p>
+                 <h3 style="margin-top:1.5rem;">4. Limitation of Liability</h3>
+                <p style="color: var(--jl-muted) !important; margin-bottom:0;">
+                    While we strive for accuracy, the legal landscape is constantly evolving. We do not warrant the completeness or accuracy of the information provided. The developers of Justice Lens shall not be liable for any damages arising out of the use of the information provided.
+                </p>
             </div>
             """,
             unsafe_allow_html=True,
@@ -1158,11 +1192,22 @@ else:
         st.markdown(
             """
             <div class="jl-card">
-                <h3 style="margin-top:0;">Intermediary takedown (2026)</h3>
+                <h3 style="margin-top:0;">Intermediary Takedown & The 2026 Rules</h3>
                 <p style="color: var(--jl-muted) !important; margin-bottom:0;">
-                    When a scenario involves an active phishing portal or deepfake/SGI content, the assistant includes a takedown step
-                    referencing the IT Amendment Rules 2026 and the 3-hour removal expectation for intermediaries on a valid order/notice,
-                    tied to Section 79 safe-harbor.
+                    The "Cyber Rules 2026" is our internal designation for critical legal updates that Justice Lens applies to relevant scenarios, particularly those involving harmful user-generated content online.
+                </p>
+                <h3 style="margin-top:1.5rem;">Key Provision: Intermediary Liability</h3>
+                <p style="color: var(--jl-muted) !important; margin-bottom:0;">
+                   A core component of these rules is the assistant's handling of scenarios involving active phishing websites, deepfakes, or other forms of "Synthetically Generated Information" (SGI).
+                </p>
+                <ul style="color: var(--jl-muted) !important;">
+                    <li><strong>The Law:</strong> Based on amendments to the IT Rules, online platforms like social media networks and hosting providers ("intermediaries") have specific obligations.</li>
+                    <li><strong>"Safe Harbor":</strong> Under Section 79 of the IT Act, these intermediaries are granted "safe harbor," which protects them from liability for content posted by their users.</li>
+                    <li><strong>The Condition:</strong> To maintain this protection, they must promptly remove unlawful content upon receiving a valid order from a court or government agency. The 2026 ruleset assumes a strict 3-hour timeline for takedown of certain harmful content to avoid liability.</li>
+                </ul>
+                 <h3 style="margin-top:1.5rem;">Justice Lens's Analysis</h3>
+                <p style="color: var(--jl-muted) !important; margin-bottom:0;">
+                   When the AI detects a relevant scenario, its Action Plan will include a step referencing the IT Amendment Rules 2026. This step advises the user on issuing a takedown notice to the intermediary, highlighting the platform's obligation to remove such material within a very short timeframe to retain their safe harbor status.
                 </p>
             </div>
             """,
