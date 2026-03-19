@@ -519,6 +519,13 @@ st.markdown(
         pointer-events: none !important;
     }
 
+    /* Permanently fix sidebar by hiding the collapse controls */
+    [data-testid="collapsedControl"],
+    [data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebarCollapsedControl"] {
+        display: none !important;
+    }
+
     /* Buttons */
     .stButton > button, .stFormSubmitButton > button, .stDownloadButton > button{
         background: var(--jl-primary) !important;
@@ -1268,13 +1275,6 @@ if not st.session_state.user:
                     """,
                     unsafe_allow_html=True,
                 )
-
-            st.write("")
-            cta_l, cta_m, cta_r = st.columns([2, 3, 2])
-            with cta_m:
-                if st.button("Start", key="start_researching_btn", use_container_width=True):
-                    st.session_state.start_researching_flow = True
-                    st.rerun()
             if st.session_state.start_researching_flow:
                 st.markdown("### Login to Start Researching")
                 entry_tabs = st.tabs(["Login", "Join"])
