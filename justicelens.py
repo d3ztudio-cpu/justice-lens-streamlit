@@ -1496,36 +1496,36 @@ else:
 
         main_col, right_col = st.columns([4, 1], gap="large")
 
-        # Right panel (Chats)
+        # Right panel (Projects)
         with right_col:
             with st.container(border=True):
-                st.markdown("### chats")
-                new_name = st.text_input("New projchatect", placeholder="e.g. Incident Notes", key="jl_new_chat")
-                if st.button("Create", use_container_width=True, key="jl_create_chat"):
+                st.markdown("### Projects")
+                new_name = st.text_input("New project", placeholder="e.g. Incident Notes", key="jl_new_project")
+                if st.button("Create", use_container_width=True, key="jl_create_project"):
                     name = (new_name or "").strip()
-                    if name and name not in st.session_state.chats:
-                        st.session_state.chats[name] = []
-                        st.session_state.active_chat = name
+                    if name and name not in st.session_state.projects:
+                        st.session_state.projects[name] = []
+                        st.session_state.active_project = name
                         st.rerun()
 
-                chat_names = list(st.session_state.chats.keys())
-                if chat_names:
+                project_names = list(st.session_state.projects.keys())
+                if project_names:
                     try:
-                        current_index = chat_names.index(st.session_state.active_chat)
+                        current_index = project_names.index(st.session_state.active_project)
                     except ValueError:
                         current_index = 0
                     chosen = st.radio(
                         "Select",
-                        chat_names,
+                        project_names,
                         index=current_index,
                         label_visibility="collapsed",
-                        key="jl_chat_radio",
+                        key="jl_project_radio",
                     )
-                    if chosen != st.session_state.active_chat:
-                        st.session_state.active_chat = chosen
+                    if chosen != st.session_state.active_project:
+                        st.session_state.active_project = chosen
                         st.rerun()
 
-                st.caption("Tip: Use Chats to separate different incident chats.")
+                st.caption("Tip: Use Projects to separate different incident chats.")
 
         # Main chat area
         with main_col:
