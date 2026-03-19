@@ -714,7 +714,7 @@ st.markdown(
         background: #F1F5F9;
     }
     .jl-badge-active{
-        border-color: rgba(34, 197, 94, 0.35);
+        border-color: rgba(6, 182, 212);
         background: rgba(34, 197, 94, 0.10);
         color: #166534 !important;
     }
