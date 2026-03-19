@@ -297,7 +297,7 @@ st.markdown("""
     }
 
     .chat-container {
-        max-width: 980px;
+        max-width: 1180px;
         margin: 0 auto;
         padding: 1.4rem;
         border-radius: 18px;
@@ -1328,7 +1328,7 @@ if not st.session_state.user:
                 with entry_tabs[0]:
                     me = st.text_input("Email", key="main_login_email")
                     mp = st.text_input("Password", type="password", key="main_login_pass")
-                    if st.button("CONTINUE TO AI", key="main_login_btn"):
+                    if st.button("AUTHENTICATE ", key="main_login_btn"):
                         valid, u_obj = authenticate(me, mp)
                         if valid:
                             if check_ban(u_obj.uid):
