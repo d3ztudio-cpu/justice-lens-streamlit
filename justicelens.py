@@ -466,6 +466,7 @@ st.markdown(
 
     html, body, .stApp, [data-testid="stAppViewContainer"]{
         background: var(--jl-bg) !important;
+        overflow-x: hidden !important;
     }
 
     html, body, [data-testid="stMarkdownContainer"] p,
