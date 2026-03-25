@@ -371,7 +371,7 @@ st.markdown(
         position: fixed;
         top: 0.9rem;
         left: 0.9rem;
-        z-index: 1200;
+        z-index: 10001;
         width: 42px;
         height: 42px;
         border-radius: 10px;
@@ -390,39 +390,47 @@ st.markdown(
         margin: 3px 0;
         border-radius: 2px;
     }
-    .jl-mobile-overlay{
+    .jl-drawer-backdrop{
         display: none;
         position: fixed;
         inset: 0;
         background: rgba(0, 0, 0, 0.5);
-        z-index: 1100;
+        z-index: 10000;
     }
     @media (max-width: 700px){
         .jl-mobile-toggle{ display: inline-flex; }
-        .jl-mobile-overlay{ display: block; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
-        body.jl-sidebar-open .jl-mobile-overlay{ opacity: 1; pointer-events: auto; }
-        section[data-testid="stSidebar"]{
-            position: fixed !important;
+        .jl-drawer-backdrop{
+            display: block;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+        body.jl-drawer-open .jl-drawer-backdrop{ opacity: 1; pointer-events: auto; }
+        .jl-drawer{
+            position: fixed;
             top: 0;
             left: 0;
-            height: 100vh !important;
-            width: min(320px, 88vw) !important;
-            min-width: 0 !important;
-            transform: translateX(-110%) !important;
-            transition: transform 0.22s ease, visibility 0.22s ease;
-            z-index: 1190;
+            height: 100vh;
+            width: min(320px, 88vw);
+            max-width: 88vw;
+            background: var(--jl-card);
             box-shadow: var(--jl-shadow);
-            overflow: hidden;
-            display: block !important;
-            background: var(--jl-card) !important;
-            visibility: hidden;
-            pointer-events: none;
+            transform: translateX(-110%);
+            transition: transform 0.22s ease;
+            z-index: 10002;
+            overflow-y: auto;
         }
-        body.jl-sidebar-open section[data-testid="stSidebar"]{
-            transform: translateX(0) !important;
-            pointer-events: auto;
-            visibility: visible;
-            width: min(320px, 88vw) !important;
+        body.jl-drawer-open .jl-drawer{ transform: translateX(0); }
+        section[data-testid="stSidebar"]{ display: none !important; }
+        .jl-drawer section[data-testid="stSidebar"]{
+            display: block !important;
+            position: static !important;
+            width: 100% !important;
+            height: auto !important;
+            transform: none !important;
+            box-shadow: none !important;
+            border-right: none !important;
+            background: var(--jl-card) !important;
         }
     }
     </style>
@@ -482,12 +490,12 @@ st.markdown(
 )
 st.markdown(
     """
-    <div class="jl-mobile-toggle" data-jl-sidebar-toggle aria-label="Open menu">
+    <div class="jl-mobile-toggle" data-jl-drawer-toggle aria-label="Open menu">
       <div>
         <span></span><span></span><span></span>
       </div>
     </div>
-    <div class="jl-mobile-overlay" data-jl-sidebar-overlay></div>
+    <div class="jl-drawer-backdrop" data-jl-drawer-backdrop></div>
     """,
     unsafe_allow_html=True,
 )
@@ -495,30 +503,69 @@ components.html(
     """
     <script>
     (function(){
-      if (window.__jlSidebarToggleInit) return;
-      window.__jlSidebarToggleInit = true;
+      if (window.__jlDrawerInit) return;
+      window.__jlDrawerInit = true;
       const doc = window.parent && window.parent.document ? window.parent.document : document;
       const body = doc.body;
-      const OPEN_CLASS = "jl-sidebar-open";
-      const openSidebar = () => body.classList.add(OPEN_CLASS);
-      const closeSidebar = () => body.classList.remove(OPEN_CLASS);
-      const handler = function(e){
-        const toggle = e.target.closest("[data-jl-sidebar-toggle]");
-        const overlay = e.target.closest("[data-jl-sidebar-overlay]");
+      const OPEN_CLASS = "jl-drawer-open";
+      const openDrawer = () => body.classList.add(OPEN_CLASS);
+      const closeDrawer = () => body.classList.remove(OPEN_CLASS);
+      const ensureDrawer = () => {
+        let drawer = doc.querySelector(".jl-drawer");
+        if (!drawer){
+          drawer = doc.createElement("div");
+          drawer.className = "jl-drawer";
+          doc.body.appendChild(drawer);
+        }
+        return drawer;
+      };
+      const mountSidebarInDrawer = () => {
         const sidebar = doc.querySelector('section[data-testid="stSidebar"]');
-        const insideSidebar = sidebar && sidebar.contains(e.target);
+        if (!sidebar) return;
+        if (!sidebar.__jlOriginalParent){
+          sidebar.__jlOriginalParent = sidebar.parentElement;
+          sidebar.__jlOriginalNext = sidebar.nextSibling;
+        }
+        const drawer = ensureDrawer();
+        if (sidebar.parentElement !== drawer){
+          drawer.appendChild(sidebar);
+        }
+      };
+      const restoreSidebar = () => {
+        const sidebar = doc.querySelector('section[data-testid="stSidebar"]');
+        if (!sidebar || !sidebar.__jlOriginalParent) return;
+        const parent = sidebar.__jlOriginalParent;
+        const next = sidebar.__jlOriginalNext;
+        if (next) parent.insertBefore(sidebar, next);
+        else parent.appendChild(sidebar);
+      };
+      const isMobile = () => doc.defaultView && doc.defaultView.matchMedia("(max-width: 700px)").matches;
+      const syncMount = () => {
+        if (isMobile()) mountSidebarInDrawer();
+        else restoreSidebar();
+      };
+      syncMount();
+      doc.defaultView && doc.defaultView.addEventListener("resize", () => {
+        syncMount();
+        if (!isMobile()) closeDrawer();
+      });
+      const handler = function(e){
+        const toggle = e.target.closest("[data-jl-drawer-toggle]");
+        const backdrop = e.target.closest("[data-jl-drawer-backdrop]");
+        const drawer = doc.querySelector(".jl-drawer");
+        const insideDrawer = drawer && drawer.contains(e.target);
         if (toggle){
           e.preventDefault();
-          openSidebar();
+          openDrawer();
           return;
         }
-        if (overlay){
+        if (backdrop){
           e.preventDefault();
-          closeSidebar();
+          closeDrawer();
           return;
         }
-        if (body.classList.contains(OPEN_CLASS) && !insideSidebar){
-          closeSidebar();
+        if (body.classList.contains(OPEN_CLASS) && !insideDrawer){
+          closeDrawer();
         }
       };
       doc.addEventListener("click", handler);
