@@ -435,7 +435,6 @@ st.markdown(
         if (!text) return;
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(text).catch(() => {});
-          return;
         }
         const ta = document.createElement("textarea");
         ta.value = text;
@@ -459,6 +458,19 @@ st.markdown(
           setTimeout(() => { btn.textContent = old; }, 1200);
         }catch(err){}
       });
+      document.addEventListener("touchstart", function(e){
+        const btn = e.target.closest(".jl-copy-btn");
+        if (!btn) return;
+        const b64 = btn.getAttribute("data-copy-b64");
+        if (!b64) return;
+        try{
+          const text = decodeURIComponent(escape(atob(b64)));
+          copyText(text);
+          const old = btn.textContent;
+          btn.textContent = "Copied";
+          setTimeout(() => { btn.textContent = old; }, 1200);
+        }catch(err){}
+      }, {passive: true});
     })();
     </script>
     """,
@@ -478,24 +490,29 @@ st.markdown(
       window.__jlSidebarToggleInit = true;
       const body = document.body;
       const OPEN_CLASS = "jl-sidebar-open";
-      document.addEventListener("click", function(e){
+      const openSidebar = () => body.classList.add(OPEN_CLASS);
+      const closeSidebar = () => body.classList.remove(OPEN_CLASS);
+      const handler = function(e){
         const toggle = e.target.closest("[data-jl-sidebar-toggle]");
         const overlay = e.target.closest("[data-jl-sidebar-overlay]");
         const sidebar = document.querySelector('section[data-testid="stSidebar"]');
         const insideSidebar = sidebar && sidebar.contains(e.target);
         if (toggle){
           e.preventDefault();
-          body.classList.add(OPEN_CLASS);
+          openSidebar();
           return;
         }
         if (overlay){
-          body.classList.remove(OPEN_CLASS);
+          e.preventDefault();
+          closeSidebar();
           return;
         }
         if (body.classList.contains(OPEN_CLASS) && !insideSidebar){
-          body.classList.remove(OPEN_CLASS);
+          closeSidebar();
         }
-      });
+      };
+      document.addEventListener("click", handler);
+      document.addEventListener("touchstart", handler, {passive: true});
     })();
     </script>
     """,
