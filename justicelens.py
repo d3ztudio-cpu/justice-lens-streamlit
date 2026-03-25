@@ -398,6 +398,9 @@ st.markdown(
         z-index: 10000;
     }
     @media (max-width: 700px){
+        :root{
+            --jl-drawer-width: min(320px, 88vw);
+        }
         .jl-mobile-toggle{ display: inline-flex; }
         .jl-drawer-backdrop{
             display: block;
@@ -411,7 +414,7 @@ st.markdown(
             top: 0;
             left: 0;
             height: 100vh;
-            width: min(320px, 88vw);
+            width: var(--jl-drawer-width);
             max-width: 88vw;
             background: var(--jl-card);
             box-shadow: var(--jl-shadow);
@@ -420,17 +423,27 @@ st.markdown(
             z-index: 10002;
             overflow-y: auto;
         }
+        body.jl-drawer-open{
+            --sidebar-width: var(--jl-drawer-width);
+        }
         body.jl-drawer-open .jl-drawer{ transform: translateX(0); }
         section[data-testid="stSidebar"]{ display: none !important; }
         .jl-drawer section[data-testid="stSidebar"]{
             display: block !important;
             position: static !important;
             width: 100% !important;
+            min-width: 100% !important;
+            max-width: 100% !important;
+            flex: 0 0 100% !important;
             height: auto !important;
             transform: none !important;
             box-shadow: none !important;
             border-right: none !important;
             background: var(--jl-card) !important;
+        }
+        .jl-drawer [data-testid="stSidebarContent"]{
+            width: 100% !important;
+            min-width: 100% !important;
         }
     }
     </style>
