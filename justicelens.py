@@ -364,6 +364,57 @@ st.markdown(
         text-decoration: none !important;
         font-size: 0.9em;
     }
+
+    .jl-mobile-toggle{
+        display: none;
+        position: fixed;
+        top: 0.9rem;
+        left: 0.9rem;
+        z-index: 1200;
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        border: 1px solid var(--jl-border);
+        background: var(--jl-card);
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: var(--jl-shadow-sm);
+    }
+    .jl-mobile-toggle span{
+        display: block;
+        width: 18px;
+        height: 2px;
+        background: var(--jl-text);
+        margin: 3px 0;
+        border-radius: 2px;
+    }
+    .jl-mobile-overlay{
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1100;
+    }
+    @media (max-width: 700px){
+        .jl-mobile-toggle{ display: inline-flex; }
+        .jl-mobile-overlay{ display: block; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+        body.jl-sidebar-open .jl-mobile-overlay{ opacity: 1; pointer-events: auto; }
+        section[data-testid="stSidebar"]{
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            height: 100vh !important;
+            width: min(280px, 80vw) !important;
+            transform: translateX(-105%);
+            transition: transform 0.22s ease;
+            z-index: 1190;
+            box-shadow: var(--jl-shadow);
+        }
+        body.jl-sidebar-open section[data-testid="stSidebar"]{
+            transform: translateX(0);
+        }
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -374,6 +425,21 @@ st.markdown(
     (function() {
       if (window.__jlCopyInit) return;
       window.__jlCopyInit = true;
+      const copyText = (text) => {
+        if (!text) return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).catch(() => {});
+          return;
+        }
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); } catch (e) {}
+        document.body.removeChild(ta);
+      };
       document.addEventListener("click", function(e){
         const btn = e.target.closest(".jl-copy-btn");
         if (!btn) return;
@@ -381,11 +447,48 @@ st.markdown(
         if (!b64) return;
         try{
           const text = decodeURIComponent(escape(atob(b64)));
-          navigator.clipboard.writeText(text);
+          copyText(text);
           const old = btn.textContent;
           btn.textContent = "Copied";
           setTimeout(() => { btn.textContent = old; }, 1200);
         }catch(err){}
+      });
+    })();
+    </script>
+    """,
+    unsafe_allow_html=True,
+)
+st.markdown(
+    """
+    <div class="jl-mobile-toggle" data-jl-sidebar-toggle aria-label="Open menu">
+      <div>
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+    <div class="jl-mobile-overlay" data-jl-sidebar-overlay></div>
+    <script>
+    (function(){
+      if (window.__jlSidebarToggleInit) return;
+      window.__jlSidebarToggleInit = true;
+      const body = document.body;
+      const OPEN_CLASS = "jl-sidebar-open";
+      document.addEventListener("click", function(e){
+        const toggle = e.target.closest("[data-jl-sidebar-toggle]");
+        const overlay = e.target.closest("[data-jl-sidebar-overlay]");
+        const sidebar = document.querySelector('section[data-testid="stSidebar"]');
+        const insideSidebar = sidebar && sidebar.contains(e.target);
+        if (toggle){
+          e.preventDefault();
+          body.classList.add(OPEN_CLASS);
+          return;
+        }
+        if (overlay){
+          body.classList.remove(OPEN_CLASS);
+          return;
+        }
+        if (body.classList.contains(OPEN_CLASS) && !insideSidebar){
+          body.classList.remove(OPEN_CLASS);
+        }
       });
     })();
     </script>
