@@ -312,6 +312,21 @@ st.markdown(
     @media (max-width: 700px){
         .jl-hero .title{ font-size: 1.65rem; }
         .main .block-container{ padding-left: 0.9rem !important; padding-right: 0.9rem !important; }
+        [data-testid="stChatMessage"]{
+            padding: 1rem 1.1rem !important;
+            border-radius: 14px !important;
+        }
+        [data-testid="stChatMessage"] p,
+        [data-testid="stChatMessage"] li,
+        [data-testid="stChatMessage"] span,
+        [data-testid="stChatMessage"] div[data-testid="stMarkdownContainer"] {
+            font-size: 0.98rem !important;
+            line-height: 1.55 !important;
+        }
+        [data-testid="stChatInput"] textarea{
+            font-size: 0.98rem !important;
+            padding: 0.7rem 0.85rem !important;
+        }
     }
     </style>
     """,
@@ -904,10 +919,6 @@ def show_sidebar():
 
             st.session_state.view = st.radio("NAVIGATION", [x.strip() for x in opts])
 
-            with st.expander("Settings", expanded=False):
-                st.caption("Preferences")
-                st.write("Account and UI preferences will appear here.")
-
             if st.session_state.view == "AI Assistant":
                 if st.button("Clear chat", use_container_width=True):
                     active = st.session_state.active_project
@@ -1301,7 +1312,7 @@ else:
             _handle_user_message(pending)
             st.rerun()
 
-        for chat in history:
+        for i, chat in enumerate(history):
             role = "user" if chat.get("role") == "user" else "assistant"
             avatar = "🧑‍💼" if role == "user" else "⚖️"
             with st.chat_message(role, avatar=avatar):
@@ -1310,7 +1321,7 @@ else:
                 if role == "assistant" and content:
                     encoded_content = urllib.parse.quote(content)
                     translate_url = f"https://translate.google.com/?sl=auto&text={encoded_content}"
-                    st.markdown(f'<a href="{translate_url}" target="_blank" style="text-decoration: none; color: #8B949E; font-size: 0.9em;">Translate</a>', unsafe_allow_html=True)
+                    st.link_button("Translate", translate_url, key=f"translate_{i}")
 
         user_msg = st.chat_input("Describe a cyber incident, or ask e.g. “Explain Section 66F”")
         if user_msg:
