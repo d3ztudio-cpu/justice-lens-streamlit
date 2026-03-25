@@ -304,6 +304,11 @@ st.markdown(
         color: #F85149 !important;
     }
 
+    .jl-mobile-only{ display: none; }
+    @media (max-width: 700px){
+        .jl-mobile-only{ display: block; }
+    }
+
     @media (max-width: 700px){
         .jl-hero .title{ font-size: 1.65rem; }
         .main .block-container{ padding-left: 0.9rem !important; padding-right: 0.9rem !important; }
@@ -377,6 +382,8 @@ if "projects" not in st.session_state or not isinstance(st.session_state.get("pr
     st.session_state.projects = {"Default": list(st.session_state.chat_history)}
 if "active_project" not in st.session_state:
     st.session_state.active_project = "Default"
+if "mobile_login_open" not in st.session_state:
+    st.session_state.mobile_login_open = False
 
 if "projects" not in st.session_state:
     st.session_state.projects = {"Default": st.session_state.get("chat_history", [])}
@@ -973,10 +980,45 @@ if not st.session_state.user:
                     unsafe_allow_html=True,
                 )
 
+            st.markdown('<div class="jl-mobile-only">', unsafe_allow_html=True)
             btn_l, btn_m, btn_r = st.columns([3, 2, 3])
             with btn_m:
-                if st.button("LOGIN", key="jl_login_btn", use_container_width=True):
+                if st.button("LOGIN", key="jl_login_btn_mobile", use_container_width=True):
+                    st.session_state.mobile_login_open = True
                     st.rerun()
+            st.markdown("</div>", unsafe_allow_html=True)
+
+            if st.session_state.mobile_login_open:
+                st.markdown('<div class="jl-mobile-only">', unsafe_allow_html=True)
+                m_tab = st.tabs(["Login", "Create Account"])
+                with m_tab[0]:
+                    m_email = st.text_input("Email", key="m_login_email")
+                    m_pass = st.text_input("Password", type="password", key="m_login_pass")
+                    if st.button(" Authenticate", key="m_login_btn"):
+                        valid, u_obj = authenticate(m_email, m_pass)
+                        if valid:
+                            if check_ban(u_obj.uid):
+                                st.error("Access Forbidden.")
+                            else:
+                                st.session_state.user = {"name": u_obj.display_name or m_email.split('@')[0], "email": m_email, "uid": u_obj.uid}
+                                st.session_state.view = "AI Assistant"
+                                st.session_state.mobile_login_open = False
+                                sync_user(st.session_state.user)
+                                st.rerun()
+                        else:
+                            st.error("Invalid Credentials.")
+
+                with m_tab[1]:
+                    m_name = st.text_input("Full Name", key="m_full_name")
+                    m_email_new = st.text_input("Email", key="m_s_email")
+                    m_pass_new = st.text_input("Create Password", type="password", key="m_s_pass")
+                    if st.button("REGISTER", key="m_register_btn"):
+                        try:
+                            auth.create_user(email=m_email_new, password=m_pass_new, display_name=m_name)
+                            st.success("Account Ready! Use Login.")
+                        except Exception as ex:
+                            st.error(str(ex))
+                st.markdown("</div>", unsafe_allow_html=True)
 
             st.write("")
             f1, f2, f3 = st.columns(3)
@@ -1124,43 +1166,8 @@ else:
 
         # st.markdown("<div style='height: 1.5rem;'></div>", unsafe_allow_html=True)
 
-        main_col, right_col = st.columns([4, 1], gap="large")
-
-        # Right panel (Projects)
-        with right_col:
-            with st.container(border=True):
-                st.markdown("### Chats")
-                new_name = st.text_input("New Chats", placeholder="e.g. Incident Notes", key="jl_new_project")
-                if st.button("Create", use_container_width=True, key="jl_create_project"):
-                    name = (new_name or "").strip()
-                    if name and name not in st.session_state.projects:
-                        st.session_state.projects[name] = []
-                        st.session_state.active_project = name
-                        st.rerun()
-
-                project_names = list(st.session_state.projects.keys())
-                if project_names:
-                    try:
-                        current_index = project_names.index(st.session_state.active_project)
-                    except ValueError:
-                        current_index = 0
-                    chosen = st.radio(
-                        "Select",
-                        project_names,
-                        index=current_index,
-                        label_visibility="collapsed",
-                        key="jl_project_radio",
-                    )
-                    if chosen != st.session_state.active_project:
-                        st.session_state.active_project = chosen
-                        st.rerun()
-
-                st.caption("Tip: Use Chats to separate different incident chats.")
-
         # Main chat area
-        main_col, right_col = st.columns([2, 1], gap="large")
-
-        with right_col:
+        with st.container():
             # Welcome tiles when empty
             st.markdown("""
                 <div class="jl-card" style="text-align:center; margin-bottom: 2rem;">
