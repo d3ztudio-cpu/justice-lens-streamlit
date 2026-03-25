@@ -14,6 +14,7 @@ import urllib.parse
 import base64
 from pinecone import Pinecone
 from langchain_huggingface import HuggingFaceEmbeddings
+import streamlit.components.v1 as components
 
 # ==========================================
 # ⚙️ CONFIGURATION & API KEYS
