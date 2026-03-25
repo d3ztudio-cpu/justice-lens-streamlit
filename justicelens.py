@@ -827,8 +827,8 @@ def show_sidebar():
                     st.rerun()
 
                 st.markdown("### Chats")
-                new_name = st.text_input("New Chats", placeholder="e.g. Incident Notes", key="jl_new_project")
-                if st.button("Create", use_container_width=True, key="jl_create_project"):
+                new_name = st.text_input("New Chats", placeholder="e.g. Incident Notes", key="jl_new_project_sb")
+                if st.button("Create", use_container_width=True, key="jl_create_project_sb"):
                     name = (new_name or "").strip()
                     if name and name not in st.session_state.projects:
                         st.session_state.projects[name] = []
@@ -846,7 +846,7 @@ def show_sidebar():
                         project_names,
                         index=current_index,
                         label_visibility="collapsed",
-                        key="jl_project_radio",
+                        key="jl_project_radio_sb",
                     )
                     if chosen != st.session_state.active_project:
                         st.session_state.active_project = chosen
