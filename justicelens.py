@@ -373,8 +373,11 @@ if "user" not in st.session_state: st.session_state.user = None
 if "chat_history" not in st.session_state: st.session_state.chat_history = []
 if "admin_mode" not in st.session_state: st.session_state.admin_mode = False
 if "view" not in st.session_state: st.session_state.view = "AI Assistant"
-if "projects" not in st.session_state: st.session_state.projects = {"Default": []}
-if "active_project" not in st.session_state: st.session_state.active_project = "Default"
+
+if "projects" not in st.session_state:
+    st.session_state.projects = {"Default": st.session_state.get("chat_history", [])}
+if "active_project" not in st.session_state:
+    st.session_state.active_project = "Default"
 
 # --- AUTH SYSTEM ---
 def authenticate(email, password):
@@ -733,7 +736,7 @@ def show_sidebar():
             st.session_state.active_project = "Default"
         if st.session_state.active_project not in st.session_state.projects:
             st.session_state.projects[st.session_state.active_project] = []
-
+        
         if not st.session_state.user:
             if st.session_state.show_login:
                 auth_tab = st.tabs(["Login", "Create Account"])
@@ -1009,16 +1012,6 @@ if not st.session_state.user:
 else:
     page = st.session_state.view
     if page == "AI Assistant":
-        # --- PROJECTS (lightweight, UI-only) ---
-        if "projects" not in st.session_state:
-            # Migrate existing chat_history into a default project
-            existing = list(st.session_state.chat_history) if st.session_state.get("chat_history") else []
-            st.session_state.projects = {"Default": existing}
-        if "active_project" not in st.session_state:
-            st.session_state.active_project = "Default"
-        if st.session_state.active_project not in st.session_state.projects:
-            st.session_state.projects[st.session_state.active_project] = []
-
         active = st.session_state.active_project
         history = st.session_state.projects[active]
         # Keep backward compatibility for other parts of the app
