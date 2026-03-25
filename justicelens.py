@@ -398,7 +398,7 @@ st.markdown(
         z-index: 1100;
     }
     @media (max-width: 700px){
-        .jl-mobile-toggle{ display: none; }
+        .jl-mobile-toggle{ display: inline-flex; }
         .jl-mobile-overlay{ display: block; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
         body.jl-sidebar-open .jl-mobile-overlay{ opacity: 1; pointer-events: auto; }
         section[data-testid="stSidebar"]{
@@ -483,6 +483,11 @@ st.markdown(
 )
 st.markdown(
     """
+    <div class="jl-mobile-toggle" data-jl-sidebar-toggle aria-label="Open menu">
+      <div>
+        <span></span><span></span><span></span>
+      </div>
+    </div>
     <div class="jl-mobile-overlay" data-jl-sidebar-overlay></div>
     """,
     unsafe_allow_html=True,
@@ -498,14 +503,16 @@ components.html(
       const OPEN_CLASS = "jl-sidebar-open";
       const openSidebar = () => body.classList.add(OPEN_CLASS);
       const closeSidebar = () => body.classList.remove(OPEN_CLASS);
-      let touchStartX = null;
-      let touchStartY = null;
-      let touchStartTime = 0;
-      const isMobile = () => window.matchMedia && window.matchMedia("(max-width: 991px)").matches;
       const handler = function(e){
+        const toggle = e.target.closest("[data-jl-sidebar-toggle]");
         const overlay = e.target.closest("[data-jl-sidebar-overlay]");
         const sidebar = doc.querySelector('section[data-testid="stSidebar"]');
         const insideSidebar = sidebar && sidebar.contains(e.target);
+        if (toggle){
+          e.preventDefault();
+          openSidebar();
+          return;
+        }
         if (overlay){
           e.preventDefault();
           closeSidebar();
@@ -517,38 +524,6 @@ components.html(
       };
       doc.addEventListener("click", handler);
       doc.addEventListener("touchstart", handler, {passive: true});
-
-      doc.addEventListener("touchstart", function(e){
-        if (!isMobile()) return;
-        const t = e.touches && e.touches[0];
-        if (!t) return;
-        touchStartX = t.clientX;
-        touchStartY = t.clientY;
-        touchStartTime = Date.now();
-      }, {passive: true});
-
-      doc.addEventListener("touchend", function(e){
-        if (!isMobile()) return;
-        const t = e.changedTouches && e.changedTouches[0];
-        if (!t || touchStartX === null) return;
-        const startX = touchStartX;
-        const dx = t.clientX - startX;
-        const dy = t.clientY - touchStartY;
-        const dt = Date.now() - touchStartTime;
-        const sidebar = doc.querySelector('section[data-testid="stSidebar"]');
-        const startedInSidebar = sidebar && startX !== null && sidebar.contains(e.target);
-        touchStartX = null;
-        touchStartY = null;
-        if (dt > 600) return;
-        if (Math.abs(dy) > 80) return;
-        if (dx > 100 && startX !== null && startX < 40) {
-          openSidebar();
-          return;
-        }
-        if (dx < -100 && body.classList.contains(OPEN_CLASS) && startedInSidebar) {
-          closeSidebar();
-        }
-      }, {passive: true});
     })();
     </script>
     """,
