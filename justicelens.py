@@ -769,7 +769,7 @@ def show_sidebar():
 
             st.markdown("---")
             st.caption("Resources")
-        public_pages = ["AI Assistant", "About", "Terms", "Cyber Rules 2026"]
+            public_pages = ["AI Assistant", "About", "Terms", "Cyber Rules 2026"]
             try:
                 default_index = public_pages.index(st.session_state.view)
             except ValueError:
