@@ -158,7 +158,7 @@ st.markdown(
         width: min(320px, 85vw) !important;
         transform: translateX(-105%);
         transition: transform 0.22s ease;
-        z-index: 1200;
+        z-index: 9999;
         box-shadow: var(--jl-shadow);
     }
     body.jl-sidebar-open section[data-testid="stSidebar"]{
@@ -167,11 +167,11 @@ st.markdown(
     .jl-sidebar-overlay{
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, 0.45);
+        background: rgba(0, 0, 0, 0.55);
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.2s ease;
-        z-index: 1100;
+        z-index: 9998;
     }
     body.jl-sidebar-open .jl-sidebar-overlay{
         opacity: 1;
@@ -186,7 +186,7 @@ st.markdown(
         height: 64px;
         background: #0B0F14;
         border-bottom: 1px solid var(--jl-border);
-        z-index: 1250;
+        z-index: 9500;
         display: flex;
         align-items: center;
     }
@@ -245,8 +245,15 @@ st.markdown(
     }
 
     @media (max-width: 991px){
+        .jl-topbar{ display: none; }
         .jl-nav{ display: none; }
-        .jl-hamburger{ display: flex; }
+        .jl-hamburger{
+            display: flex;
+            position: fixed;
+            top: 0.9rem;
+            left: 0.9rem;
+            z-index: 9501;
+        }
     }
     @media (min-width: 992px){
         .jl-sidebar-overlay{ display: none; }
@@ -423,11 +430,11 @@ st.markdown(
         <div class="jl-topbar-inner">
             <div class="jl-brand">Justice Lens</div>
             <nav class="jl-nav">
-                <a class="active" href="javascript:void(0)">HOME</a>
-                <a href="javascript:void(0)">ABOUT</a>
-                <a href="javascript:void(0)">SERVICES</a>
-                <a href="javascript:void(0)">CONTACT</a>
-                <a href="javascript:void(0)">PORTFOLIO</a>
+                <a class="active" href="javascript:void(0)">AI Assistant</a>
+                <a href="javascript:void(0)">Vision & Mission</a>
+                <a href="javascript:void(0)">About</a>
+                <a href="javascript:void(0)">Terms</a>
+                <a href="javascript:void(0)">Cyber Rules 2026</a>
             </nav>
             <button class="jl-hamburger" data-jl-toggle-sidebar aria-label="Open menu">
                 <span></span>
