@@ -47,7 +47,7 @@ if not os.environ.get("JUSTICE_LENS_SKIP_PAGE_CONFIG"):
         page_title="Justice Lens | Expert Cyber Legal AI",
         page_icon="⚖️",
         layout="wide",
-        initial_sidebar_state="expanded",
+        initial_sidebar_state="collapsed",
     )
 
 # --- Justice Lens: Deep Dive Theme ---
@@ -91,6 +91,15 @@ st.markdown(
     section[data-testid="stSidebar"]{
         background: var(--jl-card) !important;
         border-right: 1px solid var(--jl-border) !important;
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        height: 100vh !important;
+        width: 320px !important;
+        transform: translateX(-105%);
+        transition: transform 0.22s ease;
+        z-index: 1200;
+        box-shadow: var(--jl-shadow);
     }
     [data-testid="stSidebarContent"]{
         padding-top: 0.5rem !important;
@@ -131,6 +140,49 @@ st.markdown(
     [data-testid="stSidebarCollapseButton"],
     [data-testid="stSidebarCollapsedControl"] {
         display: none !important;
+    }
+
+    body.jl-sidebar-open section[data-testid="stSidebar"]{
+        transform: translateX(0);
+    }
+
+    .jl-sidebar-toggle{
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: 1300;
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        border: 1px solid var(--jl-border);
+        background: var(--jl-card);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: var(--jl-shadow-sm);
+    }
+    .jl-sidebar-toggle span{
+        display: block;
+        width: 20px;
+        height: 2px;
+        background: var(--jl-text);
+        margin: 3px 0;
+        border-radius: 2px;
+    }
+
+    .jl-sidebar-overlay{
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+        z-index: 1100;
+    }
+    body.jl-sidebar-open .jl-sidebar-overlay{
+        opacity: 1;
+        pointer-events: auto;
     }
 
     /* Buttons */
@@ -291,6 +343,66 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
+if "jl_open_sidebar" not in st.session_state:
+    st.session_state.jl_open_sidebar = False
+
+_autopen = "true" if st.session_state.jl_open_sidebar else "false"
+st.markdown(
+    f"""
+    <div class="jl-sidebar-toggle" data-jl-toggle-sidebar aria-label="Open menu">
+        <div>
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+    <div class="jl-sidebar-overlay" data-jl-close-sidebar></div>
+    <div data-jl-autopen="{_autopen}" style="display:none;"></div>
+    <script>
+    (function() {{
+        if (window.__jlSidebarInit) return;
+        window.__jlSidebarInit = true;
+        const body = document.body;
+        const OPEN_CLASS = "jl-sidebar-open";
+        const openSidebar = () => body.classList.add(OPEN_CLASS);
+        const closeSidebar = () => body.classList.remove(OPEN_CLASS);
+        const toggleSidebar = () => body.classList.toggle(OPEN_CLASS);
+
+        document.addEventListener("click", (e) => {{
+            const toggleBtn = e.target.closest("[data-jl-toggle-sidebar]");
+            const openBtn = e.target.closest("[data-jl-open-sidebar]");
+            const closeBtn = e.target.closest("[data-jl-close-sidebar]");
+            if (toggleBtn) {{
+                e.preventDefault();
+                toggleSidebar();
+                return;
+            }}
+            if (openBtn) {{
+                e.preventDefault();
+                openSidebar();
+                return;
+            }}
+            if (closeBtn) {{
+                e.preventDefault();
+                closeSidebar();
+            }}
+        }});
+
+        const maybeAutoOpen = () => {{
+            const autoEl = document.querySelector('[data-jl-autopen="true"]');
+            if (autoEl) {{
+                openSidebar();
+            }}
+        }};
+        setTimeout(maybeAutoOpen, 0);
+    }})();
+    </script>
+    """,
+    unsafe_allow_html=True,
+)
+if st.session_state.jl_open_sidebar:
+    st.session_state.jl_open_sidebar = False
 
 # --- BOOTSTRAP / INITIALIZATION ---
 @st.cache_resource(show_spinner=False)
@@ -878,6 +990,12 @@ if not st.session_state.user:
                     """,
                     unsafe_allow_html=True,
                 )
+
+            btn_l, btn_m, btn_r = st.columns([3, 2, 3])
+            with btn_m:
+                if st.button("LOGIN", key="jl_login_btn", use_container_width=True):
+                    st.session_state.jl_open_sidebar = True
+                    st.rerun()
 
             st.write("")
             f1, f2, f3 = st.columns(3)
