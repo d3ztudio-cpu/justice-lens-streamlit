@@ -729,7 +729,7 @@ def show_sidebar():
 
         if "show_login" not in st.session_state:
             st.session_state.show_login = True
-        if "projects" not in st.session_state:
+        if "projects" not in st.session_state or not isinstance(st.session_state.get("projects"), dict):
             existing = list(st.session_state.get("chat_history") or [])
             st.session_state.projects = {"Default": existing}
         if "active_project" not in st.session_state:
@@ -831,7 +831,7 @@ def show_sidebar():
                         st.session_state.active_project = name
                         st.rerun()
 
-                project_names = list(st.session_state.projects.keys())
+                project_names = list((st.session_state.get("projects") or {}).keys())
                 if project_names:
                     try:
                         current_index = project_names.index(st.session_state.active_project)
