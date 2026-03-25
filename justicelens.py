@@ -433,6 +433,22 @@ if "jl_open_sidebar" not in st.session_state:
 if "view" not in st.session_state:
     st.session_state.view = "AI Assistant"
 
+if "jl_nav_view" not in st.session_state:
+    st.session_state.jl_nav_view = st.session_state.view
+
+_nav_options = ["AI Assistant", "Vision & Mission", "About", "Terms", "Cyber Rules 2026"]
+_nav_index = _nav_options.index(st.session_state.view) if st.session_state.view in _nav_options else 0
+st.radio(
+    "JL_NAV_VIEW",
+    _nav_options,
+    index=_nav_index,
+    key="jl_nav_view",
+    label_visibility="collapsed",
+)
+if st.session_state.jl_nav_view != st.session_state.view:
+    st.session_state.view = st.session_state.jl_nav_view
+    st.rerun()
+
 _valid_views = ["AI Assistant", "Vision & Mission", "About", "Terms", "Cyber Rules 2026"]
 _requested_view = st.query_params.get("view")
 if _requested_view in _valid_views:
@@ -449,7 +465,7 @@ _nav_links = []
 for label, href in _nav_items:
     active_class = "active" if st.session_state.get("view", "AI Assistant") == label else ""
     safe_label = label.replace("&", "&amp;")
-    _nav_links.append(f'<a class="{active_class}" href="{href}">{safe_label}</a>')
+    _nav_links.append(f'<a class="{active_class}" href="javascript:void(0)" data-jl-nav="{safe_label}">{safe_label}</a>')
 
 st.markdown(
     f"""
@@ -502,16 +518,42 @@ components.html(
             const mo = new MutationObserver(() => stripDefaultToggle());
             mo.observe(document.documentElement, {{ childList: true, subtree: true }});
         }};
+        const hideNavRadio = () => {{
+            const groups = Array.from(document.querySelectorAll('[role="radiogroup"]'));
+            const required = ["AI Assistant", "Vision & Mission", "About", "Terms", "Cyber Rules 2026"];
+            groups.forEach((group) => {{
+                const text = (group.textContent || "");
+                const matches = required.every((label) => text.includes(label));
+                if (matches) {{
+                    const root = group.closest('div[data-testid="stRadio"]');
+                    if (root) root.style.display = "none";
+                }}
+            }});
+        }};
+        const selectNav = (label) => {{
+            const radios = Array.from(document.querySelectorAll('[role="radio"]'));
+            const target = radios.find((el) => (el.textContent || "").trim() === label);
+            if (target) {{
+                target.click();
+            }}
+        }};
 
         document.addEventListener("click", (e) => {{
             const toggleBtn = e.target.closest("[data-jl-toggle-sidebar]");
             const openBtn = e.target.closest("[data-jl-open-sidebar]");
             const closeBtn = e.target.closest("[data-jl-close-sidebar]");
+            const navLink = e.target.closest("[data-jl-nav]");
             const sidebarEl = document.querySelector('section[data-testid="stSidebar"]');
             const clickedInsideSidebar = sidebarEl && sidebarEl.contains(e.target);
             if (toggleBtn) {{
                 e.preventDefault();
                 toggleSidebar();
+                return;
+            }}
+            if (navLink) {{
+                e.preventDefault();
+                const label = (navLink.textContent || "").trim();
+                selectNav(label);
                 return;
             }}
             if (body.classList.contains(OPEN_CLASS) && !clickedInsideSidebar && !openBtn && !closeBtn) {{
@@ -539,6 +581,7 @@ components.html(
             stripDefaultToggle();
             observeAndStrip();
             maybeAutoOpen();
+            hideNavRadio();
         }}, 0);
         setTimeout(stripDefaultToggle, 500);
     }})();
