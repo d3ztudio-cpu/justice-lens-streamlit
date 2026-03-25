@@ -13,6 +13,7 @@ import re
 import urllib.parse
 from pinecone import Pinecone
 from langchain_huggingface import HuggingFaceEmbeddings
+import streamlit.components.v1 as components
 
 # ==========================================
 # ⚙️ CONFIGURATION & API KEYS
@@ -91,15 +92,6 @@ st.markdown(
     section[data-testid="stSidebar"]{
         background: var(--jl-card) !important;
         border-right: 1px solid var(--jl-border) !important;
-        position: fixed !important;
-        top: 0;
-        left: 0;
-        height: 100vh !important;
-        width: 320px !important;
-        transform: translateX(-105%);
-        transition: transform 0.22s ease;
-        z-index: 1200;
-        box-shadow: var(--jl-shadow);
     }
     [data-testid="stSidebarContent"]{
         padding-top: 0.5rem !important;
@@ -142,47 +134,65 @@ st.markdown(
         display: none !important;
     }
 
-    body.jl-sidebar-open section[data-testid="stSidebar"]{
-        transform: translateX(0);
-    }
-
-    .jl-sidebar-toggle{
-        position: fixed;
-        top: 1rem;
-        left: 1rem;
-        z-index: 1300;
-        width: 44px;
-        height: 44px;
-        border-radius: 10px;
-        border: 1px solid var(--jl-border);
-        background: var(--jl-card);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        box-shadow: var(--jl-shadow-sm);
-    }
-    .jl-sidebar-toggle span{
-        display: block;
-        width: 20px;
-        height: 2px;
-        background: var(--jl-text);
-        margin: 3px 0;
-        border-radius: 2px;
-    }
-
+    .jl-sidebar-toggle,
     .jl-sidebar-overlay{
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.45);
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.2s ease;
-        z-index: 1100;
+        display: none;
     }
-    body.jl-sidebar-open .jl-sidebar-overlay{
-        opacity: 1;
-        pointer-events: auto;
+
+    @media (max-width: 900px){
+        section[data-testid="stSidebar"]{
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            height: 100vh !important;
+            width: min(320px, 85vw) !important;
+            transform: translateX(-105%);
+            transition: transform 0.22s ease;
+            z-index: 1200;
+            box-shadow: var(--jl-shadow);
+        }
+        body.jl-sidebar-open section[data-testid="stSidebar"]{
+            transform: translateX(0);
+        }
+        .jl-sidebar-toggle{
+            display: flex;
+            position: fixed;
+            top: 0.9rem;
+            left: 0.9rem;
+            z-index: 1300;
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            border: 1px solid var(--jl-border);
+            background: var(--jl-card);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--jl-shadow-sm);
+        }
+        .jl-sidebar-toggle span{
+            display: block;
+            width: 20px;
+            height: 2px;
+            background: var(--jl-text);
+            margin: 3px 0;
+            border-radius: 2px;
+        }
+        .jl-sidebar-overlay{
+            display: block;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 1100;
+        }
+        body.jl-sidebar-open .jl-sidebar-overlay{
+            opacity: 1;
+            pointer-events: auto;
+        }
     }
 
     /* Buttons */
@@ -348,7 +358,7 @@ if "jl_open_sidebar" not in st.session_state:
     st.session_state.jl_open_sidebar = False
 
 _autopen = "true" if st.session_state.jl_open_sidebar else "false"
-st.markdown(
+components.html(
     f"""
     <div class="jl-sidebar-toggle" data-jl-toggle-sidebar aria-label="Open menu">
         <div>
@@ -399,7 +409,8 @@ st.markdown(
     }})();
     </script>
     """,
-    unsafe_allow_html=True,
+    height=0,
+    width=0,
 )
 if st.session_state.jl_open_sidebar:
     st.session_state.jl_open_sidebar = False
