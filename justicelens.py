@@ -159,6 +159,9 @@ st.markdown(
         left: 0;
         height: 100vh !important;
         width: min(320px, 85vw) !important;
+        min-width: min(320px, 85vw) !important;
+        display: block !important;
+        visibility: visible !important;
         transform: translateX(-105%);
         transition: transform 0.22s ease;
         z-index: 9999;
@@ -479,6 +482,7 @@ components.html(
             stripDefaultToggle();
             maybeAutoOpen();
         }}, 0);
+        setTimeout(maybeAutoOpen, 200);
         setTimeout(stripDefaultToggle, 500);
     }})();
     </script>
