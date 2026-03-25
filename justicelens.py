@@ -726,6 +726,13 @@ def show_sidebar():
 
         if "show_login" not in st.session_state:
             st.session_state.show_login = True
+        if "projects" not in st.session_state:
+            existing = list(st.session_state.get("chat_history") or [])
+            st.session_state.projects = {"Default": existing}
+        if "active_project" not in st.session_state:
+            st.session_state.active_project = "Default"
+        if st.session_state.active_project not in st.session_state.projects:
+            st.session_state.projects[st.session_state.active_project] = []
 
         if not st.session_state.user:
             if st.session_state.show_login:
