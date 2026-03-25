@@ -430,6 +430,9 @@ st.markdown(
 if "jl_open_sidebar" not in st.session_state:
     st.session_state.jl_open_sidebar = False
 
+if "view" not in st.session_state:
+    st.session_state.view = "AI Assistant"
+
 _valid_views = ["AI Assistant", "Vision & Mission", "About", "Terms", "Cyber Rules 2026"]
 _requested_view = st.query_params.get("view")
 if _requested_view in _valid_views:
@@ -444,7 +447,7 @@ _nav_items = [
 ]
 _nav_links = []
 for label, href in _nav_items:
-    active_class = "active" if st.session_state.view == label else ""
+    active_class = "active" if st.session_state.get("view", "AI Assistant") == label else ""
     safe_label = label.replace("&", "&amp;")
     _nav_links.append(f'<a class="{active_class}" href="{href}">{safe_label}</a>')
 
