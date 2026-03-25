@@ -130,7 +130,13 @@ st.markdown(
     /* Permanently fix sidebar by hiding the collapse controls */
     [data-testid="collapsedControl"],
     [data-testid="stSidebarCollapseButton"],
-    [data-testid="stSidebarCollapsedControl"] {
+    [data-testid="stSidebarCollapsedControl"],
+    button[aria-label="Open sidebar"],
+    button[aria-label="Close sidebar"],
+    button[title="Open sidebar"],
+    button[title="Close sidebar"],
+    button[title="Show sidebar"],
+    button[title="Hide sidebar"] {
         display: none !important;
     }
 
@@ -378,6 +384,20 @@ components.html(
         const openSidebar = () => body.classList.add(OPEN_CLASS);
         const closeSidebar = () => body.classList.remove(OPEN_CLASS);
         const toggleSidebar = () => body.classList.toggle(OPEN_CLASS);
+        const stripDefaultToggle = () => {{
+            const candidates = Array.from(document.querySelectorAll("button, span, div"));
+            candidates.forEach((el) => {{
+                const txt = (el.textContent || "").trim();
+                if (txt === "double_arrow_right" || txt === "double_arrow_left") {{
+                    const btn = el.closest("button");
+                    if (btn) {{
+                        btn.remove();
+                    }} else {{
+                        el.remove();
+                    }}
+                }}
+            }});
+        }};
 
         document.addEventListener("click", (e) => {{
             const toggleBtn = e.target.closest("[data-jl-toggle-sidebar]");
@@ -405,7 +425,11 @@ components.html(
                 openSidebar();
             }}
         }};
-        setTimeout(maybeAutoOpen, 0);
+        setTimeout(() => {{
+            stripDefaultToggle();
+            maybeAutoOpen();
+        }}, 0);
+        setTimeout(stripDefaultToggle, 500);
     }})();
     </script>
     """,
