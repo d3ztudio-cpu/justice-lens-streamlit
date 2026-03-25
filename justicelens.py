@@ -489,7 +489,8 @@ components.html(
     (function(){
       if (window.__jlSidebarToggleInit) return;
       window.__jlSidebarToggleInit = true;
-      const body = document.body;
+      const doc = window.parent && window.parent.document ? window.parent.document : document;
+      const body = doc.body;
       const OPEN_CLASS = "jl-sidebar-open";
       const openSidebar = () => body.classList.add(OPEN_CLASS);
       const closeSidebar = () => body.classList.remove(OPEN_CLASS);
@@ -498,7 +499,7 @@ components.html(
       let touchStartTime = 0;
       const handler = function(e){
         const overlay = e.target.closest("[data-jl-sidebar-overlay]");
-        const sidebar = document.querySelector('section[data-testid="stSidebar"]');
+        const sidebar = doc.querySelector('section[data-testid="stSidebar"]');
         const insideSidebar = sidebar && sidebar.contains(e.target);
         if (overlay){
           e.preventDefault();
@@ -509,10 +510,10 @@ components.html(
           closeSidebar();
         }
       };
-      document.addEventListener("click", handler);
-      document.addEventListener("touchstart", handler, {passive: true});
+      doc.addEventListener("click", handler);
+      doc.addEventListener("touchstart", handler, {passive: true});
 
-      document.addEventListener("touchstart", function(e){
+      doc.addEventListener("touchstart", function(e){
         const t = e.touches && e.touches[0];
         if (!t) return;
         touchStartX = t.clientX;
@@ -520,7 +521,7 @@ components.html(
         touchStartTime = Date.now();
       }, {passive: true});
 
-      document.addEventListener("touchend", function(e){
+      doc.addEventListener("touchend", function(e){
         const t = e.changedTouches && e.changedTouches[0];
         if (!t || touchStartX === null) return;
         const dx = t.clientX - touchStartX;
