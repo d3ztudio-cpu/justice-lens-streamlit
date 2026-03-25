@@ -501,6 +501,7 @@ components.html(
       let touchStartX = null;
       let touchStartY = null;
       let touchStartTime = 0;
+      const isMobile = () => window.matchMedia && window.matchMedia("(max-width: 991px)").matches;
       const handler = function(e){
         const overlay = e.target.closest("[data-jl-sidebar-overlay]");
         const sidebar = doc.querySelector('section[data-testid="stSidebar"]');
@@ -518,6 +519,7 @@ components.html(
       doc.addEventListener("touchstart", handler, {passive: true});
 
       doc.addEventListener("touchstart", function(e){
+        if (!isMobile()) return;
         const t = e.touches && e.touches[0];
         if (!t) return;
         touchStartX = t.clientX;
@@ -526,20 +528,24 @@ components.html(
       }, {passive: true});
 
       doc.addEventListener("touchend", function(e){
+        if (!isMobile()) return;
         const t = e.changedTouches && e.changedTouches[0];
         if (!t || touchStartX === null) return;
-        const dx = t.clientX - touchStartX;
+        const startX = touchStartX;
+        const dx = t.clientX - startX;
         const dy = t.clientY - touchStartY;
         const dt = Date.now() - touchStartTime;
+        const sidebar = doc.querySelector('section[data-testid="stSidebar"]');
+        const startedInSidebar = sidebar && startX !== null && sidebar.contains(e.target);
         touchStartX = null;
         touchStartY = null;
         if (dt > 600) return;
         if (Math.abs(dy) > 80) return;
-        if (dx > 70 && t.clientX < 260) {
+        if (dx > 100 && startX !== null && startX < 40) {
           openSidebar();
           return;
         }
-        if (dx < -70 && body.classList.contains(OPEN_CLASS)) {
+        if (dx < -100 && body.classList.contains(OPEN_CLASS) && startedInSidebar) {
           closeSidebar();
         }
       }, {passive: true});
