@@ -406,13 +406,18 @@ st.markdown(
             left: 0;
             height: 100vh !important;
             width: min(280px, 80vw) !important;
-            transform: translateX(-105%);
-            transition: transform 0.22s ease;
+            min-width: 0 !important;
+            transform: translateX(-110%) !important;
+            transition: transform 0.22s ease, visibility 0.22s ease;
             z-index: 1190;
             box-shadow: var(--jl-shadow);
+            pointer-events: none;
+            visibility: hidden;
         }
         body.jl-sidebar-open section[data-testid="stSidebar"]{
-            transform: translateX(0);
+            transform: translateX(0) !important;
+            pointer-events: auto;
+            visibility: visible;
         }
     }
     </style>
