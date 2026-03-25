@@ -911,7 +911,7 @@ with st.sidebar:
 
         st.markdown("---")
         st.caption("Resources")
-        public_pages = ["AI Assistant", "About", "Terms", "Cyber Rules 2026"]
+        public_pages = ["Vision & Mission", "About", "Terms", "Cyber Rules 2026"]
         try:
             default_index = public_pages.index(st.session_state.view)
         except ValueError:
@@ -954,7 +954,26 @@ with st.sidebar:
 
 # --- MAIN CONTENT ---
 if not st.session_state.user:
-    if st.session_state.view in ("About", "Terms", "Cyber Rules 2026"):
+    if st.session_state.view == "AI Assistant":
+        l_pad, main, r_pad = st.columns([1, 8, 1])
+        with main:
+            with st.container():
+                st.markdown(
+                    """
+                    <div class="jl-hero">
+                        <div class="title">Login Required</div>
+                        <div class="subtitle">Sign in to access the AI Assistant.</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            st.write("")
+            btn_l, btn_m, btn_r = st.columns([3, 2, 3])
+            with btn_m:
+                if st.button("LOGIN", key="jl_login_gate", use_container_width=True):
+                    st.session_state.jl_open_sidebar = True
+                    st.rerun()
+    elif st.session_state.view in ("Vision & Mission", "About", "Terms", "Cyber Rules 2026"):
         l_pad, main, r_pad = st.columns([1, 8, 1])
         with main:
             with st.container():
