@@ -893,84 +893,108 @@ def ask_groq_lawyer_validated(user_input: str, law_evidence: str, category: str)
     final = repaired if _validate_ai_answer(category, repaired) else answer
     return _apply_high_priority_refinements(user_input, category, final)
 
-# --- SIDEBAR UI ---
-with st.sidebar:
-    st.image(LOGO_SOURCE, use_container_width=True)
-    
-    if not st.session_state.user:
-        auth_tab = st.tabs(["Login", "Create Account"])
-        with auth_tab[0]:
-            e_val = st.text_input("Email", key="login_email")
-            p_val = st.text_input("Password", type="password", key="login_pass")
-            if st.button(" Authenticate"):
-                valid, u_obj = authenticate(e_val, p_val)
-                if valid:
-                    if check_ban(u_obj.uid): st.error("Access Forbidden.")
-                    else:
-                        st.session_state.user = {"name": u_obj.display_name or e_val.split('@')[0], "email": e_val, "uid": u_obj.uid}
-                        st.session_state.view = "AI Assistant"
-                        sync_user(st.session_state.user)
-                        st.rerun()
-                else:
-                    st.error("Invalid Credentials.")
-        
-        with auth_tab[1]:
-            nu = st.text_input("Full Name")
-            eu = st.text_input("Email", key="s_email")
-            pu = st.text_input("Create Password", type="password", key="s_pass")
-            if st.button("REGISTER"):
-                try:
-                    auth.create_user(email=eu, password=pu, display_name=nu)
-                    st.success("Account Ready! Use Login.")
-                except Exception as ex: st.error(str(ex))
-                
-        if st.button("Guest User"):
-            gid = str(uuid.uuid4())[:8]
-            st.session_state.user = {"name": f"Guest_{gid}", "email": "guest@justicelens.io", "uid": f"guest_{gid}"}
-            st.rerun()
+def show_sidebar():
+    with st.sidebar:
+        st.image(LOGO_SOURCE, use_container_width=True)
 
-        st.markdown("---")
-        st.caption("Resources")
-        public_pages = ["Vision & Mission", "About", "Terms", "Cyber Rules 2026"]
-        try:
-            default_index = public_pages.index(st.session_state.view)
-        except ValueError:
-            default_index = 0
-        public_choice = st.radio(
-            "Resources",
-            public_pages,
-            index=default_index,
-            key="jl_public_nav",
-            label_visibility="collapsed",
-        )
-        if public_choice != st.session_state.view:
-            st.session_state.view = public_choice
-            st.rerun()
-    else:
-        st.markdown(
-            f"<div class='jl-sidebar-connected'>Connected to: <b>{st.session_state.user['name']}</b></div>",
-            unsafe_allow_html=True,
-        )
-        
-        if st.session_state.user['email'] == "d3ztudio@gmail.com":
-            st.markdown('<span style="color:var(--jl-primary); font-weight:800; font-size:0.7rem; letter-spacing:0.12em;">SYSTEM COMMANDER</span>', unsafe_allow_html=True)
-            if not st.session_state.admin_mode:
-                pin = st.text_input("PIN", type="password", placeholder="Enter PIN")
-                if pin == "1923": 
-                    st.session_state.admin_mode = True
+        if "show_login" not in st.session_state:
+            st.session_state.show_login = True
+
+        if not st.session_state.user:
+            if st.session_state.show_login:
+                auth_tab = st.tabs(["Login", "Create Account"])
+                with auth_tab[0]:
+                    e_val = st.text_input("Email", key="login_email")
+                    p_val = st.text_input("Password", type="password", key="login_pass")
+                    if st.button(" Authenticate"):
+                        valid, u_obj = authenticate(e_val, p_val)
+                        if valid:
+                            if check_ban(u_obj.uid):
+                                st.error("Access Forbidden.")
+                            else:
+                                st.session_state.user = {
+                                    "name": u_obj.display_name or e_val.split('@')[0],
+                                    "email": e_val,
+                                    "uid": u_obj.uid
+                                }
+                                st.session_state.view = "AI Assistant"
+                                st.session_state.show_login = False  # Hide login form
+                                sync_user(st.session_state.user)
+                                st.rerun()
+                        else:
+                            st.error("Invalid Credentials.")
+
+                with auth_tab[1]:
+                    nu = st.text_input("Full Name")
+                    eu = st.text_input("Email", key="s_email")
+                    pu = st.text_input("Create Password", type="password", key="s_pass")
+                    if st.button("REGISTER"):
+                        try:
+                            auth.create_user(email=eu, password=pu, display_name=nu)
+                            st.success("Account Ready! Use Login.")
+                        except Exception as ex:
+                            st.error(str(ex))
+
+            if st.button("Guest User"):
+                gid = str(uuid.uuid4())[:8]
+                st.session_state.user = {"name": f"Guest_{gid}", "email": "guest@justicelens.io",
+                                         "uid": f"guest_{gid}"}
+                st.session_state.show_login = False  # Hide login form
+                st.rerun()
+
+            st.markdown("---")
+            st.caption("Resources")
+            public_pages = ["Vision & Mission", "About", "Terms", "Cyber Rules 2026"]
+            try:
+                default_index = public_pages.index(st.session_state.view)
+            except ValueError:
+                default_index = 0
+            public_choice = st.radio(
+                "Resources",
+                public_pages,
+                index=default_index,
+                key="jl_public_nav",
+                label_visibility="collapsed",
+            )
+            if public_choice != st.session_state.view:
+                st.session_state.view = public_choice
+                st.rerun()
+        else:
+            st.markdown(
+                f"<div class='jl-sidebar-connected'>Connected to: <b>{st.session_state.user['name']}</b></div>",
+                unsafe_allow_html=True,
+            )
+
+            opts = ["AI Assistant", "Vision & Mission", "About", "Terms", "Cyber Rules 2026"]
+            if st.session_state.user['email'] == "d3ztudio@gmail.com":
+                st.markdown(
+                    '<span style="color:var(--jl-primary); font-weight:800; font-size:0.7rem; letter-spacing:0.12em;">SYSTEM COMMANDER</span>',
+                    unsafe_allow_html=True)
+                if not st.session_state.admin_mode:
+                    pin = st.text_input("PIN", type="password", placeholder="Enter PIN")
+                    if pin == "1923":
+                        st.session_state.admin_mode = True
+                        st.rerun()
+            if st.session_state.admin_mode:
+                opts.append("Admin Dashboard")
+
+            st.session_state.view = st.radio("NAVIGATION", [x.strip() for x in opts])
+
+            if st.session_state.view == "AI Assistant":
+                if st.button("New Chat", use_container_width=True):
+                    st.session_state.chat_history = []
                     st.rerun()
-        
-        opts = ["AI Assistant", "Vision & Mission", "About", "Terms", "Cyber Rules 2026"]
-        if st.session_state.admin_mode: opts.append("Admin Dashboard")
-        
-        st.session_state.view = st.radio("NAVIGATION", [x.strip() for x in opts])
-        
-        st.markdown("---")
-        if st.button("TERMINATE SESSION"):
-            st.session_state.user = None
-            st.session_state.admin_mode = False
-            st.session_state.chat_history = []
-            st.rerun()
+
+            st.markdown("---")
+            if st.button("TERMINATE SESSION"):
+                st.session_state.user = None
+                st.session_state.admin_mode = False
+                st.session_state.chat_history = []
+                st.session_state.show_login = True  # Show login form
+                st.rerun()
+
+# --- SIDEBAR UI ---
+show_sidebar()
 
 # --- MAIN CONTENT ---
 if not st.session_state.user:
