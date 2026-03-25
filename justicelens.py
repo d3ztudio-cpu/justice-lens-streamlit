@@ -11,6 +11,7 @@ import requests
 import time
 import re
 import urllib.parse
+import base64
 from pinecone import Pinecone
 from langchain_huggingface import HuggingFaceEmbeddings
 
@@ -1397,7 +1398,10 @@ else:
                 if role == "assistant" and content:
                     encoded_content = urllib.parse.quote_plus(content)
                     translate_url = f"https://translate.google.com/?sl=auto&tl=en&text={encoded_content}&op=translate"
-                    b64 = base64.b64encode(content.encode("utf-8")).decode("ascii")
+                    try:
+                        b64 = base64.b64encode(content.encode("utf-8")).decode("ascii")
+                    except Exception:
+                        b64 = ""
                     st.markdown(
                         f'<div class="jl-chat-actions">'
                         f'<button class="jl-copy-btn" data-copy-b64="{b64}" title="Copy">⧉</button>'
