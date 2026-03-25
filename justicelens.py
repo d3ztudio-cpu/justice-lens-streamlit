@@ -336,7 +336,58 @@ st.markdown(
             padding: 0.7rem 0.85rem !important;
         }
     }
+
+    .jl-chat-actions{
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-top: 0.35rem;
+    }
+    .jl-copy-btn{
+        background: transparent;
+        border: 1px solid var(--jl-border);
+        color: var(--jl-muted);
+        border-radius: 8px;
+        padding: 0.15rem 0.45rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .jl-copy-btn:active{
+        transform: translateY(1px);
+    }
+    .jl-translate-link{
+        color: var(--jl-muted) !important;
+        text-decoration: none !important;
+        font-size: 0.9em;
+    }
     </style>
+    """,
+    unsafe_allow_html=True,
+)
+st.markdown(
+    """
+    <script>
+    (function() {
+      if (window.__jlCopyInit) return;
+      window.__jlCopyInit = true;
+      document.addEventListener("click", function(e){
+        const btn = e.target.closest(".jl-copy-btn");
+        if (!btn) return;
+        const b64 = btn.getAttribute("data-copy-b64");
+        if (!b64) return;
+        try{
+          const text = decodeURIComponent(escape(atob(b64)));
+          navigator.clipboard.writeText(text);
+          const old = btn.textContent;
+          btn.textContent = "Copied";
+          setTimeout(() => { btn.textContent = old; }, 1200);
+        }catch(err){}
+      });
+    })();
+    </script>
     """,
     unsafe_allow_html=True,
 )
@@ -1138,6 +1189,23 @@ if not st.session_state.user:
                             st.success("Account Ready! Use Login.")
                         except Exception as ex:
                             st.error(str(ex))
+                if st.button("Guest User", key="m_guest_btn"):
+                    gid = str(uuid.uuid4())[:8]
+                    st.session_state.user = {"name": f"Guest_{gid}", "email": "guest@justicelens.io", "uid": f"guest_{gid}"}
+                    st.session_state.mobile_login_open = False
+                    if db:
+                        sid = str(uuid.uuid4())
+                        try:
+                            _session_store_ref().document(sid).set({
+                                "uid": st.session_state.user["uid"],
+                                "email": st.session_state.user["email"],
+                                "name": st.session_state.user["name"],
+                                "created_at": utc_now(),
+                            })
+                            _set_sid(sid)
+                        except Exception:
+                            pass
+                    st.rerun()
                 st.markdown("</div>", unsafe_allow_html=True)
 
             st.write("")
@@ -1329,7 +1397,14 @@ else:
                 if role == "assistant" and content:
                     encoded_content = urllib.parse.quote_plus(content)
                     translate_url = f"https://translate.google.com/?sl=auto&tl=en&text={encoded_content}&op=translate"
-                    st.markdown(f"[Translate]({translate_url})")
+                    b64 = base64.b64encode(content.encode("utf-8")).decode("ascii")
+                    st.markdown(
+                        f'<div class="jl-chat-actions">'
+                        f'<button class="jl-copy-btn" data-copy-b64="{b64}" title="Copy">⧉</button>'
+                        f'<a class="jl-translate-link" href="{translate_url}" target="_blank" rel="noopener">Translate</a>'
+                        f'</div>',
+                        unsafe_allow_html=True,
+                    )
 
         user_msg = st.chat_input("Describe a cyber incident, or ask e.g. “Explain Section 66F”")
         if user_msg:
