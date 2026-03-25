@@ -1194,28 +1194,27 @@ else:
                     st.session_state.jl_pending_msg = "Someone posted my private photos without consent. What are the punishments?"
                     st.rerun()
         
-        with main_col:
-            # Process any pending message (from tiles)
-            pending = st.session_state.pop("jl_pending_msg", None)
-            if pending:
-                _handle_user_message(pending)
-                st.rerun()
+        # Process any pending message (from tiles)
+        pending = st.session_state.pop("jl_pending_msg", None)
+        if pending:
+            _handle_user_message(pending)
+            st.rerun()
 
-            for chat in history:
-                role = "user" if chat.get("role") == "user" else "assistant"
-                avatar = "🧑‍💼" if role == "user" else "⚖️"
-                with st.chat_message(role, avatar=avatar):
-                    content = chat.get("content", "")
-                    st.markdown(content)
-                    if role == "assistant" and content:
-                        encoded_content = urllib.parse.quote(content)
-                        translate_url = f"https://translate.google.com/?sl=auto&text={encoded_content}"
-                        st.markdown(f'<a href="{translate_url}" target="_blank" style="text-decoration: none; color: #8B949E; font-size: 0.9em;">Translate</a>', unsafe_allow_html=True)
+        for chat in history:
+            role = "user" if chat.get("role") == "user" else "assistant"
+            avatar = "🧑‍💼" if role == "user" else "⚖️"
+            with st.chat_message(role, avatar=avatar):
+                content = chat.get("content", "")
+                st.markdown(content)
+                if role == "assistant" and content:
+                    encoded_content = urllib.parse.quote(content)
+                    translate_url = f"https://translate.google.com/?sl=auto&text={encoded_content}"
+                    st.markdown(f'<a href="{translate_url}" target="_blank" style="text-decoration: none; color: #8B949E; font-size: 0.9em;">Translate</a>', unsafe_allow_html=True)
 
-            user_msg = st.chat_input("Describe a cyber incident, or ask e.g. “Explain Section 66F”")
-            if user_msg:
-                _handle_user_message(user_msg)
-                st.rerun()
+        user_msg = st.chat_input("Describe a cyber incident, or ask e.g. “Explain Section 66F”")
+        if user_msg:
+            _handle_user_message(user_msg)
+            st.rerun()
 
     elif page == "Vision & Mission":
         st.title("Our Core Principles")
