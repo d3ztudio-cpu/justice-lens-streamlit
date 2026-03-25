@@ -373,6 +373,8 @@ if "user" not in st.session_state: st.session_state.user = None
 if "chat_history" not in st.session_state: st.session_state.chat_history = []
 if "admin_mode" not in st.session_state: st.session_state.admin_mode = False
 if "view" not in st.session_state: st.session_state.view = "AI Assistant"
+if "projects" not in st.session_state: st.session_state.projects = {"Default": []}
+if "active_project" not in st.session_state: st.session_state.active_project = "Default"
 
 # --- AUTH SYSTEM ---
 def authenticate(email, password):
