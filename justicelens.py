@@ -13,7 +13,6 @@ import re
 import urllib.parse
 from pinecone import Pinecone
 from langchain_huggingface import HuggingFaceEmbeddings
-import streamlit.components.v1 as components
 
 # ==========================================
 # ⚙️ CONFIGURATION & API KEYS
@@ -48,7 +47,7 @@ if not os.environ.get("JUSTICE_LENS_SKIP_PAGE_CONFIG"):
         page_title="Justice Lens | Expert Cyber Legal AI",
         page_icon="⚖️",
         layout="wide",
-        initial_sidebar_state="collapsed",
+        initial_sidebar_state="expanded",
     )
 
 # --- Justice Lens: Deep Dive Theme ---
@@ -89,51 +88,6 @@ st.markdown(
     }
     [data-testid="stAppViewContainer"] > .main{
         margin-left: 0 !important;
-    }
-    .jl-topbar{
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 64px;
-        background: #0B0F14;
-        border-bottom: 1px solid var(--jl-border);
-        z-index: 9500;
-        display: flex;
-        align-items: center;
-    }
-    .jl-topbar-inner{
-        width: 100%;
-        max-width: 1120px;
-        margin: 0 auto;
-        padding: 0 1.2rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1.25rem;
-    }
-    .jl-brand{
-        font-weight: 800;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        color: #FFFFFF !important;
-    }
-    .jl-nav{
-        display: flex;
-        align-items: center;
-        gap: 1.2rem;
-        font-weight: 700;
-    }
-    .jl-nav a{
-        color: #FFFFFF !important;
-        text-decoration: none;
-        letter-spacing: 0.08em;
-        font-size: 0.78rem;
-        text-transform: uppercase;
-    }
-    .jl-nav a.active{
-        color: #FF4D4D !important;
-        text-shadow: 0 0 10px rgba(255, 77, 77, 0.55);
     }
 
     /* Sidebar */
@@ -198,74 +152,7 @@ st.markdown(
         display: none !important;
     }
 
-    section[data-testid="stSidebar"]{
-        position: fixed !important;
-        top: 0;
-        left: 0;
-        height: 100vh !important;
-        width: min(320px, 85vw) !important;
-        min-width: min(320px, 85vw) !important;
-        display: block !important;
-        visibility: visible !important;
-        transform: translateX(-105%);
-        transition: transform 0.22s ease;
-        z-index: 9999;
-        box-shadow: var(--jl-shadow);
-    }
-    body.jl-sidebar-open section[data-testid="stSidebar"]{
-        transform: translateX(0);
-    }
-    .jl-sidebar-overlay{
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.55);
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.2s ease;
-        z-index: 9998;
-    }
-    body.jl-sidebar-open .jl-sidebar-overlay{
-        opacity: 1;
-        pointer-events: auto;
-    }
-
-    .jl-hamburger{
-        display: none;
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
-        border: 1px solid var(--jl-border);
-        background: var(--jl-card);
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        box-shadow: var(--jl-shadow-sm);
-    }
-    .jl-hamburger span{
-        display: block;
-        width: 20px;
-        height: 2px;
-        background: var(--jl-text);
-        margin: 3px 0;
-        border-radius: 2px;
-    }
-
-    @media (max-width: 991px){
-        .jl-topbar{ display: none; }
-        .jl-hamburger{
-            display: flex;
-            position: fixed;
-            top: 0.9rem;
-            left: 0.9rem;
-            z-index: 9501;
-        }
-    }
-    @media (min-width: 992px){
-        .jl-sidebar-overlay{ display: none; }
-    }
-    .main .block-container{
-        padding-top: 5.5rem !important;
-    }
+    /* (Removed custom sidebar overlay/hamburger styles) */
 
     /* Buttons */
     .stButton > button, .stFormSubmitButton > button, .stDownloadButton > button{
@@ -426,188 +313,10 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-if "jl_open_sidebar" not in st.session_state:
-    st.session_state.jl_open_sidebar = False
-
 if "view" not in st.session_state:
     st.session_state.view = "AI Assistant"
 
-if "jl_nav_view" not in st.session_state:
-    st.session_state.jl_nav_view = st.session_state.view
-
-_nav_options = ["AI Assistant", "Vision & Mission", "About", "Terms", "Cyber Rules 2026"]
-_nav_index = _nav_options.index(st.session_state.view) if st.session_state.view in _nav_options else 0
-st.radio(
-    "JL_NAV_VIEW",
-    _nav_options,
-    index=_nav_index,
-    key="jl_nav_view",
-    label_visibility="collapsed",
-)
-if st.session_state.jl_nav_view != st.session_state.view:
-    st.session_state.view = st.session_state.jl_nav_view
-    st.rerun()
-
-_nav_items = [
-    "AI Assistant",
-    "Vision & Mission",
-    "About",
-    "Terms",
-    "Cyber Rules 2026",
-]
-_nav_links = []
-for label in _nav_items:
-    active_class = "active" if st.session_state.get("view", "AI Assistant") == label else ""
-    safe_label = label.replace("&", "&amp;")
-    _nav_links.append(f'<a class="{active_class}" href="javascript:void(0)" data-jl-nav="{safe_label}">{safe_label}</a>')
-
-_autopen = "true" if st.session_state.jl_open_sidebar else "false"
-st.markdown(
-    f"""
-    <div class="jl-topbar">
-        <div class="jl-topbar-inner">
-            <div class="jl-brand">Justice Lens</div>
-            <nav class="jl-nav">
-                {"".join(_nav_links)}
-            </nav>
-            <button class="jl-hamburger" data-jl-toggle-sidebar aria-label="Open menu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-        </div>
-    </div>
-    <button class="jl-hamburger" data-jl-toggle-sidebar aria-label="Open menu">
-        <span></span>
-        <span></span>
-        <span></span>
-    </button>
-    <div class="jl-sidebar-overlay" data-jl-close-sidebar></div>
-    <div data-jl-autopen="{_autopen}" style="display:none;"></div>
-    """,
-    unsafe_allow_html=True,
-)
-
-components.html(
-    f"""
-    <script>
-    (function() {{
-        const doc = (window.parent && window.parent.document) ? window.parent.document : document;
-        const body = doc.body;
-        const OPEN_CLASS = "jl-sidebar-open";
-        let lastOpenedAt = 0;
-        const openSidebar = () => body.classList.add(OPEN_CLASS);
-        const closeSidebar = () => body.classList.remove(OPEN_CLASS);
-        const toggleSidebar = () => {{
-            body.classList.toggle(OPEN_CLASS);
-            if (body.classList.contains(OPEN_CLASS)) {{
-                lastOpenedAt = Date.now();
-            }}
-        }};
-        const safeOpen = () => {{
-            openSidebar();
-            lastOpenedAt = Date.now();
-        }};
-        const stripDefaultToggle = () => {{
-            const candidates = Array.from(doc.querySelectorAll("button, span, div"));
-            candidates.forEach((el) => {{
-                const txt = (el.textContent || "").trim();
-                if (txt === "double_arrow_right" || txt === "double_arrow_left") {{
-                    const btn = el.closest("button");
-                    if (btn) {{
-                        btn.remove();
-                    }} else {{
-                        el.remove();
-                    }}
-                }}
-            }});
-        }};
-        const observeAndStrip = () => {{
-            const mo = new MutationObserver(() => stripDefaultToggle());
-            mo.observe(doc.documentElement, {{ childList: true, subtree: true }});
-        }};
-        const hideNavRadio = () => {{
-            const groups = Array.from(doc.querySelectorAll('[role="radiogroup"]'));
-            const required = ["AI Assistant", "Vision & Mission", "About", "Terms", "Cyber Rules 2026"];
-            groups.forEach((group) => {{
-                const text = (group.textContent || "");
-                const matches = required.every((label) => text.includes(label));
-                if (matches) {{
-                    const root = group.closest('div[data-testid="stRadio"]');
-                    if (root) root.style.display = "none";
-                }}
-            }});
-        }};
-        const selectNav = (label) => {{
-            const radios = Array.from(doc.querySelectorAll('[role="radio"]'));
-            const target = radios.find((el) => (el.textContent || "").trim() === label);
-            if (target) {{
-                target.click();
-            }}
-        }};
-        const attachListeners = () => {{
-            doc.addEventListener("click", (e) => {{
-                const toggleBtn = e.target.closest("[data-jl-toggle-sidebar]");
-                const openBtn = e.target.closest("[data-jl-open-sidebar]");
-                const closeBtn = e.target.closest("[data-jl-close-sidebar]");
-                const navLink = e.target.closest("[data-jl-nav]");
-                const sidebarEl = doc.querySelector('section[data-testid="stSidebar"]');
-                const clickedInsideSidebar = sidebarEl && sidebarEl.contains(e.target);
-                if (toggleBtn) {{
-                    e.preventDefault();
-                    toggleSidebar();
-                    return;
-                }}
-                if (navLink) {{
-                    e.preventDefault();
-                    const label = (navLink.textContent || "").trim();
-                    selectNav(label);
-                    return;
-                }}
-                if (openBtn) {{
-                    e.preventDefault();
-                    safeOpen();
-                    return;
-                }}
-                if (closeBtn) {{
-                    e.preventDefault();
-                    closeSidebar();
-                    return;
-                }}
-                if (body.classList.contains(OPEN_CLASS) && !clickedInsideSidebar) {{
-                    if (Date.now() - lastOpenedAt < 250) return;
-                    closeSidebar();
-                }}
-            }});
-        }};
-
-        if (!window.__jlSidebarInit) {{
-            window.__jlSidebarInit = true;
-            attachListeners();
-            observeAndStrip();
-        }}
-
-        const maybeAutoOpen = () => {{
-            const autoEl = doc.querySelector('[data-jl-autopen="true"]');
-            if (autoEl) {{
-                safeOpen();
-            }}
-        }};
-        setTimeout(() => {{
-            stripDefaultToggle();
-            maybeAutoOpen();
-            hideNavRadio();
-        }}, 0);
-        setTimeout(maybeAutoOpen, 200);
-        setTimeout(stripDefaultToggle, 500);
-    }})();
-    </script>
-    """,
-    height=0,
-    width=0,
-)
-if st.session_state.jl_open_sidebar:
-    st.session_state.jl_open_sidebar = False
+ 
 
 # --- BOOTSTRAP / INITIALIZATION ---
 @st.cache_resource(show_spinner=False)
@@ -1060,7 +769,7 @@ def show_sidebar():
 
             st.markdown("---")
             st.caption("Resources")
-            public_pages = ["Vision & Mission", "About", "Terms", "Cyber Rules 2026"]
+        public_pages = ["AI Assistant", "About", "Terms", "Cyber Rules 2026"]
             try:
                 default_index = public_pages.index(st.session_state.view)
             except ValueError:
@@ -1142,26 +851,7 @@ show_sidebar()
 
 # --- MAIN CONTENT ---
 if not st.session_state.user:
-    if st.session_state.view == "AI Assistant":
-        l_pad, main, r_pad = st.columns([1, 8, 1])
-        with main:
-            with st.container():
-                st.markdown(
-                    """
-                    <div class="jl-hero">
-                        <div class="title">Login Required</div>
-                        <div class="subtitle">Sign in to access the AI Assistant.</div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-            st.write("")
-            btn_l, btn_m, btn_r = st.columns([3, 2, 3])
-            with btn_m:
-                if st.button("LOGIN", key="jl_login_gate", use_container_width=True):
-                    st.session_state.jl_open_sidebar = True
-                    st.rerun()
-    elif st.session_state.view in ("Vision & Mission", "About", "Terms", "Cyber Rules 2026"):
+    if st.session_state.view in ("Vision & Mission", "About", "Terms", "Cyber Rules 2026"):
         l_pad, main, r_pad = st.columns([1, 8, 1])
         with main:
             with st.container():
@@ -1270,7 +960,6 @@ if not st.session_state.user:
             btn_l, btn_m, btn_r = st.columns([3, 2, 3])
             with btn_m:
                 if st.button("LOGIN", key="jl_login_btn", use_container_width=True):
-                    st.session_state.jl_open_sidebar = True
                     st.rerun()
 
             st.write("")
