@@ -413,6 +413,11 @@ st.markdown(
             box-shadow: var(--jl-shadow);
             pointer-events: none;
             visibility: hidden;
+            overflow: hidden;
+        }
+        body:not(.jl-sidebar-open) section[data-testid="stSidebar"]{
+            width: 0 !important;
+            border: none !important;
         }
         body.jl-sidebar-open section[data-testid="stSidebar"]{
             transform: translateX(0) !important;
