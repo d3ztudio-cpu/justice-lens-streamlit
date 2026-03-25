@@ -83,9 +83,12 @@ st.markdown(
     }
 
     .main .block-container{
-        padding-top: 1.25rem !important;
+        padding-top: 5.5rem !important;
         padding-bottom: 5.5rem !important;
         max-width: 1120px !important;
+    }
+    [data-testid="stAppViewContainer"] > .main{
+        margin-left: 0 !important;
     }
 
     /* Sidebar */
@@ -253,6 +256,9 @@ st.markdown(
             top: 0.9rem;
             left: 0.9rem;
             z-index: 9501;
+        }
+        .main .block-container{
+            padding-top: 1.25rem !important;
         }
     }
     @media (min-width: 992px){
@@ -424,17 +430,31 @@ st.markdown(
 if "jl_open_sidebar" not in st.session_state:
     st.session_state.jl_open_sidebar = False
 
+_valid_views = ["AI Assistant", "Vision & Mission", "About", "Terms", "Cyber Rules 2026"]
+_requested_view = st.query_params.get("view")
+if _requested_view in _valid_views:
+    st.session_state.view = _requested_view
+
+_nav_items = [
+    ("AI Assistant", "?view=AI%20Assistant"),
+    ("Vision & Mission", "?view=Vision%20%26%20Mission"),
+    ("About", "?view=About"),
+    ("Terms", "?view=Terms"),
+    ("Cyber Rules 2026", "?view=Cyber%20Rules%202026"),
+]
+_nav_links = []
+for label, href in _nav_items:
+    active_class = "active" if st.session_state.view == label else ""
+    safe_label = label.replace("&", "&amp;")
+    _nav_links.append(f'<a class="{active_class}" href="{href}">{safe_label}</a>')
+
 st.markdown(
-    """
+    f"""
     <div class="jl-topbar">
         <div class="jl-topbar-inner">
             <div class="jl-brand">Justice Lens</div>
             <nav class="jl-nav">
-                <a class="active" href="javascript:void(0)">AI Assistant</a>
-                <a href="javascript:void(0)">Vision & Mission</a>
-                <a href="javascript:void(0)">About</a>
-                <a href="javascript:void(0)">Terms</a>
-                <a href="javascript:void(0)">Cyber Rules 2026</a>
+                {"".join(_nav_links)}
             </nav>
             <button class="jl-hamburger" data-jl-toggle-sidebar aria-label="Open menu">
                 <span></span>
