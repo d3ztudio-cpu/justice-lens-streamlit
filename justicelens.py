@@ -406,7 +406,7 @@ st.markdown(
             top: 0;
             left: 0;
             height: 100vh !important;
-            width: min(280px, 80vw) !important;
+            width: min(320px, 88vw) !important;
             min-width: 0 !important;
             transform: translateX(-110%) !important;
             transition: transform 0.22s ease, visibility 0.22s ease;
@@ -422,7 +422,7 @@ st.markdown(
             transform: translateX(0) !important;
             pointer-events: auto;
             visibility: visible;
-            width: min(280px, 80vw) !important;
+            width: min(320px, 88vw) !important;
         }
     }
     </style>
