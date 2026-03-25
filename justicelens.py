@@ -401,13 +401,21 @@ components.html(
     <div data-jl-autopen="{_autopen}" style="display:none;"></div>
     <script>
     (function() {{
-        if (window.__jlSidebarInit) return;
-        window.__jlSidebarInit = true;
         const body = document.body;
         const OPEN_CLASS = "jl-sidebar-open";
+        let lastOpenedAt = 0;
         const openSidebar = () => body.classList.add(OPEN_CLASS);
         const closeSidebar = () => body.classList.remove(OPEN_CLASS);
-        const toggleSidebar = () => body.classList.toggle(OPEN_CLASS);
+        const toggleSidebar = () => {{
+            body.classList.toggle(OPEN_CLASS);
+            if (body.classList.contains(OPEN_CLASS)) {{
+                lastOpenedAt = Date.now();
+            }}
+        }};
+        const safeOpen = () => {{
+            openSidebar();
+            lastOpenedAt = Date.now();
+        }};
         const stripDefaultToggle = () => {{
             const candidates = Array.from(document.querySelectorAll("button, span, div"));
             candidates.forEach((el) => {{
@@ -426,41 +434,49 @@ components.html(
             const mo = new MutationObserver(() => stripDefaultToggle());
             mo.observe(document.documentElement, {{ childList: true, subtree: true }});
         }};
-        document.addEventListener("click", (e) => {{
-            const toggleBtn = e.target.closest("[data-jl-toggle-sidebar]");
-            const openBtn = e.target.closest("[data-jl-open-sidebar]");
-            const closeBtn = e.target.closest("[data-jl-close-sidebar]");
-            const sidebarEl = document.querySelector('section[data-testid="stSidebar"]');
-            const clickedInsideSidebar = sidebarEl && sidebarEl.contains(e.target);
-            if (toggleBtn) {{
-                e.preventDefault();
-                toggleSidebar();
-                return;
-            }}
-            if (body.classList.contains(OPEN_CLASS) && !clickedInsideSidebar && !openBtn && !closeBtn) {{
-                closeSidebar();
-                return;
-            }}
-            if (openBtn) {{
-                e.preventDefault();
-                openSidebar();
-                return;
-            }}
-            if (closeBtn) {{
-                e.preventDefault();
-                closeSidebar();
-            }}
-        }});
+        const attachListeners = () => {{
+            document.addEventListener("click", (e) => {{
+                const toggleBtn = e.target.closest("[data-jl-toggle-sidebar]");
+                const openBtn = e.target.closest("[data-jl-open-sidebar]");
+                const closeBtn = e.target.closest("[data-jl-close-sidebar]");
+                const sidebarEl = document.querySelector('section[data-testid="stSidebar"]');
+                const clickedInsideSidebar = sidebarEl && sidebarEl.contains(e.target);
+                if (toggleBtn) {{
+                    e.preventDefault();
+                    toggleSidebar();
+                    return;
+                }}
+                if (openBtn) {{
+                    e.preventDefault();
+                    safeOpen();
+                    return;
+                }}
+                if (closeBtn) {{
+                    e.preventDefault();
+                    closeSidebar();
+                    return;
+                }}
+                if (body.classList.contains(OPEN_CLASS) && !clickedInsideSidebar) {{
+                    if (Date.now() - lastOpenedAt < 250) return;
+                    closeSidebar();
+                }}
+            }});
+        }};
+
+        if (!window.__jlSidebarInit) {{
+            window.__jlSidebarInit = true;
+            attachListeners();
+            observeAndStrip();
+        }}
 
         const maybeAutoOpen = () => {{
             const autoEl = document.querySelector('[data-jl-autopen="true"]');
             if (autoEl) {{
-                openSidebar();
+                safeOpen();
             }}
         }};
         setTimeout(() => {{
             stripDefaultToggle();
-            observeAndStrip();
             maybeAutoOpen();
         }}, 0);
         setTimeout(stripDefaultToggle, 500);
