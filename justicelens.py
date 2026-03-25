@@ -90,6 +90,51 @@ st.markdown(
     [data-testid="stAppViewContainer"] > .main{
         margin-left: 0 !important;
     }
+    .jl-topbar{
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 64px;
+        background: #0B0F14;
+        border-bottom: 1px solid var(--jl-border);
+        z-index: 9500;
+        display: flex;
+        align-items: center;
+    }
+    .jl-topbar-inner{
+        width: 100%;
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 0 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.25rem;
+    }
+    .jl-brand{
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #FFFFFF !important;
+    }
+    .jl-nav{
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        font-weight: 700;
+    }
+    .jl-nav a{
+        color: #FFFFFF !important;
+        text-decoration: none;
+        letter-spacing: 0.08em;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+    }
+    .jl-nav a.active{
+        color: #FF4D4D !important;
+        text-shadow: 0 0 10px rgba(255, 77, 77, 0.55);
+    }
 
     /* Sidebar */
     section[data-testid="stSidebar"]{
@@ -206,6 +251,7 @@ st.markdown(
     }
 
     @media (max-width: 991px){
+        .jl-topbar{ display: none; }
         .jl-hamburger{
             display: flex;
             position: fixed;
@@ -386,8 +432,50 @@ if "jl_open_sidebar" not in st.session_state:
 if "view" not in st.session_state:
     st.session_state.view = "AI Assistant"
 
+if "jl_nav_view" not in st.session_state:
+    st.session_state.jl_nav_view = st.session_state.view
+
+_nav_options = ["AI Assistant", "Vision & Mission", "About", "Terms", "Cyber Rules 2026"]
+_nav_index = _nav_options.index(st.session_state.view) if st.session_state.view in _nav_options else 0
+st.radio(
+    "JL_NAV_VIEW",
+    _nav_options,
+    index=_nav_index,
+    key="jl_nav_view",
+    label_visibility="collapsed",
+)
+if st.session_state.jl_nav_view != st.session_state.view:
+    st.session_state.view = st.session_state.jl_nav_view
+    st.rerun()
+
+_nav_items = [
+    "AI Assistant",
+    "Vision & Mission",
+    "About",
+    "Terms",
+    "Cyber Rules 2026",
+]
+_nav_links = []
+for label in _nav_items:
+    active_class = "active" if st.session_state.get("view", "AI Assistant") == label else ""
+    safe_label = label.replace("&", "&amp;")
+    _nav_links.append(f'<a class="{active_class}" href="javascript:void(0)" data-jl-nav="{safe_label}">{safe_label}</a>')
+
 st.markdown(
-    """
+    f"""
+    <div class="jl-topbar">
+        <div class="jl-topbar-inner">
+            <div class="jl-brand">Justice Lens</div>
+            <nav class="jl-nav">
+                {"".join(_nav_links)}
+            </nav>
+            <button class="jl-hamburger" data-jl-toggle-sidebar aria-label="Open menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </div>
     <button class="jl-hamburger" data-jl-toggle-sidebar aria-label="Open menu">
         <span></span>
         <span></span>
@@ -437,16 +525,42 @@ components.html(
             const mo = new MutationObserver(() => stripDefaultToggle());
             mo.observe(document.documentElement, {{ childList: true, subtree: true }});
         }};
+        const hideNavRadio = () => {{
+            const groups = Array.from(document.querySelectorAll('[role="radiogroup"]'));
+            const required = ["AI Assistant", "Vision & Mission", "About", "Terms", "Cyber Rules 2026"];
+            groups.forEach((group) => {{
+                const text = (group.textContent || "");
+                const matches = required.every((label) => text.includes(label));
+                if (matches) {{
+                    const root = group.closest('div[data-testid="stRadio"]');
+                    if (root) root.style.display = "none";
+                }}
+            }});
+        }};
+        const selectNav = (label) => {{
+            const radios = Array.from(document.querySelectorAll('[role="radio"]'));
+            const target = radios.find((el) => (el.textContent || "").trim() === label);
+            if (target) {{
+                target.click();
+            }}
+        }};
         const attachListeners = () => {{
             document.addEventListener("click", (e) => {{
                 const toggleBtn = e.target.closest("[data-jl-toggle-sidebar]");
                 const openBtn = e.target.closest("[data-jl-open-sidebar]");
                 const closeBtn = e.target.closest("[data-jl-close-sidebar]");
+                const navLink = e.target.closest("[data-jl-nav]");
                 const sidebarEl = document.querySelector('section[data-testid="stSidebar"]');
                 const clickedInsideSidebar = sidebarEl && sidebarEl.contains(e.target);
                 if (toggleBtn) {{
                     e.preventDefault();
                     toggleSidebar();
+                    return;
+                }}
+                if (navLink) {{
+                    e.preventDefault();
+                    const label = (navLink.textContent || "").trim();
+                    selectNav(label);
                     return;
                 }}
                 if (openBtn) {{
@@ -481,6 +595,7 @@ components.html(
         setTimeout(() => {{
             stripDefaultToggle();
             maybeAutoOpen();
+            hideNavRadio();
         }}, 0);
         setTimeout(maybeAutoOpen, 200);
         setTimeout(stripDefaultToggle, 500);
@@ -985,6 +1100,34 @@ def show_sidebar():
                     st.session_state.chat_history = []
                     st.rerun()
 
+                st.markdown("### Chats")
+                new_name = st.text_input("New Chats", placeholder="e.g. Incident Notes", key="jl_new_project")
+                if st.button("Create", use_container_width=True, key="jl_create_project"):
+                    name = (new_name or "").strip()
+                    if name and name not in st.session_state.projects:
+                        st.session_state.projects[name] = []
+                        st.session_state.active_project = name
+                        st.rerun()
+
+                project_names = list(st.session_state.projects.keys())
+                if project_names:
+                    try:
+                        current_index = project_names.index(st.session_state.active_project)
+                    except ValueError:
+                        current_index = 0
+                    chosen = st.radio(
+                        "Select",
+                        project_names,
+                        index=current_index,
+                        label_visibility="collapsed",
+                        key="jl_project_radio",
+                    )
+                    if chosen != st.session_state.active_project:
+                        st.session_state.active_project = chosen
+                        st.rerun()
+
+                st.caption("Tip: Use Chats to separate different incident chats.")
+
             st.markdown("---")
             if st.button("TERMINATE SESSION"):
                 st.session_state.user = None
@@ -1236,54 +1379,54 @@ else:
         #         history.clear()
         #         st.rerun()
 
-        with st.container():
-            st.markdown(
-                """
-                <div class="jl-hero">
-                    <div class="title">Justice Lens</div>
-                    <div class="subtitle">Professional cyber-law assistant for scenarios and IT Act references.</div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+        # with st.container():
+        #     st.markdown(
+        #         """
+        #         <div class="jl-hero">
+        #             <div class="title">Justice Lens</div>
+        #             <div class="subtitle">Professional cyber-law assistant for scenarios and IT Act references.</div>
+        #         </div>
+        #         """,
+        #         unsafe_allow_html=True,
+        #     )
 
-        st.write("")
-        g1, g2, g3 = st.columns(3)
-        with g1:
-            st.markdown(
-                """
-                <div class="jl-feature">
-                    <div class="kicker">Always On</div>
-                    <div class="headline">24/7 Incident Support</div>
-                    <p class="desc">Get immediate, automated guidance for reporting cybercrimes, preserving critical digital evidence, and containing the incident to prevent further harm.</p>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-        with g2:
-            st.markdown(
-                """
-                <div class="jl-feature">
-                    <div class="kicker">Grounded</div>
-                    <div class="headline">Verified Legal Framework</div>
-                    <p class="desc">Our AI provides responses structured around specific IT Act sections, official punishments, and relevant case law, ensuring the guidance is grounded and reliable.</p>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-        with g3:
-            st.markdown(
-                """
-                <div class="jl-feature">
-                    <div class="kicker">Tactical</div>
-                    <div class="headline">Actionable Response Plans</div>
-                    <p class="desc">Receive clear, step-by-step action plans, including golden-hour reporting, evidence collection, and strategic escalation paths for banks and authorities.</p>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+        # st.write("")
+        # g1, g2, g3 = st.columns(3)
+        # with g1:
+        #     st.markdown(
+        #         """
+        #         <div class="jl-feature">
+        #             <div class="kicker">Always On</div>
+        #             <div class="headline">24/7 Incident Support</div>
+        #             <p class="desc">Get immediate, automated guidance for reporting cybercrimes, preserving critical digital evidence, and containing the incident to prevent further harm.</p>
+        #         </div>
+        #         """,
+        #         unsafe_allow_html=True,
+        #     )
+        # with g2:
+        #     st.markdown(
+        #         """
+        #         <div class="jl-feature">
+        #             <div class="kicker">Grounded</div>
+        #             <div class="headline">Verified Legal Framework</div>
+        #             <p class="desc">Our AI provides responses structured around specific IT Act sections, official punishments, and relevant case law, ensuring the guidance is grounded and reliable.</p>
+        #         </div>
+        #         """,
+        #         unsafe_allow_html=True,
+        #     )
+        # with g3:
+        #     st.markdown(
+        #         """
+        #         <div class="jl-feature">
+        #             <div class="kicker">Tactical</div>
+        #             <div class="headline">Actionable Response Plans</div>
+        #             <p class="desc">Receive clear, step-by-step action plans, including golden-hour reporting, evidence collection, and strategic escalation paths for banks and authorities.</p>
+        #         </div>
+        #         """,
+        #         unsafe_allow_html=True,
+        #     )
 
-        st.markdown("<div style='height: 1.5rem;'></div>", unsafe_allow_html=True)
+        # st.markdown("<div style='height: 1.5rem;'></div>", unsafe_allow_html=True)
 
         main_col, right_col = st.columns([4, 1], gap="large")
 
@@ -1319,34 +1462,36 @@ else:
                 st.caption("Tip: Use Chats to separate different incident chats.")
 
         # Main chat area
-        with main_col:
+        main_col, right_col = st.columns([2, 1], gap="large")
+
+        with right_col:
             # Welcome tiles when empty
-            if not history:
-                st.markdown("""
-                    <div class="jl-card" style="text-align:center; margin-bottom: 2rem;">
-                        <h2 style="margin:0;">Welcome</h2>
-                        <p style="margin:0.35rem 0 0; color: var(--jl-muted) !important; font-weight:600;">Start with a scenario or ask for an IT Act section explanation.</p>
-                    </div>
-                """, unsafe_allow_html=True)
+            st.markdown("""
+                <div class="jl-card" style="text-align:center; margin-bottom: 2rem;">
+                    <h2 style="margin:0;">Welcome</h2>
+                    <p style="margin:0.35rem 0 0; color: var(--jl-muted) !important; font-weight:600;">Start with a scenario or ask for an IT Act section explanation.</p>
+                </div>
+            """, unsafe_allow_html=True)
 
-                t1, t2 = st.columns(2, gap="large")
-                with t1:
-                    if st.button("Report UPI scam", use_container_width=True):
-                        st.session_state.jl_pending_msg = "I was scammed via UPI. What sections apply?"
-                        st.rerun()
-                    st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
-                    if st.button("Account hacked", use_container_width=True):
-                        st.session_state.jl_pending_msg = "My account was hacked and my data leaked. What should I do?"
-                        st.rerun()
-                with t2:
-                    if st.button("Explain Section 66F", use_container_width=True):
-                        st.session_state.jl_pending_msg = "Explain Section 66F"
-                        st.rerun()
-                    st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
-                    if st.button("Privacy violation", use_container_width=True):
-                        st.session_state.jl_pending_msg = "Someone posted my private photos without consent. What are the punishments?"
-                        st.rerun()
-
+            t1, t2 = st.columns(2, gap="large")
+            with t1:
+                if st.button("Report UPI scam", use_container_width=True):
+                    st.session_state.jl_pending_msg = "I was scammed via UPI. What sections apply?"
+                    st.rerun()
+                st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
+                if st.button("Account hacked", use_container_width=True):
+                    st.session_state.jl_pending_msg = "My account was hacked and my data leaked. What should I do?"
+                    st.rerun()
+            with t2:
+                if st.button("Explain Section 66F", use_container_width=True):
+                    st.session_state.jl_pending_msg = "Explain Section 66F"
+                    st.rerun()
+                st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
+                if st.button("Privacy violation", use_container_width=True):
+                    st.session_state.jl_pending_msg = "Someone posted my private photos without consent. What are the punishments?"
+                    st.rerun()
+        
+        with main_col:
             # Process any pending message (from tiles)
             pending = st.session_state.pop("jl_pending_msg", None)
             if pending:
