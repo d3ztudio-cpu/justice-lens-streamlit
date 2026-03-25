@@ -260,6 +260,11 @@ st.markdown(
         font-size: 1.15rem !important;
         line-height: 1.7 !important;
     }
+    [data-testid="stChatMessage"] a{
+        color: #8B949E !important;
+        text-decoration: none !important;
+        font-size: 0.9em !important;
+    }
     [data-testid="stChatInput"]{ 
         max-width: 920px;
         margin-left: auto;
@@ -322,6 +327,9 @@ st.markdown(
         [data-testid="stChatMessage"] div[data-testid="stMarkdownContainer"] {
             font-size: 0.98rem !important;
             line-height: 1.55 !important;
+        }
+        [data-testid="stChatMessage"] a{
+            font-size: 0.85em !important;
         }
         [data-testid="stChatInput"] textarea{
             font-size: 0.98rem !important;
@@ -1321,13 +1329,7 @@ else:
                 if role == "assistant" and content:
                     encoded_content = urllib.parse.quote_plus(content)
                     translate_url = f"https://translate.google.com/?sl=auto&tl=en&text={encoded_content}&op=translate"
-                    js_text = json.dumps(content)
-                    st.markdown(
-                        f'<a href="{translate_url}" target="_blank" rel="noopener" '
-                        f'onclick="try{{navigator.clipboard.writeText({js_text});}}catch(e){{}};" '
-                        f'style="text-decoration: none; color: #8B949E; font-size: 0.9em;">Translate</a>',
-                        unsafe_allow_html=True,
-                    )
+                    st.markdown(f"[Translate]({translate_url})")
 
         user_msg = st.chat_input("Describe a cyber incident, or ask e.g. “Explain Section 66F”")
         if user_msg:
