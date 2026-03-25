@@ -478,12 +478,12 @@ st.markdown(
 )
 st.markdown(
     """
-    <div class="jl-mobile-toggle" data-jl-sidebar-toggle aria-label="Open menu">
-      <div>
-        <span></span><span></span><span></span>
-      </div>
-    </div>
     <div class="jl-mobile-overlay" data-jl-sidebar-overlay></div>
+    """,
+    unsafe_allow_html=True,
+)
+components.html(
+    """
     <script>
     (function(){
       if (window.__jlSidebarToggleInit) return;
@@ -496,15 +496,9 @@ st.markdown(
       let touchStartY = null;
       let touchStartTime = 0;
       const handler = function(e){
-        const toggle = e.target.closest("[data-jl-sidebar-toggle]");
         const overlay = e.target.closest("[data-jl-sidebar-overlay]");
         const sidebar = document.querySelector('section[data-testid="stSidebar"]');
         const insideSidebar = sidebar && sidebar.contains(e.target);
-        if (toggle){
-          e.preventDefault();
-          openSidebar();
-          return;
-        }
         if (overlay){
           e.preventDefault();
           closeSidebar();
@@ -546,7 +540,8 @@ st.markdown(
     })();
     </script>
     """,
-    unsafe_allow_html=True,
+    height=0,
+    width=0,
 )
 
 if "view" not in st.session_state:
