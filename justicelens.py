@@ -1321,8 +1321,11 @@ else:
                 if role == "assistant" and content:
                     encoded_content = urllib.parse.quote_plus(content)
                     translate_url = f"https://translate.google.com/?sl=auto&tl=en&text={encoded_content}&op=translate"
+                    js_text = json.dumps(content)
                     st.markdown(
-                        f'<a href="{translate_url}" target="_blank" rel="noopener" style="text-decoration: none; color: #8B949E; font-size: 0.9em;">Translate</a>',
+                        f'<a href="{translate_url}" target="_blank" rel="noopener" '
+                        f'onclick="try{{navigator.clipboard.writeText({js_text});}}catch(e){{}};" '
+                        f'style="text-decoration: none; color: #8B949E; font-size: 0.9em;">Translate</a>',
                         unsafe_allow_html=True,
                     )
 
