@@ -1230,11 +1230,11 @@ else:
                     pass
 
         # Header (minimal hero + utility actions)
-        _, clear_col = st.columns([5, 1])
-        with clear_col:
-            if st.button("Clear chat", use_container_width=True):
-                history.clear()
-                st.rerun()
+        # _, clear_col = st.columns([5, 1])
+        # with clear_col:
+        #     if st.button("Clear chat", use_container_width=True):
+        #         history.clear()
+        #         st.rerun()
 
         with st.container():
             st.markdown(
