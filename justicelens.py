@@ -385,6 +385,58 @@ if "active_project" not in st.session_state:
 if "mobile_login_open" not in st.session_state:
     st.session_state.mobile_login_open = False
 
+def _session_store_ref():
+    if not db:
+        return None
+    return (
+        db.collection("artifacts")
+        .document("justicelens-law")
+        .collection("public")
+        .document("data")
+        .collection("sessions")
+    )
+
+def _get_sid():
+    try:
+        return st.query_params.get("sid")
+    except Exception:
+        return None
+
+def _set_sid(sid: str):
+    try:
+        st.query_params["sid"] = sid
+    except Exception:
+        pass
+
+def _clear_sid():
+    try:
+        st.query_params.clear()
+    except Exception:
+        pass
+
+def _restore_session_from_sid():
+    if st.session_state.user or not db:
+        return
+    sid = _get_sid()
+    if not sid:
+        return
+    try:
+        ref = _session_store_ref()
+        doc = ref.document(sid).get() if ref else None
+        if doc and doc.exists:
+            data = doc.to_dict() or {}
+            if data.get("uid") and data.get("email"):
+                st.session_state.user = {
+                    "uid": data.get("uid"),
+                    "email": data.get("email"),
+                    "name": data.get("name") or data.get("email", "").split("@")[0],
+                }
+                st.session_state.view = st.session_state.view or "AI Assistant"
+    except Exception:
+        pass
+
+_restore_session_from_sid()
+
 if "projects" not in st.session_state:
     st.session_state.projects = {"Default": st.session_state.get("chat_history", [])}
 if "active_project" not in st.session_state:
@@ -766,6 +818,18 @@ def show_sidebar():
                                     "uid": u_obj.uid
                                 }
                                 st.session_state.view = "AI Assistant"
+                                if db:
+                                    sid = str(uuid.uuid4())
+                                    try:
+                                        _session_store_ref().document(sid).set({
+                                            "uid": u_obj.uid,
+                                            "email": e_val,
+                                            "name": u_obj.display_name or e_val.split('@')[0],
+                                            "created_at": utc_now(),
+                                        })
+                                        _set_sid(sid)
+                                    except Exception:
+                                        pass
                                 st.session_state.show_login = False  # Hide login form
                                 sync_user(st.session_state.user)
                                 st.rerun()
@@ -788,6 +852,18 @@ def show_sidebar():
                 st.session_state.user = {"name": f"Guest_{gid}", "email": "guest@justicelens.io",
                                          "uid": f"guest_{gid}"}
                 st.session_state.show_login = False  # Hide login form
+                if db:
+                    sid = str(uuid.uuid4())
+                    try:
+                        _session_store_ref().document(sid).set({
+                            "uid": st.session_state.user["uid"],
+                            "email": st.session_state.user["email"],
+                            "name": st.session_state.user["name"],
+                            "created_at": utc_now(),
+                        })
+                        _set_sid(sid)
+                    except Exception:
+                        pass
                 st.rerun()
 
             st.markdown("---")
@@ -828,8 +904,14 @@ def show_sidebar():
 
             st.session_state.view = st.radio("NAVIGATION", [x.strip() for x in opts])
 
+            with st.expander("Settings", expanded=False):
+                st.caption("Preferences")
+                st.write("Account and UI preferences will appear here.")
+
             if st.session_state.view == "AI Assistant":
-                if st.button("New Chat", use_container_width=True):
+                if st.button("Clear chat", use_container_width=True):
+                    active = st.session_state.active_project
+                    st.session_state.projects[active] = []
                     st.session_state.chat_history = []
                     st.rerun()
 
@@ -863,6 +945,13 @@ def show_sidebar():
 
             st.markdown("---")
             if st.button("TERMINATE SESSION"):
+                sid = _get_sid()
+                if sid and db:
+                    try:
+                        _session_store_ref().document(sid).delete()
+                    except Exception:
+                        pass
+                _clear_sid()
                 st.session_state.user = None
                 st.session_state.admin_mode = False
                 st.session_state.chat_history = []
@@ -1003,6 +1092,18 @@ if not st.session_state.user:
                                 st.session_state.user = {"name": u_obj.display_name or m_email.split('@')[0], "email": m_email, "uid": u_obj.uid}
                                 st.session_state.view = "AI Assistant"
                                 st.session_state.mobile_login_open = False
+                                if db:
+                                    sid = str(uuid.uuid4())
+                                    try:
+                                        _session_store_ref().document(sid).set({
+                                            "uid": u_obj.uid,
+                                            "email": m_email,
+                                            "name": u_obj.display_name or m_email.split('@')[0],
+                                            "created_at": utc_now(),
+                                        })
+                                        _set_sid(sid)
+                                    except Exception:
+                                        pass
                                 sync_user(st.session_state.user)
                                 st.rerun()
                         else:
