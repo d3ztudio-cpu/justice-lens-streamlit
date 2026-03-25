@@ -402,9 +402,6 @@ st.markdown(
         .jl-mobile-overlay{ display: block; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
         body.jl-sidebar-open .jl-mobile-overlay{ opacity: 1; pointer-events: auto; }
         section[data-testid="stSidebar"]{
-            display: none !important;
-        }
-        .jl-mobile-drawer{
             position: fixed !important;
             top: 0;
             left: 0;
@@ -418,12 +415,10 @@ st.markdown(
             overflow: hidden;
             display: block !important;
             background: var(--jl-card) !important;
-            padding: 0.6rem 0.7rem;
-            overflow-y: auto;
             visibility: hidden;
             pointer-events: none;
         }
-        body.jl-sidebar-open .jl-mobile-drawer{
+        body.jl-sidebar-open section[data-testid="stSidebar"]{
             transform: translateX(0) !important;
             pointer-events: auto;
             visibility: visible;
@@ -1173,105 +1168,6 @@ def show_sidebar():
 
 # --- SIDEBAR UI ---
 show_sidebar()
-
-def show_mobile_drawer():
-    st.markdown('<div class="jl-mobile-drawer">', unsafe_allow_html=True)
-    with st.container():
-        st.image(LOGO_SOURCE, use_container_width=True)
-        if not st.session_state.user:
-            auth_tab = st.tabs(["Login", "Create Account"])
-            with auth_tab[0]:
-                e_val = st.text_input("Email", key="drawer_login_email")
-                p_val = st.text_input("Password", type="password", key="drawer_login_pass")
-                if st.button(" Authenticate", key="drawer_login_btn"):
-                    valid, u_obj = authenticate(e_val, p_val)
-                    if valid:
-                        if check_ban(u_obj.uid):
-                            st.error("Access Forbidden.")
-                        else:
-                            st.session_state.user = {
-                                "name": u_obj.display_name or e_val.split('@')[0],
-                                "email": e_val,
-                                "uid": u_obj.uid
-                            }
-                            st.session_state.view = "AI Assistant"
-                            if db:
-                                sid = str(uuid.uuid4())
-                                try:
-                                    _session_store_ref().document(sid).set({
-                                        "uid": u_obj.uid,
-                                        "email": e_val,
-                                        "name": u_obj.display_name or e_val.split('@')[0],
-                                        "created_at": utc_now(),
-                                    })
-                                    _set_sid(sid)
-                                except Exception:
-                                    pass
-                            sync_user(st.session_state.user)
-                            st.rerun()
-                    else:
-                        st.error("Invalid Credentials.")
-            with auth_tab[1]:
-                nu = st.text_input("Full Name", key="drawer_full_name")
-                eu = st.text_input("Email", key="drawer_s_email")
-                pu = st.text_input("Create Password", type="password", key="drawer_s_pass")
-                if st.button("REGISTER", key="drawer_register_btn"):
-                    try:
-                        auth.create_user(email=eu, password=pu, display_name=nu)
-                        st.success("Account Ready! Use Login.")
-                    except Exception as ex:
-                        st.error(str(ex))
-            if st.button("Guest User", key="drawer_guest_btn"):
-                gid = str(uuid.uuid4())[:8]
-                st.session_state.user = {"name": f"Guest_{gid}", "email": "guest@justicelens.io", "uid": f"guest_{gid}"}
-                if db:
-                    sid = str(uuid.uuid4())
-                    try:
-                        _session_store_ref().document(sid).set({
-                            "uid": st.session_state.user["uid"],
-                            "email": st.session_state.user["email"],
-                            "name": st.session_state.user["name"],
-                            "created_at": utc_now(),
-                        })
-                        _set_sid(sid)
-                    except Exception:
-                        pass
-                st.rerun()
-            st.markdown("---")
-            public_pages = ["AI Assistant", "About", "Terms", "Cyber Rules 2026"]
-            choice = st.radio("Resources", public_pages, key="drawer_public_nav", label_visibility="collapsed")
-            if choice != st.session_state.view:
-                st.session_state.view = choice
-                st.rerun()
-        else:
-            st.markdown(
-                f"<div class='jl-sidebar-connected'>Connected to: <b>{st.session_state.user['name']}</b></div>",
-                unsafe_allow_html=True,
-            )
-            opts = ["AI Assistant", "Vision & Mission", "About", "Terms", "Cyber Rules 2026"]
-            if st.session_state.admin_mode:
-                opts.append("Admin Dashboard")
-            choice = st.radio("NAVIGATION", [x.strip() for x in opts], key="drawer_nav")
-            if choice != st.session_state.view:
-                st.session_state.view = choice
-                st.rerun()
-            st.markdown("---")
-            if st.button("TERMINATE SESSION", key="drawer_terminate"):
-                sid = _get_sid()
-                if sid and db:
-                    try:
-                        _session_store_ref().document(sid).delete()
-                    except Exception:
-                        pass
-                _clear_sid()
-                st.session_state.user = None
-                st.session_state.admin_mode = False
-                st.session_state.chat_history = []
-                st.session_state.show_login = True
-                st.rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
-
-show_mobile_drawer()
 
 # --- MAIN CONTENT ---
 if not st.session_state.user:
