@@ -150,65 +150,109 @@ st.markdown(
         display: none !important;
     }
 
-    .jl-sidebar-toggle,
+    section[data-testid="stSidebar"]{
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        height: 100vh !important;
+        width: min(320px, 85vw) !important;
+        transform: translateX(-105%);
+        transition: transform 0.22s ease;
+        z-index: 1200;
+        box-shadow: var(--jl-shadow);
+    }
+    body.jl-sidebar-open section[data-testid="stSidebar"]{
+        transform: translateX(0);
+    }
     .jl-sidebar-overlay{
-        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+        z-index: 1100;
+    }
+    body.jl-sidebar-open .jl-sidebar-overlay{
+        opacity: 1;
+        pointer-events: auto;
     }
 
-    @media (max-width: 900px){
-        section[data-testid="stSidebar"]{
-            position: fixed !important;
-            top: 0;
-            left: 0;
-            height: 100vh !important;
-            width: min(320px, 85vw) !important;
-            transform: translateX(-105%);
-            transition: transform 0.22s ease;
-            z-index: 1200;
-            box-shadow: var(--jl-shadow);
-        }
-        body.jl-sidebar-open section[data-testid="stSidebar"]{
-            transform: translateX(0);
-        }
-        .jl-sidebar-toggle{
-            display: flex;
-            position: fixed;
-            top: 0.9rem;
-            left: 0.9rem;
-            z-index: 1300;
-            width: 44px;
-            height: 44px;
-            border-radius: 10px;
-            border: 1px solid var(--jl-border);
-            background: var(--jl-card);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: var(--jl-shadow-sm);
-        }
-        .jl-sidebar-toggle span{
-            display: block;
-            width: 20px;
-            height: 2px;
-            background: var(--jl-text);
-            margin: 3px 0;
-            border-radius: 2px;
-        }
-        .jl-sidebar-overlay{
-            display: block;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.45);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease;
-            z-index: 1100;
-        }
-        body.jl-sidebar-open .jl-sidebar-overlay{
-            opacity: 1;
-            pointer-events: auto;
-        }
+    .jl-topbar{
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 64px;
+        background: #0B0F14;
+        border-bottom: 1px solid var(--jl-border);
+        z-index: 1250;
+        display: flex;
+        align-items: center;
+    }
+    .jl-topbar-inner{
+        width: 100%;
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 0 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.25rem;
+    }
+    .jl-brand{
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #FFFFFF !important;
+    }
+    .jl-nav{
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        font-weight: 700;
+    }
+    .jl-nav a{
+        color: #FFFFFF !important;
+        text-decoration: none;
+        letter-spacing: 0.08em;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+    }
+    .jl-nav a.active{
+        color: #FF4D4D !important;
+        text-shadow: 0 0 10px rgba(255, 77, 77, 0.55);
+    }
+    .jl-hamburger{
+        display: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        border: 1px solid var(--jl-border);
+        background: var(--jl-card);
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: var(--jl-shadow-sm);
+    }
+    .jl-hamburger span{
+        display: block;
+        width: 20px;
+        height: 2px;
+        background: var(--jl-text);
+        margin: 3px 0;
+        border-radius: 2px;
+    }
+
+    @media (max-width: 991px){
+        .jl-nav{ display: none; }
+        .jl-hamburger{ display: flex; }
+    }
+    @media (min-width: 992px){
+        .jl-sidebar-overlay{ display: none; }
+    }
+    .main .block-container{
+        padding-top: 5.5rem !important;
     }
 
     /* Buttons */
@@ -373,16 +417,32 @@ st.markdown(
 if "jl_open_sidebar" not in st.session_state:
     st.session_state.jl_open_sidebar = False
 
+st.markdown(
+    """
+    <div class="jl-topbar">
+        <div class="jl-topbar-inner">
+            <div class="jl-brand">Justice Lens</div>
+            <nav class="jl-nav">
+                <a class="active" href="javascript:void(0)">HOME</a>
+                <a href="javascript:void(0)">ABOUT</a>
+                <a href="javascript:void(0)">SERVICES</a>
+                <a href="javascript:void(0)">CONTACT</a>
+                <a href="javascript:void(0)">PORTFOLIO</a>
+            </nav>
+            <button class="jl-hamburger" data-jl-toggle-sidebar aria-label="Open menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
 _autopen = "true" if st.session_state.jl_open_sidebar else "false"
 components.html(
     f"""
-    <div class="jl-sidebar-toggle" data-jl-toggle-sidebar aria-label="Open menu">
-        <div>
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
-    </div>
     <div class="jl-sidebar-overlay" data-jl-close-sidebar></div>
     <div data-jl-autopen="{_autopen}" style="display:none;"></div>
     <script>
@@ -417,9 +477,15 @@ components.html(
             const toggleBtn = e.target.closest("[data-jl-toggle-sidebar]");
             const openBtn = e.target.closest("[data-jl-open-sidebar]");
             const closeBtn = e.target.closest("[data-jl-close-sidebar]");
+            const sidebarEl = document.querySelector('section[data-testid="stSidebar"]');
+            const clickedInsideSidebar = sidebarEl && sidebarEl.contains(e.target);
             if (toggleBtn) {{
                 e.preventDefault();
                 toggleSidebar();
+                return;
+            }}
+            if (body.classList.contains(OPEN_CLASS) && !clickedInsideSidebar && !openBtn && !closeBtn) {{
+                closeSidebar();
                 return;
             }}
             if (openBtn) {{
