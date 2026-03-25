@@ -127,6 +127,16 @@ st.markdown(
         pointer-events: none !important;
     }
 
+    /* Remove Streamlit header/toolbar (removes default toggle & deployment chrome) */
+    header[data-testid="stHeader"],
+    [data-testid="stToolbar"],
+    [data-testid="stDecoration"],
+    #MainMenu {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+    }
+
     /* Permanently fix sidebar by hiding the collapse controls */
     [data-testid="collapsedControl"],
     [data-testid="stSidebarCollapseButton"],
@@ -398,6 +408,10 @@ components.html(
                 }}
             }});
         }};
+        const observeAndStrip = () => {{
+            const mo = new MutationObserver(() => stripDefaultToggle());
+            mo.observe(document.documentElement, {{ childList: true, subtree: true }});
+        }};
 
         document.addEventListener("click", (e) => {{
             const toggleBtn = e.target.closest("[data-jl-toggle-sidebar]");
@@ -427,6 +441,7 @@ components.html(
         }};
         setTimeout(() => {{
             stripDefaultToggle();
+            observeAndStrip();
             maybeAutoOpen();
         }}, 0);
         setTimeout(stripDefaultToggle, 500);
