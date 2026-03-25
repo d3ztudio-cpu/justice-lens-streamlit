@@ -415,11 +415,14 @@ st.markdown(
             pointer-events: none;
             visibility: hidden;
             overflow: hidden;
+            display: block !important;
         }
         body.jl-sidebar-open section[data-testid="stSidebar"]{
             transform: translateX(0) !important;
             pointer-events: auto;
             visibility: visible;
+            display: block !important;
+            width: min(280px, 80vw) !important;
         }
     }
     </style>
