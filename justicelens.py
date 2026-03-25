@@ -397,7 +397,7 @@ st.markdown(
         z-index: 1100;
     }
     @media (max-width: 700px){
-        .jl-mobile-toggle{ display: inline-flex; }
+        .jl-mobile-toggle{ display: none; }
         .jl-mobile-overlay{ display: block; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
         body.jl-sidebar-open .jl-mobile-overlay{ opacity: 1; pointer-events: auto; }
         section[data-testid="stSidebar"]{
@@ -492,6 +492,9 @@ st.markdown(
       const OPEN_CLASS = "jl-sidebar-open";
       const openSidebar = () => body.classList.add(OPEN_CLASS);
       const closeSidebar = () => body.classList.remove(OPEN_CLASS);
+      let touchStartX = null;
+      let touchStartY = null;
+      let touchStartTime = 0;
       const handler = function(e){
         const toggle = e.target.closest("[data-jl-sidebar-toggle]");
         const overlay = e.target.closest("[data-jl-sidebar-overlay]");
@@ -513,6 +516,33 @@ st.markdown(
       };
       document.addEventListener("click", handler);
       document.addEventListener("touchstart", handler, {passive: true});
+
+      document.addEventListener("touchstart", function(e){
+        const t = e.touches && e.touches[0];
+        if (!t) return;
+        touchStartX = t.clientX;
+        touchStartY = t.clientY;
+        touchStartTime = Date.now();
+      }, {passive: true});
+
+      document.addEventListener("touchend", function(e){
+        const t = e.changedTouches && e.changedTouches[0];
+        if (!t || touchStartX === null) return;
+        const dx = t.clientX - touchStartX;
+        const dy = t.clientY - touchStartY;
+        const dt = Date.now() - touchStartTime;
+        touchStartX = null;
+        touchStartY = null;
+        if (dt > 600) return;
+        if (Math.abs(dy) > 80) return;
+        if (dx > 70 && t.clientX < 260) {
+          openSidebar();
+          return;
+        }
+        if (dx < -70 && body.classList.contains(OPEN_CLASS)) {
+          closeSidebar();
+        }
+      }, {passive: true});
     })();
     </script>
     """,
