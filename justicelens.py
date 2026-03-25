@@ -416,6 +416,7 @@ st.markdown(
             visibility: hidden;
             overflow: hidden;
             display: block !important;
+            background: var(--jl-card) !important;
         }
         body.jl-sidebar-open section[data-testid="stSidebar"]{
             transform: translateX(0) !important;
