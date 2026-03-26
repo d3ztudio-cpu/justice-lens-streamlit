@@ -520,6 +520,7 @@ components.html(
         const backdrop = e.target.closest("[data-jl-drawer-backdrop]");
         const sidebar = doc.querySelector('section[data-testid="stSidebar"]');
         const insideSidebar = sidebar && sidebar.contains(e.target);
+        const clickedButton = e.target.closest("button");
         if (toggle){
           e.preventDefault();
           openDrawer();
@@ -528,6 +529,10 @@ components.html(
         if (backdrop){
           e.preventDefault();
           closeDrawer();
+          return;
+        }
+        if (body.classList.contains(OPEN_CLASS) && insideSidebar && clickedButton && isMobile()){
+          setTimeout(() => closeDrawer(), 60);
           return;
         }
         if (body.classList.contains(OPEN_CLASS) && !insideSidebar){
@@ -564,14 +569,11 @@ def init_backend():
             bar = st.progress(0, text="Verifying Database...")
             pc = Pinecone(api_key=PINECONE_KEY)
             idx = pc.Index(INDEX_NAME)
-            time.sleep(0.2)
             
             bar.progress(50, text="Synchronizing AI Engine...")
             embed_model = HuggingFaceEmbeddings(model_name="nlpaueb/legal-bert-base-uncased")
-            time.sleep(0.2)
             
             bar.progress(100, text="AI Online.")
-            time.sleep(0.4)
             
         splash.empty()
         return idx, embed_model
@@ -1547,7 +1549,7 @@ else:
                 st.markdown(content)
                 if role == "assistant" and content:
                     encoded_content = urllib.parse.quote_plus(content)
-                    translate_url = f"https://translate.google.com/?sl=auto&tl=en&text={encoded_content}&op=translate"
+                    translate_url = f"https://translate.google.com/m?sl=auto&tl=en&q={encoded_content}"
                     try:
                         b64 = base64.b64encode(content.encode("utf-8")).decode("ascii")
                     except Exception:
