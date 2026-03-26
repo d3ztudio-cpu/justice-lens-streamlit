@@ -530,6 +530,7 @@ components.html(
         const sidebar = doc.querySelector('section[data-testid="stSidebar"]');
         const insideSidebar = sidebar && sidebar.contains(e.target);
         const clickedButton = e.target.closest("button");
+        const clickedOption = e.target.closest("input, select, textarea, label, [role='option'], [role='radio'], [role='checkbox']");
         if (toggle){
           e.preventDefault();
           openDrawer();
@@ -540,7 +541,7 @@ components.html(
           closeDrawer();
           return;
         }
-        if (body.classList.contains(OPEN_CLASS) && insideSidebar && clickedButton && isMobile()){
+        if (body.classList.contains(OPEN_CLASS) && insideSidebar && isMobile() && (clickedButton || clickedOption)){
           setTimeout(() => closeDrawer(), 60);
           return;
         }
