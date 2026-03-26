@@ -1083,14 +1083,24 @@ def _render_report_html(text: str) -> str:
                 continue
             in_action = False
 
-        kv_numbered = re.match(r"^\d+\.\s*([A-Z][A-Z\s/&-]+?)(?:\s*[:\-])?\s+(.*)$", raw)
+        kv_numbered = re.match(r"^\d+\.\s*([A-Z][A-Z\s/&-]+)(?:\s*[:\-])?\s+(.*)$", raw)
         if kv_numbered:
-            rows.append(("kv", kv_numbered.group(1).strip(), kv_numbered.group(2).strip()))
+            label = kv_numbered.group(1).strip()
+            body = kv_numbered.group(2).strip()
+            if body and body.isupper() and len(body.split()) <= 3 and not re.search(r"\d", body):
+                rows.append(("section", f"{label} {body}".strip(), ""))
+            else:
+                rows.append(("kv", label, body))
             continue
 
         kv_plain = re.match(r"^([A-Z][A-Z\s/&-]+):\s*(.*)$", raw)
         if kv_plain:
-            rows.append(("kv", kv_plain.group(1).strip(), kv_plain.group(2).strip()))
+            label = kv_plain.group(1).strip()
+            body = kv_plain.group(2).strip()
+            if body and body.isupper() and len(body.split()) <= 3 and not re.search(r"\d", body):
+                rows.append(("section", f"{label} {body}".strip(), ""))
+            else:
+                rows.append(("kv", label, body))
             continue
 
         rows.append(("p", "", raw))
