@@ -885,10 +885,33 @@ def _normalize_intent_category(raw_category: str) -> str:
             return known
     return "NON_LEGAL"
 
-def get_intent_category(user_input):
+def _groq_chat(messages, timeout=18):
+    if not GROQ_API_KEY:
+        return None, "Missing GROQ API key."
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
+    data = {"model": "llama-3.1-8b-instant", "messages": messages, "temperature": 0.0}
+    last_err = None
+    for _ in range(2):
+        try:
+            response = requests.post(url, headers=headers, json=data, timeout=timeout)
+            if not response.ok:
+                last_err = f"HTTP {response.status_code}"
+                continue
+            payload = response.json() or {}
+            content = (
+                payload.get("choices", [{}])[0]
+                .get("message", {})
+                .get("content")
+            )
+            if content:
+                return content, None
+            last_err = "Empty response"
+        except Exception as e:
+            last_err = str(e)
+    return None, last_err or "Request failed"
 
+def get_intent_category(user_input):
     classifier_prompt = f"""
     Analyze the user input: "{user_input}"
     Categories:
@@ -898,22 +921,15 @@ def get_intent_category(user_input):
     4. NON_LEGAL: General/site/developer questions not asking cyber legal help.
     Respond with ONLY the category name.
     """
-    data = {
-        "model": "llama-3.1-8b-instant",
-        "messages": [{"role": "user", "content": classifier_prompt}],
-        "temperature": 0.0
-    }
-    try:
-        response = requests.post(url, headers=headers, json=data, timeout=10)
-        raw = response.json()['choices'][0]['message']['content']
-        return _normalize_intent_category(raw)
-    except:
-        return "PHYSICAL"
+    content, err = _groq_chat([{"role": "user", "content": classifier_prompt}], timeout=10)
+    if content:
+        return _normalize_intent_category(content)
+    # Fallback heuristic to avoid hard failure
+    if re.search(r"\b(section|it act|ipc|cyber)\b", str(user_input).lower()):
+        return "CYBER_EXPLAIN" if "explain" in str(user_input).lower() else "CYBER_SCENARIO"
+    return "NON_LEGAL"
 
 def ask_groq_lawyer(user_input, law_evidence, category):
-    url = "https://api.groq.com/openai/v1/chat/completions"
-    headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
-
     case_history = _justice_lens_case_history()
 
     legal_anchor = _justice_lens_legal_anchor()
@@ -946,16 +962,13 @@ def ask_groq_lawyer(user_input, law_evidence, category):
 
     full_prompt = f"{system_prompt}\nUSER QUERY: {user_input}\nDATABASE EVIDENCE: {law_evidence}"
 
-    data = {
-        "model": "llama-3.1-8b-instant",
-        "messages": [{"role": "user", "content": full_prompt}],
-        "temperature": 0.0
-    }
-    try:
-        response = requests.post(url, headers=headers, json=data, timeout=18)
-        return response.json()['choices'][0]['message']['content']
-    except:
-        return "⚠️ AI Engine Error."
+    content, err = _groq_chat([{"role": "user", "content": full_prompt}], timeout=18)
+    if content:
+        return content
+    return (
+        "⚠️ The AI engine is temporarily unavailable. "
+        "Please try again in a moment."
+    )
 
 def _validate_ai_answer(category: str, answer: str) -> bool:
     if not answer or not isinstance(answer, str):
@@ -980,9 +993,6 @@ def _validate_ai_answer(category: str, answer: str) -> bool:
     return all(x in upper for x in required_sections)
 
 def _repair_ai_answer(user_input: str, law_evidence: str, category: str, bad_answer: str) -> str:
-    url = "https://api.groq.com/openai/v1/chat/completions"
-    headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
-
     legal_anchor = _justice_lens_legal_anchor()
 
     category_upper = str(category).upper()
@@ -1025,17 +1035,8 @@ def _repair_ai_answer(user_input: str, law_evidence: str, category: str, bad_ans
         DRAFT (FIX THIS): {bad_answer}
         """
 
-    data = {
-        "model": "llama-3.1-8b-instant",
-        "messages": [{"role": "user", "content": repair_prompt}],
-        "temperature": 0.0,
-    }
-
-    try:
-        response = requests.post(url, headers=headers, json=data, timeout=18)
-        return response.json()["choices"][0]["message"]["content"]
-    except Exception:
-        return bad_answer
+    content, err = _groq_chat([{"role": "user", "content": repair_prompt}], timeout=18)
+    return content if content else bad_answer
 
 def ask_groq_lawyer_validated(user_input: str, law_evidence: str, category: str) -> str:
     answer = ask_groq_lawyer(user_input, law_evidence, category)
