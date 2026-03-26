@@ -1467,7 +1467,13 @@ else:
                         pass
 
                 with st.spinner("Generating legal report..."):
-                    ans = ask_groq_lawyer_validated(user_msg, dataset_evidence, category)
+                    try:
+                        ans = ask_groq_lawyer_validated(user_msg, dataset_evidence, category)
+                    except Exception:
+                        ans = (
+                            "⚠️ I ran into an issue generating the report just now. "
+                            "Please try again in a moment. If it persists, rephrase the query."
+                        )
 
             history.append({"role": "assistant", "content": ans})
             st.session_state.gen_count += 1
@@ -1611,14 +1617,20 @@ else:
                         If you don’t see a prompt, open your browser menu and tap “Add to Home Screen”.
                     </div>
                 </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            components.html(
+                """
                 <script>
                 (function(){
                   if (window.__jlInstallHandler) return;
                   window.__jlInstallHandler = true;
-                  const btn = document.getElementById("jl-install-btn");
+                  const doc = window.parent && window.parent.document ? window.parent.document : document;
+                  const btn = doc.getElementById("jl-install-btn");
                   if (!btn) return;
                   btn.addEventListener("click", async () => {
-                    const promptEvent = window.__jlInstallPrompt || (window.parent && window.parent.__jlInstallPrompt);
+                    const promptEvent = window.parent && window.parent.__jlInstallPrompt ? window.parent.__jlInstallPrompt : window.__jlInstallPrompt;
                     if (promptEvent && promptEvent.prompt){
                       promptEvent.prompt();
                       try { await promptEvent.userChoice; } catch(e){}
@@ -1629,7 +1641,8 @@ else:
                 })();
                 </script>
                 """,
-                unsafe_allow_html=True,
+                height=0,
+                width=0,
             )
 
         user_msg = st.chat_input("Describe a cyber incident, or ask e.g. “Explain Section 66F”")
