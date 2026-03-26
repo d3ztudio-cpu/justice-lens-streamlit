@@ -10,6 +10,7 @@ import uuid
 import requests
 import time
 import re
+import html
 import urllib.parse
 import base64
 from pinecone import Pinecone
@@ -733,24 +734,21 @@ def check_ban(uid):
 # --- AI LOGIC ---
 def _justice_lens_legal_anchor() -> str:
     return """
-    INTERNAL REFERENCE (ABSOLUTE TRUTH):
-    - Section 70 (IT Act): Protected Systems. Definition: Unauthorized access to systems declared as critical infrastructure by the Government. Punishment = Up to 10 years.
-    - Section 67A (IT Act): Sexually Explicit Content. Definition: Publishing or transmitting material containing sexually explicit acts in electronic form. Punishment = 5-7 years + 10 Lakh fine.
-    - Section 66F (IT Act): Cyber Terrorism. Definition: Acts done with intent to threaten unity, integrity, or security of India via computer. Punishment = LIFE IMPRISONMENT.
-    - Section 66E (IT Act): Violation of Privacy. Definition: Intentionally capturing or publishing private images of any person without consent. Punishment = Up to 3 years / up to 2 Lakh fine.
-    - Section 66C (IT Act): Identity Theft. Definition: Fraudulently/dishonestly using another person’s electronic signature, password, or unique identification. Punishment = Up to 3 years + up to 1 Lakh fine.
-    - Section 66D (IT Act): Cheating by Personation. Definition: Cheating by personation using any communication device/computer resource. Punishment = Up to 3 years + up to 1 Lakh fine.
-    - Section 66B (IT Act): Stolen Computer Resource. Punishment = Up to 3 years / up to 5 Lakh fine.
-    - Section 43 (IT Act): Civil Compensation. Definition: Unauthorized access/damage or unauthorised downloading/copying, etc. Punishment = Compensation ONLY (civil).
-    - Section 43A (IT Act): Corporate Data Negligence. Definition: Failure by a body corporate to implement reasonable security practices for sensitive data. Punishment = Compensation ONLY (civil).
+    STATUTORY REFERENCE:
+    - Section 70: Protected Systems (Critical Infrastructure)
+    - Section 67A: Sexually Explicit Content
+    - Section 66F: Cyber Terrorism
+    - Section 66: Hacking and Unauthorized Access
+    - Section 43A: Corporate Data Negligence
     """
 
 def _justice_lens_case_history() -> str:
     return """
-    HISTORICAL PRECEDENTS (USE FOR SCENARIOS):
-    - Hacking/Unauthorized Access: State of Tamil Nadu vs. Suhas Katti (2004).
-    - Privacy Violations: Justice K.S. Puttaswamy (Retd.) vs. Union of India (2017).
-    - Financial Fraud: CBI vs. Arif Azim (Sony Sambandh Case).
+    LANDMARK PRECEDENTS:
+    - State of Tamil Nadu vs. Suhas Katti (2004)
+    - Shreya Singhal vs. Union of India (2015)
+    - CBI vs. Arif Azim (Sony Sambandh Case)
+    - Justice K.S. Puttaswamy vs. Union of India (2017)
     """
 
 def _contains_any(haystack: str, needles: tuple[str, ...]) -> bool:
@@ -879,17 +877,17 @@ def _apply_high_priority_refinements(user_input: str, category: str, answer: str
 
 def _normalize_intent_category(raw_category: str) -> str:
     upper = str(raw_category or "").strip().upper()
-    for known in ("PHYSICAL", "CYBER_SCENARIO", "CYBER_EXPLAIN", "NON_LEGAL"):
+    for known in ("CYBER_SCENARIO", "CYBER_EXPLAIN", "INVALID"):
         if known in upper:
             return known
-    return "NON_LEGAL"
+    return "INVALID"
 
-def _groq_chat(messages, timeout=18):
+def _groq_chat(messages, timeout=18, temperature=0.0):
     if not GROQ_API_KEY:
         return None, "Missing GROQ API key."
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
-    data = {"model": "llama-3.1-8b-instant", "messages": messages, "temperature": 0.0}
+    data = {"model": "llama-3.1-8b-instant", "messages": messages, "temperature": temperature}
     last_err = None
     for _ in range(2):
         try:
@@ -912,62 +910,76 @@ def _groq_chat(messages, timeout=18):
 
 def get_intent_category(user_input):
     classifier_prompt = f"""
-    Analyze the user input: "{user_input}"
-    Categories:
-    1. PHYSICAL: Related to physical crimes (theft, assault).
-    2. CYBER_SCENARIO: A real-life cyber problem/victim situation.
-    3. CYBER_EXPLAIN: A direct request for legal definitions (e.g. "Explain 70").
-    4. NON_LEGAL: General/site/developer questions not asking cyber legal help.
-    Respond with ONLY the category name.
+    Analyze user input: "{user_input}"
+    
+    STRICT CATEGORIZATION RULES:
+    1. CYBER_SCENARIO: Only for crimes occurring in digital space (Hacking, Phishing, Ransomware, Online Fraud).
+    2. CYBER_EXPLAIN: Only for specific requests about Information Technology Act 2000 sections.
+    3. INVALID: ALL OTHER TOPICS. This includes Murder, Physical Theft (Ornaments, Cash), Assault, Math, Greetings, or General History.
+    
+    If the input is not a 100% match for Indian Cyber Law, return 'INVALID'.
+    Response must be ONLY the category name.
     """
-    content, err = _groq_chat([{"role": "user", "content": classifier_prompt}], timeout=10)
+    content, err = _groq_chat([{"role": "user", "content": classifier_prompt}], timeout=10, temperature=0.0)
     if content:
         return _normalize_intent_category(content)
-    # Fallback heuristic to avoid hard failure
-    if re.search(r"\b(section|it act|ipc|cyber)\b", str(user_input).lower()):
-        return "CYBER_EXPLAIN" if "explain" in str(user_input).lower() else "CYBER_SCENARIO"
-    return "NON_LEGAL"
+    return "INVALID"
 
 def ask_groq_lawyer(user_input, law_evidence, category):
     case_history = _justice_lens_case_history()
-
     legal_anchor = _justice_lens_legal_anchor()
 
     if "EXPLAIN" in category:
         system_prompt = f"""
         {legal_anchor}
-        You are a Precise Legal Reference Tool.
-        - Provide: OFFICIAL TITLE, DEFINITION, and EXACT PUNISHMENT.
-        - STRICT RULE: DO NOT provide 'Win Probability', 'Action Plan', or 'Case History'.
-        - Use the definitions exactly as provided in the INTERNAL REFERENCE.
+        Role: Legal Librarian.
+        Output EXACTLY in this format (plain text only, no bullets, no markdown):
+        1. SECTION TITLE [Section name]
+        2. LEGAL DEFINITION [Definition]
+        3. STATUTORY PUNISHMENT [Punishment]
         """
     else:
-        dynamic_rules = _justice_lens_dynamic_scenario_rules(user_input)
         system_prompt = f"""
         {legal_anchor}
         {case_history}
-        {_justice_lens_2026_scenario_logic()}
-        {dynamic_rules}
-        You are an Expert Cyber Law Consultant. Use this EXACT format:
-         RELEVANT SECTIONS: [Cite sections]
-         PUNISHMENTS: [List jail/compensation]
-         CASE HISTORY: [Cite landmark case]
-         WIN PROBABILITY: [Percentage] - [Reasoning]
-        ACTION PLAN:
-        1. (Golden Hour) If ANY money moved/was attempted (UPI/card/netbanking): report within 2 hours via 1930 or cybercrime.gov.in (CFCFRMS) and ask your bank to place a lien/freeze + block instruments; also report to bank within 5 days for compensation eligibility where applicable.
-        2. Secure the breach immediately: change passwords, enable 2FA, revoke sessions/devices, reset UPI PINs, and monitor accounts to mitigate further harm.
-        3. Preserve primary evidence for Section 65B: Email headers, UPI transaction IDs, URL metadata (full URL + redirects), screenshots/chats/call logs; then file the cybercrime.gov.in complaint and (if an organization) report to CERT-In within required timelines; consider a forensic auditor for large loss.
+        Role: Cyber Law Consultant.
+        Output EXACTLY in this format (plain text only, no bullets, no markdown):
+        1. LEGAL ANALYSIS [Analysis]
+        2. STATUTORY PENALTIES [Penalties]
+        3. JUDICIAL PRECEDENT [Case]
+        4. PROBABILITY OF SUCCESS [Percentage + Reason]
+        5. REMEDIAL ACTION PLAN
+        5.1 [Action step]
+        5.2 [Action step]
+        5.3 [Action step]
         """
 
-    full_prompt = f"{system_prompt}\nUSER QUERY: {user_input}\nDATABASE EVIDENCE: {law_evidence}"
+    full_prompt = f"{system_prompt}\nUser Input: {user_input}\nContext: {law_evidence}"
 
-    content, err = _groq_chat([{"role": "user", "content": full_prompt}], timeout=18)
+    content, err = _groq_chat([{"role": "user", "content": full_prompt}], timeout=18, temperature=0.1)
     if content:
         return content
     return (
-        "⚠️ The AI engine is temporarily unavailable. "
+        "The AI engine is temporarily unavailable. "
         "Please try again in a moment."
     )
+
+def _format_report_body(body: str) -> str:
+    cleaned = (body or "").strip()
+    if not cleaned:
+        return "JUSTICE LENS ADVISORY REPORT"
+    return "JUSTICE LENS ADVISORY REPORT\n" + cleaned
+
+def _out_of_scope_report() -> str:
+    return "\n".join([
+        "JUSTICE LENS ADVISORY REPORT",
+        "-" * 30,
+        "OUT OF SCOPE NOTICE",
+        "The query provided pertains to a topic outside the scope of Indian Cyber Law.",
+        "Justice Lens provides advisory services exclusively for the Information Technology Act, 2000.",
+        "Please provide a digital or cyber-related scenario.",
+        "-" * 30,
+    ])
 
 def _validate_ai_answer(category: str, answer: str) -> bool:
     if not answer or not isinstance(answer, str):
@@ -1038,13 +1050,7 @@ def _repair_ai_answer(user_input: str, law_evidence: str, category: str, bad_ans
     return content if content else bad_answer
 
 def ask_groq_lawyer_validated(user_input: str, law_evidence: str, category: str) -> str:
-    answer = ask_groq_lawyer(user_input, law_evidence, category)
-    if _validate_ai_answer(category, answer):
-        return _apply_high_priority_refinements(user_input, category, answer)
-
-    repaired = _repair_ai_answer(user_input, law_evidence, category, answer)
-    final = repaired if _validate_ai_answer(category, repaired) else answer
-    return _apply_high_priority_refinements(user_input, category, final)
+    return ask_groq_lawyer(user_input, law_evidence, category)
 
 def show_sidebar():
     with st.sidebar:
@@ -1445,13 +1451,8 @@ else:
             with st.spinner("Analyzing scope..."):
                 category = get_intent_category(user_msg)
 
-            if category == "PHYSICAL":
-                ans = "⚠️ This tool handles cyber crimes only. For other types of crimes, file an FIR under IPC."
-            elif category == "NON_LEGAL":
-                ans = (
-                    "ℹ️ I can only help with cyber-law topics (IT Act / cybercrime). "
-                    "Ask a legal question about a cyber issue and I’ll help."
-                )
+            if category == "INVALID":
+                ans = _out_of_scope_report()
             else:
                 with st.spinner("Querying legal database..."):
                     dataset_evidence = "General context."
@@ -1459,7 +1460,7 @@ else:
                         idx, emb = get_backend()
                         if idx and emb:
                             v = emb.embed_query(user_msg)
-                            m = idx.query(vector=v, top_k=5, include_metadata=True)
+                            m = idx.query(vector=v, top_k=3, include_metadata=True)
                             dataset_evidence = " ".join(
                                 [x.get("metadata", {}).get("text", "") for x in m.get("matches", [])]
                             ) or "General context."
@@ -1471,9 +1472,11 @@ else:
                         ans = ask_groq_lawyer_validated(user_msg, dataset_evidence, category)
                     except Exception:
                         ans = (
-                            "⚠️ I ran into an issue generating the report just now. "
+                            "I ran into an issue generating the report just now. "
                             "Please try again in a moment. If it persists, rephrase the query."
                         )
+                if category != "INVALID":
+                    ans = _format_report_body(ans)
 
             history.append({"role": "assistant", "content": ans})
 
@@ -1585,7 +1588,14 @@ else:
             avatar = "🧑‍💼" if role == "user" else "⚖️"
             with st.chat_message(role, avatar=avatar):
                 content = chat.get("content", "")
-                st.markdown(content)
+                if role == "assistant" and content:
+                    safe = html.escape(content)
+                    st.markdown(
+                        f"<div style='white-space: pre-wrap;'>{safe}</div>",
+                        unsafe_allow_html=True,
+                    )
+                else:
+                    st.markdown(content)
                 if role == "assistant" and content:
                     encoded_content = urllib.parse.quote_plus(content)
                     translate_url = f"https://translate.google.com/m?sl=auto&tl=en&q={encoded_content}"
@@ -1718,6 +1728,7 @@ else:
             """,
             unsafe_allow_html=True,
         )
+        
 
     elif page == "Admin Dashboard" and st.session_state.admin_mode:
         st.title("Admin Dashboard")
