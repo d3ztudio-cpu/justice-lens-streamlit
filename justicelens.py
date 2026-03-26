@@ -409,39 +409,27 @@ st.markdown(
             transition: opacity 0.2s ease;
         }
         body.jl-drawer-open .jl-drawer-backdrop{ opacity: 1; pointer-events: auto; }
-        .jl-drawer{
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: var(--jl-drawer-width);
-            max-width: 88vw;
-            background: var(--jl-card);
-            box-shadow: var(--jl-shadow);
+        body.jl-drawer-open{
+            --sidebar-width: var(--jl-drawer-width);
+        }
+        section[data-testid="stSidebar"]{
+            display: block !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            height: 100vh !important;
+            width: var(--jl-drawer-width) !important;
+            max-width: 88vw !important;
+            background: var(--jl-card) !important;
+            box-shadow: var(--jl-shadow) !important;
             transform: translateX(-110%);
             transition: transform 0.22s ease;
             z-index: 10002;
             overflow-y: auto;
-        }
-        body.jl-drawer-open{
-            --sidebar-width: var(--jl-drawer-width);
-        }
-        body.jl-drawer-open .jl-drawer{ transform: translateX(0); }
-        section[data-testid="stSidebar"]{ display: none !important; }
-        .jl-drawer section[data-testid="stSidebar"]{
-            display: block !important;
-            position: static !important;
-            width: 100% !important;
-            min-width: 100% !important;
-            max-width: 100% !important;
-            flex: 0 0 100% !important;
-            height: auto !important;
-            transform: none !important;
-            box-shadow: none !important;
             border-right: none !important;
-            background: var(--jl-card) !important;
         }
-        .jl-drawer [data-testid="stSidebarContent"]{
+        body.jl-drawer-open section[data-testid="stSidebar"]{ transform: translateX(0); }
+        section[data-testid="stSidebar"] [data-testid="stSidebarContent"]{
             width: 100% !important;
             min-width: 100% !important;
         }
@@ -523,50 +511,15 @@ components.html(
       const OPEN_CLASS = "jl-drawer-open";
       const openDrawer = () => body.classList.add(OPEN_CLASS);
       const closeDrawer = () => body.classList.remove(OPEN_CLASS);
-      const ensureDrawer = () => {
-        let drawer = doc.querySelector(".jl-drawer");
-        if (!drawer){
-          drawer = doc.createElement("div");
-          drawer.className = "jl-drawer";
-          doc.body.appendChild(drawer);
-        }
-        return drawer;
-      };
-      const mountSidebarInDrawer = () => {
-        const sidebar = doc.querySelector('section[data-testid="stSidebar"]');
-        if (!sidebar) return;
-        if (!sidebar.__jlOriginalParent){
-          sidebar.__jlOriginalParent = sidebar.parentElement;
-          sidebar.__jlOriginalNext = sidebar.nextSibling;
-        }
-        const drawer = ensureDrawer();
-        if (sidebar.parentElement !== drawer){
-          drawer.appendChild(sidebar);
-        }
-      };
-      const restoreSidebar = () => {
-        const sidebar = doc.querySelector('section[data-testid="stSidebar"]');
-        if (!sidebar || !sidebar.__jlOriginalParent) return;
-        const parent = sidebar.__jlOriginalParent;
-        const next = sidebar.__jlOriginalNext;
-        if (next) parent.insertBefore(sidebar, next);
-        else parent.appendChild(sidebar);
-      };
       const isMobile = () => doc.defaultView && doc.defaultView.matchMedia("(max-width: 700px)").matches;
-      const syncMount = () => {
-        if (isMobile()) mountSidebarInDrawer();
-        else restoreSidebar();
-      };
-      syncMount();
       doc.defaultView && doc.defaultView.addEventListener("resize", () => {
-        syncMount();
         if (!isMobile()) closeDrawer();
       });
       const handler = function(e){
         const toggle = e.target.closest("[data-jl-drawer-toggle]");
         const backdrop = e.target.closest("[data-jl-drawer-backdrop]");
-        const drawer = doc.querySelector(".jl-drawer");
-        const insideDrawer = drawer && drawer.contains(e.target);
+        const sidebar = doc.querySelector('section[data-testid="stSidebar"]');
+        const insideSidebar = sidebar && sidebar.contains(e.target);
         if (toggle){
           e.preventDefault();
           openDrawer();
@@ -577,7 +530,7 @@ components.html(
           closeDrawer();
           return;
         }
-        if (body.classList.contains(OPEN_CLASS) && !insideDrawer){
+        if (body.classList.contains(OPEN_CLASS) && !insideSidebar){
           closeDrawer();
         }
       };
