@@ -968,7 +968,23 @@ def _format_report_body(body: str) -> str:
     cleaned = (body or "").strip()
     if not cleaned:
         return "JUSTICE LENS ADVISORY REPORT"
+    cleaned = _normalize_report_spacing(cleaned)
     return "JUSTICE LENS ADVISORY REPORT\n" + cleaned
+
+def _normalize_report_spacing(text: str) -> str:
+    if not text:
+        return text
+    lines = []
+    for raw in text.splitlines():
+        line = raw.strip()
+        line = re.sub(r"^\s*[-*•]\s+", "", line)
+        lines.append(line)
+    text = "\n".join(lines)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    text = re.sub(r"(LEGAL ANALYSIS|STATUTORY PENALTIES|JUDICIAL PRECEDENT|PROBABILITY OF SUCCESS|REMEDIAL ACTION PLAN)\n+", r"\1\n", text)
+    text = re.sub(r"\n+(\d+\.\s)", r"\n\1", text)
+    text = re.sub(r"[ \t]+\n", "\n", text)
+    return text.strip()
 
 def _out_of_scope_report() -> str:
     return "\n".join([
