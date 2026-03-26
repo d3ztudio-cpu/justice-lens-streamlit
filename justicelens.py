@@ -1728,7 +1728,6 @@ else:
             """,
             unsafe_allow_html=True,
         )
-        
 
     elif page == "Admin Dashboard" and st.session_state.admin_mode:
         st.title("Admin Dashboard")
