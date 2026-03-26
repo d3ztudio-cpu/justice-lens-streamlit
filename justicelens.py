@@ -1599,15 +1599,21 @@ else:
                         unsafe_allow_html=True,
                     )
 
-        user_msg = st.chat_input("Describe a cyber incident, or ask e.g. “Explain Section 66F”")
         cooldown_remaining = max(0, int(st.session_state.cooldown_until - time.time()))
         if cooldown_remaining > 0:
             st.info(f"Please wait {cooldown_remaining}s before sending another request.")
-            st.chat_input("Describe a cyber incident, or ask e.g. “Explain Section 66F”", disabled=True)
+            _ = st.chat_input(
+                "Describe a cyber incident, or ask e.g. “Explain Section 66F”",
+                disabled=True,
+                key="jl_chat_input",
+            )
             time.sleep(1)
             st.rerun()
         else:
-            user_msg = st.chat_input("Describe a cyber incident, or ask e.g. “Explain Section 66F”")
+            user_msg = st.chat_input(
+                "Describe a cyber incident, or ask e.g. “Explain Section 66F”",
+                key="jl_chat_input",
+            )
             if user_msg:
                 st.session_state.cooldown_until = time.time() + 5
                 _handle_user_message(user_msg)
