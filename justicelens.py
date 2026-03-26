@@ -338,6 +338,9 @@ st.markdown(
             font-size: 0.98rem !important;
             padding: 0.7rem 0.85rem !important;
         }
+        .jl-report-row{
+            grid-template-columns: 1fr;
+        }
     }
 
     .jl-chat-actions{
@@ -345,6 +348,76 @@ st.markdown(
         align-items: center;
         gap: 0.6rem;
         margin-top: 0.35rem;
+    }
+    .jl-report{
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+    }
+    .jl-report-title{
+        font-size: 1.25rem;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        margin: 0;
+    }
+    .jl-report-row{
+        display: grid;
+        grid-template-columns: minmax(120px, 160px) 1fr;
+        gap: 0.9rem;
+        align-items: start;
+        padding: 0.65rem 0.75rem;
+        background: rgba(13, 17, 23, 0.5);
+        border: 1px solid var(--jl-border);
+        border-radius: 12px;
+    }
+    .jl-report-label{
+        font-weight: 800;
+        font-size: 0.86rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--jl-muted) !important;
+    }
+    .jl-report-body{
+        font-size: 1.05rem;
+        line-height: 1.65;
+    }
+    .jl-report-section{
+        font-size: 0.95rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--jl-primary) !important;
+        margin: 0.25rem 0 0.1rem;
+    }
+    .jl-report-list{
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .jl-report-step{
+        display: grid;
+        grid-template-columns: 32px 1fr;
+        gap: 0.7rem;
+        padding: 0.55rem 0.7rem;
+        border-radius: 10px;
+        background: rgba(56, 139, 253, 0.08);
+        border: 1px solid rgba(56, 139, 253, 0.35);
+    }
+    .jl-report-step-num{
+        width: 26px;
+        height: 26px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 0.85rem;
+        color: #FFFFFF !important;
+        background: var(--jl-primary);
     }
     .jl-copy-btn{
         background: transparent;
@@ -970,6 +1043,88 @@ def _format_report_body(body: str) -> str:
         return "JUSTICE LENS ADVISORY REPORT"
     cleaned = _normalize_report_spacing(cleaned)
     return "JUSTICE LENS ADVISORY REPORT\n" + cleaned
+
+def _looks_like_report(text: str) -> bool:
+    if not text:
+        return False
+    upper = text.upper()
+    return (
+        "JUSTICE LENS ADVISORY REPORT" in upper
+        or "SECTION TITLE" in upper
+        or "LEGAL DEFINITION" in upper
+        or "STATUTORY PUNISHMENT" in upper
+        or "RELEVANT SECTIONS" in upper
+        or "ACTION PLAN" in upper
+    )
+
+def _render_report_html(text: str) -> str:
+    cleaned = _normalize_report_spacing(text or "")
+    lines = [ln for ln in cleaned.splitlines() if ln.strip()]
+    title = ""
+    rows = []
+    action_steps = []
+    in_action = False
+
+    for line in lines:
+        raw = line.strip()
+        if raw.upper().startswith("JUSTICE LENS ADVISORY REPORT"):
+            title = raw
+            continue
+
+        if raw.upper().startswith("ACTION PLAN"):
+            in_action = True
+            rows.append(("section", "ACTION PLAN", ""))
+            continue
+
+        if in_action:
+            step_match = re.match(r"^(\d+)\.\s*(.+)$", raw)
+            if step_match:
+                action_steps.append(step_match.group(2).strip())
+                continue
+            in_action = False
+
+        kv_numbered = re.match(r"^\d+\.\s*([A-Z][A-Z\s/&-]+?)(?:\s*[:\-])?\s+(.*)$", raw)
+        if kv_numbered:
+            rows.append(("kv", kv_numbered.group(1).strip(), kv_numbered.group(2).strip()))
+            continue
+
+        kv_plain = re.match(r"^([A-Z][A-Z\s/&-]+):\s*(.*)$", raw)
+        if kv_plain:
+            rows.append(("kv", kv_plain.group(1).strip(), kv_plain.group(2).strip()))
+            continue
+
+        rows.append(("p", "", raw))
+
+    html_parts = ["<div class='jl-report'>"]
+    if title:
+        html_parts.append(f"<div class='jl-report-title'>{html.escape(title)}</div>")
+    for kind, label, body in rows:
+        if kind == "section":
+            html_parts.append(f"<div class='jl-report-section'>{html.escape(label)}</div>")
+            continue
+        if kind == "kv":
+            html_parts.append(
+                "<div class='jl-report-row'>"
+                f"<div class='jl-report-label'>{html.escape(label)}</div>"
+                f"<div class='jl-report-body'>{html.escape(body)}</div>"
+                "</div>"
+            )
+            continue
+        html_parts.append(f"<div class='jl-report-body'>{html.escape(body)}</div>")
+
+    if action_steps:
+        html_parts.append("<ol class='jl-report-list'>")
+        for idx, step in enumerate(action_steps, start=1):
+            html_parts.append(
+                "<li class='jl-report-step'>"
+                f"<span class='jl-report-step-num'>{idx}</span>"
+                f"<span class='jl-report-body'>{html.escape(step)}</span>"
+                "</li>"
+            )
+        html_parts.append("</ol>")
+
+    html_parts.append("</div>")
+    return "".join(html_parts)
 
 def _normalize_report_spacing(text: str) -> str:
     if not text:
@@ -1605,11 +1760,14 @@ else:
             with st.chat_message(role, avatar=avatar):
                 content = chat.get("content", "")
                 if role == "assistant" and content:
-                    safe = html.escape(content)
-                    st.markdown(
-                        f"<div style='white-space: pre-wrap;'>{safe}</div>",
-                        unsafe_allow_html=True,
-                    )
+                    if _looks_like_report(content):
+                        st.markdown(_render_report_html(content), unsafe_allow_html=True)
+                    else:
+                        safe = html.escape(content)
+                        st.markdown(
+                            f"<div style='white-space: pre-wrap;'>{safe}</div>",
+                            unsafe_allow_html=True,
+                        )
                 else:
                     st.markdown(content)
                 if role == "assistant" and content:
