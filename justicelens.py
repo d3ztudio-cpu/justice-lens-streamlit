@@ -500,6 +500,15 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+st.markdown(
+    """
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#0D1117">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    """,
+    unsafe_allow_html=True,
+)
 components.html(
     """
     <script>
@@ -547,9 +556,33 @@ components.html(
     height=0,
     width=0,
 )
+components.html(
+    """
+    <script>
+    (function(){
+      if (window.__jlPwaInit) return;
+      window.__jlPwaInit = true;
+      const win = window.parent || window;
+      if ("serviceWorker" in win.navigator){
+        win.navigator.serviceWorker.register("/static/service-worker.js").catch(() => {});
+      }
+      win.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        win.__jlInstallPrompt = e;
+      });
+    })();
+    </script>
+    """,
+    height=0,
+    width=0,
+)
 
 if "view" not in st.session_state:
     st.session_state.view = "AI Assistant"
+if "gen_count" not in st.session_state:
+    st.session_state.gen_count = 0
+if "pwa_prompted" not in st.session_state:
+    st.session_state.pwa_prompted = False
 
  
 
@@ -1437,6 +1470,7 @@ else:
                     ans = ask_groq_lawyer_validated(user_msg, dataset_evidence, category)
 
             history.append({"role": "assistant", "content": ans})
+            st.session_state.gen_count += 1
 
             if db:
                 try:
@@ -1556,11 +1590,47 @@ else:
                         b64 = ""
                     st.markdown(
                         f'<div class="jl-chat-actions">'
-                        f'<button class="jl-copy-btn" data-copy-b64="{b64}" title="Copy">⧉</button>'
                         f'<a class="jl-translate-link" href="{translate_url}" target="_blank" rel="noopener">Translate</a>'
                         f'</div>',
                         unsafe_allow_html=True,
                     )
+
+        if st.session_state.gen_count >= 5 and not st.session_state.pwa_prompted:
+            st.session_state.pwa_prompted = True
+            st.markdown(
+                """
+                <div class="jl-card" style="margin-top: 1rem; text-align:center;">
+                    <h3 style="margin:0;">Install Justice Lens?</h3>
+                    <p style="margin:0.35rem 0 0.8rem; color: var(--jl-muted) !important; font-weight:600;">
+                        Would you like to install this as an app on your device?
+                    </p>
+                    <button id="jl-install-btn" style="background:var(--jl-primary); border:1px solid rgba(88,166,255,0.35); color:#fff; border-radius:10px; padding:0.58rem 0.9rem; font-weight:700; cursor:pointer;">
+                        Install App
+                    </button>
+                    <div style="margin-top:0.6rem; font-size:0.85rem; color: var(--jl-muted) !important;">
+                        If you don’t see a prompt, open your browser menu and tap “Add to Home Screen”.
+                    </div>
+                </div>
+                <script>
+                (function(){
+                  if (window.__jlInstallHandler) return;
+                  window.__jlInstallHandler = true;
+                  const btn = document.getElementById("jl-install-btn");
+                  if (!btn) return;
+                  btn.addEventListener("click", async () => {
+                    const promptEvent = window.__jlInstallPrompt || (window.parent && window.parent.__jlInstallPrompt);
+                    if (promptEvent && promptEvent.prompt){
+                      promptEvent.prompt();
+                      try { await promptEvent.userChoice; } catch(e){}
+                    } else {
+                      alert("Install prompt not available. Use your browser menu to Add to Home Screen.");
+                    }
+                  });
+                })();
+                </script>
+                """,
+                unsafe_allow_html=True,
+            )
 
         user_msg = st.chat_input("Describe a cyber incident, or ask e.g. “Explain Section 66F”")
         if user_msg:
