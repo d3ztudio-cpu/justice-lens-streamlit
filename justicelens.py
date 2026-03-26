@@ -579,10 +579,8 @@ components.html(
 
 if "view" not in st.session_state:
     st.session_state.view = "AI Assistant"
-if "gen_count" not in st.session_state:
-    st.session_state.gen_count = 0
-if "pwa_prompted" not in st.session_state:
-    st.session_state.pwa_prompted = False
+if "cooldown_until" not in st.session_state:
+    st.session_state.cooldown_until = 0.0
 
  
 
@@ -1477,7 +1475,6 @@ else:
                         )
 
             history.append({"role": "assistant", "content": ans})
-            st.session_state.gen_count += 1
 
             if db:
                 try:
@@ -1602,54 +1599,19 @@ else:
                         unsafe_allow_html=True,
                     )
 
-        if st.session_state.gen_count >= 5 and not st.session_state.pwa_prompted:
-            st.session_state.pwa_prompted = True
-            st.markdown(
-                """
-                <div class="jl-card" style="margin-top: 1rem; text-align:center;">
-                    <h3 style="margin:0;">Install Justice Lens?</h3>
-                    <p style="margin:0.35rem 0 0.8rem; color: var(--jl-muted) !important; font-weight:600;">
-                        Would you like to install this as an app on your device?
-                    </p>
-                    <button id="jl-install-btn" style="background:var(--jl-primary); border:1px solid rgba(88,166,255,0.35); color:#fff; border-radius:10px; padding:0.58rem 0.9rem; font-weight:700; cursor:pointer;">
-                        Install App
-                    </button>
-                    <div style="margin-top:0.6rem; font-size:0.85rem; color: var(--jl-muted) !important;">
-                        If you don’t see a prompt, open your browser menu and tap “Add to Home Screen”.
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-            components.html(
-                """
-                <script>
-                (function(){
-                  if (window.__jlInstallHandler) return;
-                  window.__jlInstallHandler = true;
-                  const doc = window.parent && window.parent.document ? window.parent.document : document;
-                  const btn = doc.getElementById("jl-install-btn");
-                  if (!btn) return;
-                  btn.addEventListener("click", async () => {
-                    const promptEvent = window.parent && window.parent.__jlInstallPrompt ? window.parent.__jlInstallPrompt : window.__jlInstallPrompt;
-                    if (promptEvent && promptEvent.prompt){
-                      promptEvent.prompt();
-                      try { await promptEvent.userChoice; } catch(e){}
-                    } else {
-                      alert("Install prompt not available. Use your browser menu to Add to Home Screen.");
-                    }
-                  });
-                })();
-                </script>
-                """,
-                height=0,
-                width=0,
-            )
-
         user_msg = st.chat_input("Describe a cyber incident, or ask e.g. “Explain Section 66F”")
-        if user_msg:
-            _handle_user_message(user_msg)
+        cooldown_remaining = max(0, int(st.session_state.cooldown_until - time.time()))
+        if cooldown_remaining > 0:
+            st.info(f"Please wait {cooldown_remaining}s before sending another request.")
+            st.chat_input("Describe a cyber incident, or ask e.g. “Explain Section 66F”", disabled=True)
+            time.sleep(1)
             st.rerun()
+        else:
+            user_msg = st.chat_input("Describe a cyber incident, or ask e.g. “Explain Section 66F”")
+            if user_msg:
+                st.session_state.cooldown_until = time.time() + 5
+                _handle_user_message(user_msg)
+                st.rerun()
 
     elif page == "Vision & Mission":
         st.title("Our Core Principles")
