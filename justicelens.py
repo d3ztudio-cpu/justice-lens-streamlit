@@ -982,60 +982,71 @@ def _groq_chat(messages, timeout=18, temperature=0.0):
     return None, last_err or "Request failed"
 
 def get_intent_category(user_input):
+    """
+    STRICT GATEKEEPER:
+    Prevents physical crimes (murder, theft) from being processed.
+    """
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
     classifier_prompt = f"""
     Analyze user input: "{user_input}"
-    
-    STRICT CATEGORIZATION RULES:
-    1. CYBER_SCENARIO: Only for crimes occurring in digital space (Hacking, Phishing, Ransomware, Online Fraud).
-    2. CYBER_EXPLAIN: Only for specific requests about Information Technology Act 2000 sections.
-    3. INVALID: ALL OTHER TOPICS. This includes Murder, Physical Theft (Ornaments, Cash), Assault, Math, Greetings, or General History.
-    
-    If the input is not a 100% match for Indian Cyber Law, return 'INVALID'.
-    Response must be ONLY the category name.
+    CRITICAL RULE:
+    If the query is about PHYSICAL CRIMES (Murder, Physical Theft, Assault, Physical Robbery)
+    or non-legal topics (Math, Greetings), you MUST return 'INVALID'.
+    Categories:
+    1. CYBER_SCENARIO: Digital crimes only (Hacking, Phishing, Identity Theft).
+    2. CYBER_EXPLAIN: IT Act 2000 section requests.
+    3. INVALID: All other topics.
+    Respond with ONLY the category name.
     """
-    content, err = _groq_chat([{"role": "user", "content": classifier_prompt}], timeout=10, temperature=0.0)
-    if content:
-        return _normalize_intent_category(content)
-    return "INVALID"
+    data = {
+        "model": "llama-3.1-8b-instant",
+        "messages": [{"role": "user", "content": classifier_prompt}],
+        "temperature": 0.0,
+    }
+    try:
+        response = requests.post(url, headers=headers, json=data)
+        return response.json()['choices'][0]['message']['content'].strip().upper()
+    except Exception:
+        return "INVALID"
 
 def ask_groq_lawyer(user_input, law_evidence, category):
-    case_history = _justice_lens_case_history()
-    legal_anchor = _justice_lens_legal_anchor()
-
-    if "EXPLAIN" in category:
-        system_prompt = f"""
-        {legal_anchor}
-        Role: Legal Librarian.
-        Output EXACTLY in this format (plain text only, no bullets, no markdown):
-        1. SECTION TITLE [Section name]
-        2. LEGAL DEFINITION [Definition]
-        3. STATUTORY PUNISHMENT [Punishment]
-        """
-    else:
-        system_prompt = f"""
-        {legal_anchor}
-        {case_history}
-        Role: Cyber Law Consultant.
-        Output EXACTLY in this format (plain text only, no bullets, no markdown):
-        1. LEGAL ANALYSIS [Analysis]
-        2. STATUTORY PENALTIES [Penalties]
-        3. JUDICIAL PRECEDENT [Case]
-        4. PROBABILITY OF SUCCESS [Percentage + Reason]
-        5. REMEDIAL ACTION PLAN
-        5.1 [Action step]
-        5.2 [Action step]
-        5.3 [Action step]
-        """
-
+    """Generates professional, non-repetitive legal reports."""
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
+    system_prompt = """
+Role: Professional Legal Validator (Indian IT Act 2000).
+CASE SELECTION RULES (Choose ONLY ONE per report):
+1. Financial/UPI/Bank Fraud -> Dhule Vikas Bank vs. Axis Bank (2025)
+2. Identity Theft/Impersonation -> CBI vs. Arif Azim (Sony Sambandh Case)
+3. Deepfakes/AI Harassment -> Delhi HC Deepfake Injunction (2025)
+4. Hacking/Login Theft -> State vs. N.G. Arun Kumar (2011)
+5. Privacy/Fundamental Rights -> Justice K.S. Puttaswamy vs. Union of India
+6. Social Media/Intermediary -> Shreya Singhal vs. Union of India
+7. Electronic Evidence/Logs -> Anvar P.V. vs. P.K. Basheer (2014)
+8. Cyber Stalking/Obscenity -> State of Tamil Nadu vs. Suhas Katti
+CRITICAL CONSTRAINTS:
+- NEVER cite Section 66F (Terrorism) or Section 70 (Critical Systems) unless it involves National/Govt infrastructure.
+- Provide ONLY the single most relevant case. Do NOT list others or explain why they were not chosen.
+- Style: Professional technical plain text. No stars (*) or emojis.
+REPORT FORMAT:
+1. LEGAL PROVISIONS: [List specific IT Act sections]
+2. STATUTORY PENALTIES: [List Jail/Fines]
+3. JUDICIAL PRECEDENT: [The single matching case name and one sentence on its significance]
+4. WIN PROBABILITY: [95% if logs exist, 40% if anonymous]
+5. MANDATORY ACTION: [Must include 6-hour CERT-In rule]
+"""
     full_prompt = f"{system_prompt}\nUser Input: {user_input}\nContext: {law_evidence}"
-
-    content, err = _groq_chat([{"role": "user", "content": full_prompt}], timeout=18, temperature=0.1)
-    if content:
-        return content
-    return (
-        "The AI engine is temporarily unavailable. "
-        "Please try again in a moment."
-    )
+    data = {
+        "model": "llama-3.1-8b-instant",
+        "messages": [{"role": "user", "content": full_prompt}],
+        "temperature": 0.0,
+    }
+    try:
+        response = requests.post(url, headers=headers, json=data)
+        return response.json()['choices'][0]['message']['content']
+    except Exception:
+        return "Error processing legal advisory."
 
 def _format_report_body(body: str) -> str:
     cleaned = (body or "").strip()
