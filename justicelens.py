@@ -1782,6 +1782,7 @@ else:
 
             if isinstance(ans, str):
                 ans = ans.replace("**", "")
+                ans = ans.replace("IT Act 2000\nEvidence-Only", "")
 
             history.append({"role": "assistant", "content": ans})
 
