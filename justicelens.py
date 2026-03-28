@@ -13,6 +13,9 @@ import re
 import html
 import urllib.parse
 import base64
+import io
+import cloudinary
+import cloudinary.uploader
 from pinecone import Pinecone
 from langchain_huggingface import HuggingFaceEmbeddings
 import streamlit.components.v1 as components
@@ -28,6 +31,18 @@ LOGO_FALLBACK_URL = "https://i.ibb.co/mCP4BQC5/width-1200.jpg"
 LOCAL_LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.png")
 LOGO_SOURCE = LOCAL_LOGO_PATH if os.path.exists(LOCAL_LOGO_PATH) else LOGO_FALLBACK_URL
 APP_TZ = ZoneInfo("Asia/Kolkata")
+
+# Cloudinary (free image hosting)
+CLOUDINARY_CLOUD_NAME = st.secrets.get("CLOUDINARY_CLOUD_NAME", "")
+CLOUDINARY_API_KEY = st.secrets.get("CLOUDINARY_API_KEY", "")
+CLOUDINARY_API_SECRET = st.secrets.get("CLOUDINARY_API_SECRET", "")
+if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:
+    cloudinary.config(
+        cloud_name=CLOUDINARY_CLOUD_NAME,
+        api_key=CLOUDINARY_API_KEY,
+        api_secret=CLOUDINARY_API_SECRET,
+        secure=True,
+    )
 
 def utc_now():
     return datetime.now(timezone.utc)
@@ -729,7 +744,15 @@ def init_firebase():
         try:
             fb_data = dict(st.secrets["firebase"])
             cred = credentials.Certificate(fb_data)
-            firebase_admin.initialize_app(cred, {'projectId': fb_data.get('project_id')})
+            bucket = (
+                fb_data.get("storage_bucket")
+                or st.secrets.get("FIREBASE_STORAGE_BUCKET", "")
+                or os.environ.get("FIREBASE_STORAGE_BUCKET", "")
+            )
+            init_args = {'projectId': fb_data.get('project_id')}
+            if bucket:
+                init_args["storageBucket"] = bucket
+            firebase_admin.initialize_app(cred, init_args)
         except Exception as e:
             st.sidebar.error(f"Database Error: {e}")
     return firestore.client() if firebase_admin._apps else None
@@ -845,11 +868,16 @@ def check_ban(uid):
 def _justice_lens_legal_anchor() -> str:
     return """
     STATUTORY REFERENCE:
-    - Section 70: Protected Systems (Critical Infrastructure)
-    - Section 67A: Sexually Explicit Content
-    - Section 66F: Cyber Terrorism
-    - Section 66: Hacking and Unauthorized Access
-    - Section 43A: Corporate Data Negligence
+    - Section 65: Tampering with Computer Source Documents
+    - Section 66: Computer Related Offences
+    - Section 66B: Receiving Stolen Computer Resource/Device
+    - Section 66C: Identity Theft
+    - Section 66D: Cheating by Personation (Online Fraud)
+    - Section 66E: Violation of Privacy (Private Images)
+    - Section 66F: Cyber Terrorism (Critical/National Infrastructure only)
+    - Section 67/67A/67B: Obscenity, Sexually Explicit, Child Sexual Material
+    - Section 72/72A: Breach of Confidentiality/Unlawful Disclosure
+    - Section 43/43A: Civil Compensation for Damage/Data Negligence
     """
 
 def _justice_lens_case_history() -> str:
@@ -857,9 +885,71 @@ def _justice_lens_case_history() -> str:
     LANDMARK PRECEDENTS:
     - State of Tamil Nadu vs. Suhas Katti (2004)
     - Shreya Singhal vs. Union of India (2015)
-    - CBI vs. Arif Azim (Sony Sambandh Case)
+    - Anvar P.V. vs. P.K. Basheer (2014)
     - Justice K.S. Puttaswamy vs. Union of India (2017)
     """
+
+def _safe_filename(name: str) -> str:
+    base = re.sub(r"[^a-zA-Z0-9._-]+", "_", name or "file")
+    return base.strip("._") or "file"
+
+def _upload_case_file(file_bytes: bytes, filename: str, content_type: str | None, uid: str | None) -> str | None:
+    # Upload to Cloudinary and return a secure URL
+    if not (CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET):
+        return None
+    try:
+        safe = _safe_filename(filename)
+        uid_part = uid or "anonymous"
+        public_id = f"justice_lens/{uid_part}/{uuid.uuid4().hex}_{safe}"
+        result = cloudinary.uploader.upload(
+            file_bytes,
+            public_id=public_id,
+            resource_type="auto",
+            overwrite=False,
+        )
+        return result.get("secure_url")
+    except Exception:
+        return None
+
+def _clean_extracted_text(text: str) -> str:
+    if not text:
+        return ""
+    text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
+
+def _extract_text_from_pdf(file_bytes: bytes) -> str:
+    text = ""
+    try:
+        import pdfplumber  # type: ignore
+        with pdfplumber.open(io.BytesIO(file_bytes)) as pdf:
+            parts = [(page.extract_text() or "") for page in pdf.pages]
+            text = "\n".join(parts)
+    except Exception:
+        try:
+            from PyPDF2 import PdfReader  # type: ignore
+            reader = PdfReader(io.BytesIO(file_bytes))
+            text = "\n".join([(p.extract_text() or "") for p in reader.pages])
+        except Exception:
+            text = ""
+    return _clean_extracted_text(text)
+
+def _extract_text_from_image(file_bytes: bytes) -> str:
+    try:
+        from PIL import Image, ImageOps  # type: ignore
+        import pytesseract  # type: ignore
+        img = Image.open(io.BytesIO(file_bytes)).convert("RGB")
+        img = ImageOps.autocontrast(img)
+        text = pytesseract.image_to_string(img)
+        return _clean_extracted_text(text)
+    except Exception:
+        return ""
+
+def _extract_text_from_upload(file_name: str, mime_type: str | None, file_bytes: bytes) -> str:
+    lower = (file_name or "").lower()
+    if lower.endswith(".pdf") or (mime_type and "pdf" in mime_type):
+        return _extract_text_from_pdf(file_bytes)
+    return _extract_text_from_image(file_bytes)
 
 def _contains_any(haystack: str, needles: tuple[str, ...]) -> bool:
     h = str(haystack or "").lower()
@@ -893,6 +983,19 @@ def _is_phishing_portal_or_deepfake(user_input: str) -> bool:
         "sgi", "synthetically generated",
     ))
 
+def _is_ncii_or_intimate_imagery(user_input: str) -> bool:
+    return _contains_any(user_input, (
+        "revenge porn", "intimate images", "private photos", "private videos", "leaked nudes",
+        "non-consensual", "without consent", "morphed", "deepfake nude", "deepfake porn",
+        "obscene video", "sexual video", "sexually explicit",
+    ))
+
+def _is_data_breach(user_input: str) -> bool:
+    return _contains_any(user_input, (
+        "data breach", "breach", "leak", "leaked database", "exposed data",
+        "ransomware", "stolen data", "database dump", "credential dump",
+    ))
+
 def _is_national_or_govt_infra(user_input: str) -> bool:
     return _contains_any(user_input, (
         "critical infrastructure", "protected system", "national security", "defence", "defense",
@@ -911,9 +1014,19 @@ def _justice_lens_dynamic_scenario_rules(user_input: str) -> str:
 
     if _is_phishing_portal_or_deepfake(user_input):
         rules.append("""
-        - 2026 Intermediary Takedown Rules: If the user mentions an active phishing portal or deepfake content, you MUST mention the IT Amendment Rules 2026.
-          State that intermediaries/hosting platforms must remove unlawful "Synthetically Generated Information" (SGI) within 3 hours of a valid order/notice to maintain their "Safe Harbor" immunity under Section 79.
-          Include this as a concrete takedown step in ACTION PLAN.
+        - Intermediary compliance (IT Rules 2021 as amended in 2026): If the user mentions an active phishing portal or deepfake/synthetic content, mention that "synthetically generated information" is now covered under the Intermediary Rules (G.S.R. 120(E), 10 Feb 2026).
+          Advise issuing a takedown/abuse report to the platform and, where required, seeking a court/government order; intermediaries must act on lawful orders within the timelines specified in the amended rules to retain Section 79 safe-harbor.
+          Include a concrete takedown step in ACTION PLAN.
+        """)
+
+    if _is_ncii_or_intimate_imagery(user_input):
+        rules.append("""
+        - Intimate imagery takedown (IT Rules 2021 as amended 2026): For non-consensual intimate content, the platform must remove/disable access within 2 hours of a valid complaint under Rule 3(2)(b). Include an immediate takedown step.
+        """)
+
+    if _is_data_breach(user_input):
+        rules.append("""
+        - Data breach obligations (DPDP Act 2023): If a personal data breach is involved, note that the Data Fiduciary must notify the Data Protection Board of India and affected individuals as prescribed under Section 8(6).
         """)
 
     if _is_loan_identity_theft(user_input):
@@ -928,12 +1041,13 @@ def _justice_lens_dynamic_scenario_rules(user_input: str) -> str:
 
 def _justice_lens_2026_scenario_logic() -> str:
     return """
-    JUSTICE LENS — 2026 LEGAL LOGIC UPDATES (APPLY TO ALL SCENARIO RESPONSES):
+    JUSTICE LENS — CYBER LAW UPDATES (APPLY TO ALL SCENARIO RESPONSES):
+    - Jurisdiction: If the scenario is clearly outside the applicable jurisdiction or not cyber-related, respond with OUT OF SCOPE.
     - Phishing/identity theft/personation: Lead with IT Act Sections 66C (Identity Theft) and 66D (Cheating by Personation). Treat Section 43/43A as secondary civil-compensation remedies.
-    - RBI compensation (2026 draft directions): If the user’s monetary loss is <= ₹50,000, explicitly mention they may be eligible for 85% compensation (capped at ₹25,000) if they report to the bank AND the 1930 helpline within 5 days (advise confirming current bank/RBI circular applicability).
-    - Golden Hour: In ACTION PLAN, emphasize that financial fraud should be reported within the first 2 hours via the 1930 helpline or CFCFRMS (via cybercrime.gov.in) to maximize lien/freeze chances.
-    - Liability nuance: Do NOT claim “0% liability” as a blanket rule. Clarify victim is not liable for hacker’s subsequent scams, but has a duty to report promptly and secure the breach (passwords/2FA/session revokes) to mitigate further harm.
-    - Evidence strategy (primary): Advise preserving Email Headers, UPI Transaction IDs, and URL Metadata, and referencing Section 65B (Indian Evidence Act) for admissibility of electronic records.
+    - CERT-In Directions (28 Apr 2022): If the victim is an organisation/service provider or the incident affects enterprise systems, include reporting to CERT-In within 6 hours of noticing/being notified (for reportable incidents).
+    - Golden Hour: In ACTION PLAN, emphasize immediate reporting via 1930/cybercrime.gov.in to maximize lien/freeze chances (avoid promising refunds).
+    - Liability nuance: Do NOT claim “0% liability” as a blanket rule. Clarify victim must report promptly and secure the breach (passwords/2FA/session revokes).
+    - Evidence strategy (primary): Preserve Email Headers, UPI Transaction IDs, URL Metadata, and device logs; reference Section 65B (Indian Evidence Act) for admissibility of electronic records.
     """
 
 def _ensure_intermediary_takedown_mention(answer: str) -> str:
@@ -941,17 +1055,16 @@ def _ensure_intermediary_takedown_mention(answer: str) -> str:
         return answer
 
     already_mentions = (
-        _contains_any(answer, ("it amendment rules 2026", "intermediary", "intermediaries")) and
-        _contains_any(answer, ("3 hour", "three hour")) and
+        _contains_any(answer, ("it rules 2021", "intermediary", "intermediaries", "it amendment rules 2026")) and
         _contains_any(answer, ("section 79", "safe harbor", "safe harbour"))
     )
     if already_mentions:
         return answer
 
     insertion = (
-        '4. (Intermediary takedown) For an active phishing portal/deepfake: cite the IT Amendment Rules 2026—'
-        'intermediaries must remove unlawful "Synthetically Generated Information" (SGI) within 3 hours of a valid order/notice '
-        'to retain "Safe Harbor" under Section 79; file a takedown/abuse report with the host/platform and seek a cyber-cell order if needed.'
+        '4. (Intermediary takedown) For an active phishing portal/deepfake: cite the IT Rules 2021 as amended in 2026—'
+        'synthetically generated information is covered; file a takedown/abuse report with the host/platform and, where required, seek a court/government order. '
+        'Intermediaries must act within the amended timelines to retain Section 79 safe-harbor.'
     )
 
     if "ACTION PLAN:" in answer:
@@ -1063,12 +1176,13 @@ def get_intent_category(user_input):
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
     classifier_prompt = f"""
     Analyze user input: "{user_input}"
-    CRITICAL RULE:
-    If the query is about PHYSICAL CRIMES (Murder, Physical Theft, Assault, Physical Robbery)
-    or non-legal topics (Math, Greetings), you MUST return 'INVALID'.
+    CRITICAL RULES:
+    - If the query is clearly outside the applicable jurisdiction, return 'INVALID'.
+    - If the query is about PHYSICAL CRIMES (Murder, Physical Theft, Assault, Physical Robbery)
+      or non-legal topics (Math, Greetings), return 'INVALID'.
     Categories:
-    1. CYBER_SCENARIO: Digital crimes only (Hacking, Phishing, Identity Theft).
-    2. CYBER_EXPLAIN: IT Act 2000 section requests.
+    1. CYBER_SCENARIO: Cybercrime scenarios only.
+    2. CYBER_EXPLAIN: IT Act 2000/IT Rules/CERT-In/DPDP Act section requests.
     3. INVALID: All other topics.
     Respond with ONLY the category name.
     """
@@ -1089,29 +1203,32 @@ def ask_groq_lawyer(user_input, law_evidence, category):
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
     # SYSTEM PROMPT WITH 8 DYNAMIC PATHS (aligned with final.docx)
     system_prompt = """
-Role: Professional Legal Validator (Indian IT Act 2000).
+Role: Professional Legal Validator (IT Act 2000, IT Rules 2021 as amended in 2026, CERT-In Directions 2022, and DPDP Act 2023 where relevant).
 
 CASE SELECTION RULES (Choose ONLY ONE per report):
-1. Financial/UPI/Bank Fraud -> Dhule Vikas Bank vs. Axis Bank (2025)
+1. Online Fraud/Phishing -> NASSCOM vs. Ajay Sood (2005)
 2. Identity Theft/Impersonation -> CBI vs. Arif Azim (Sony Sambandh Case)
-3. Deepfakes/AI Harassment -> Delhi HC Deepfake Injunction (2025)
-4. Hacking/Login Theft -> State vs. N.G. Arun Kumar (2011)
-5. Privacy/Fundamental Rights -> Justice K.S. Puttaswamy vs. Union of India
-6. Social Media/Intermediary -> Shreya Singhal vs. Union of India
-7. Electronic Evidence/Logs -> Anvar P.V. vs. P.K. Basheer (2014)
-8. Cyber Stalking/Obscenity -> State of Tamil Nadu vs. Suhas Katti
+3. Cyber Stalking/Obscenity -> State of Tamil Nadu vs. Suhas Katti (2004)
+4. Electronic Evidence/Logs -> Anvar P.V. vs. P.K. Basheer (2014)
+5. Privacy/Fundamental Rights -> Justice K.S. Puttaswamy vs. Union of India (2017)
+6. Free Speech/66A -> Shreya Singhal vs. Union of India (2015)
+7. Corporate Data Negligence -> Justice K.S. Puttaswamy vs. Union of India (2017)
+8. General Computer Offences -> NASSCOM vs. Ajay Sood (2005)
 
 CRITICAL CONSTRAINTS:
+- If the scenario is outside the applicable jurisdiction or not cyber-related, output OUT OF SCOPE NOTICE in plain text (same formatting style).
 - NEVER cite Section 66F (Terrorism) or Section 70 (Critical Systems) unless it involves National/Govt infrastructure.
+- Section 66A is struck down; do NOT cite it for offences.
 - Provide ONLY the single most relevant case. Do NOT list others or explain why they were not chosen.
 - Style: Professional technical plain text. No stars (*) or emojis.
+- Use the LATEST applicable updates: IT Rules (2026 amendment on synthetic content and timelines), CERT-In Directions (6-hour reporting where applicable), DPDP Act 2023 (personal data breach notification), and current IT Act sections.
 
 REPORT FORMAT:
 1. LEGAL PROVISIONS: [List specific IT Act sections]
 2. STATUTORY PENALTIES: [List Jail/Fines]
 3. JUDICIAL PRECEDENT: [The single matching case name and one sentence on its significance]
-4. WIN PROBABILITY: [95% if logs exist, 40% if anonymous]
-5. MANDATORY ACTION: [Must include 6-hour CERT-In rule]
+4. WIN PROBABILITY: [Use evidence-based range. Examples: 80–90% if strong logs + traceable IDs + prompt FIR; 50–70% if partial logs/screenshots; 30–50% if mostly anonymous/no logs. Adjust to facts.]
+5. MANDATORY ACTION: [Must include 6-hour CERT-In rule where applicable]
 """
 
     full_prompt = f"{system_prompt}\nUser Input: {user_input}\nContext: {law_evidence}"
@@ -1257,8 +1374,8 @@ def _out_of_scope_report() -> str:
         "JUSTICE LENS ADVISORY REPORT",
         "-" * 30,
         "OUT OF SCOPE NOTICE",
-        "This query pertains to a topic outside the scope of Indian Cyber Law.",
-        "Justice Lens provides advisory services exclusively for the IT Act, 2000.",
+        "This query pertains to a topic outside the scope of the assistant.",
+        "Justice Lens provides advisory services exclusively for cyber law under the IT Act and related rules.",
         "Please provide a digital or cyber-related scenario.",
         "-" * 30,
     ])
@@ -1279,7 +1396,7 @@ def _validate_ai_answer(category: str, answer: str) -> bool:
 
 def _repair_ai_answer(user_input: str, law_evidence: str, category: str, bad_answer: str) -> str:
     repair_prompt = f"""
-    You are a Precise Legal Report Tool (Indian IT Act 2000).
+    You are a Precise Legal Report Tool (IT Act 2000, IT Rules, CERT-In Directions, DPDP Act).
     Rewrite the following draft to STRICTLY follow this exact format (include all headings):
     LEGAL PROVISIONS: ...
     STATUTORY PENALTIES: ...
@@ -1290,6 +1407,7 @@ def _repair_ai_answer(user_input: str, law_evidence: str, category: str, bad_ans
     Rules:
     - Maintain professional technical plain text. No stars (*) or emojis.
     - Include the 6-hour CERT-In rule in MANDATORY ACTION.
+    - Use the latest applicable updates (IT Rules 2026 amendments, CERT-In 2022 directions, DPDP Act 2023) when relevant.
 
     USER QUERY: {user_input}
     DATABASE EVIDENCE: {law_evidence}
@@ -1542,22 +1660,22 @@ if not st.session_state.user:
                 st.markdown(
                     """
                     <div class="jl-card">
-                        <h3 style="margin-top:0;">Intermediary Takedown & The 2026 Rules</h3>
+                        <h3 style="margin-top:0;">Intermediary Duties & The 2026 Amendment</h3>
                         <p style="color: var(--jl-muted) !important; margin-bottom:0;">
-                            The "Cyber Rules 2026" is our internal designation for critical legal updates that Justice Lens applies to relevant scenarios, particularly those involving harmful user-generated content online.
+                            The “Cyber Rules 2026” refers to the official amendment to the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021 (G.S.R. 120(E), 10 Feb 2026). Justice Lens applies these updates to cyber cases involving phishing, deepfakes, and harmful synthetic content.
                         </p>
                         <h3 style="margin-top:1.5rem;">Key Provision: Intermediary Liability</h3>
                         <p style="color: var(--jl-muted) !important; margin-bottom:0;">
-                           A core component of these rules is the assistant's handling of scenarios involving active phishing websites, deepfakes, or other forms of "Synthetically Generated Information" (SGI).
+                           A core component of these rules is the handling of “synthetically generated information” (SGI), including deepfakes, and fast-track compliance timelines.
                         </p>
                         <ul style="color: var(--jl-muted) !important;">
                             <li><strong>The Law:</strong> Based on amendments to the IT Rules, online platforms like social media networks and hosting providers ("intermediaries") have specific obligations.</li>
                             <li><strong>"Safe Harbor":</strong> Under Section 79 of the IT Act, these intermediaries are granted "safe harbor," which protects them from liability for content posted by their users.</li>
-                            <li><strong>The Condition:</strong> To maintain this protection, they must promptly remove unlawful content upon receiving a valid order from a court or government agency. The 2026 ruleset assumes a strict 3-hour timeline for takedown of certain harmful content to avoid liability.</li>
+                            <li><strong>Updated Timelines (2026):</strong> The amendment shortens key timelines (e.g., 7 days for grievance disposal; 36 hours for certain lawful takedown orders; and 2 hours for non-consensual intimate imagery complaints under Rule 3(2)(b)).</li>
                         </ul>
                          <h3 style="margin-top:1.5rem;">Justice Lens's Analysis</h3>
                         <p style="color: var(--jl-muted) !important; margin-bottom:0;">
-                           When the AI detects a relevant scenario, its Action Plan will include a step referencing the IT Amendment Rules 2026. This step advises the user on issuing a takedown notice to the intermediary, highlighting the platform's obligation to remove such material within a very short timeframe to retain their safe harbor status.
+                           When the AI detects a relevant scenario, its Action Plan references the amended IT Rules 2021 (2026 update). It advises issuing a takedown notice to the intermediary and highlights the updated timelines where applicable.
                         </p>
                     </div>
                     """,
@@ -1693,9 +1811,49 @@ else:
         # Keep backward compatibility for other parts of the app
         st.session_state.chat_history = history
 
-        def _handle_user_message(user_msg: str):
+        def _handle_user_message(user_msg: str, uploads=None):
+            uploads = uploads or []
+            extracted_chunks = []
+            attachment_urls = []
+            unclear_files = []
+
+            for up in uploads:
+                try:
+                    file_bytes = up.getvalue()
+                except Exception:
+                    file_bytes = b""
+                if not file_bytes:
+                    continue
+                file_name = getattr(up, "name", "attachment")
+                mime_type = getattr(up, "type", None)
+                url = _upload_case_file(
+                    file_bytes=file_bytes,
+                    filename=file_name,
+                    content_type=mime_type,
+                    uid=(st.session_state.user or {}).get("uid"),
+                )
+                if url:
+                    attachment_urls.append(url)
+
+                extracted = _extract_text_from_upload(file_name, mime_type, file_bytes)
+                if extracted and len(extracted) >= 40:
+                    extracted_chunks.append(f"[{file_name}]\n{extracted}")
+                else:
+                    unclear_files.append(file_name)
+
+            if not user_msg and extracted_chunks:
+                user_msg = "Please analyze the attached case file(s) and generate the report."
+
             if not user_msg:
+                # No usable text and no user message
+                if unclear_files:
+                    ans = (
+                        "The uploaded file(s) were not clear enough to read. "
+                        "Please upload a clearer image or a text-based PDF."
+                    )
+                    history.append({"role": "assistant", "content": ans})
                 return
+
             history.append({"role": "user", "content": user_msg})
 
             with st.spinner("Analyzing scope..."):
@@ -1719,9 +1877,16 @@ else:
 
                 with st.spinner("Generating legal report..."):
                     try:
-                        ans = ask_groq_lawyer_validated(user_msg, dataset_evidence, category)
+                        if extracted_chunks:
+                            extracted_text = "\n\n".join(extracted_chunks)
+                            combined = (
+                                f"{user_msg}\n\nATTACHMENT TEXT (OCR):\n{extracted_text}"
+                            )
+                        else:
+                            combined = user_msg
+                        ans = ask_groq_lawyer_validated(combined, dataset_evidence, category)
                         if not _validate_ai_answer(category, ans):
-                            ans = _repair_ai_answer(user_msg, dataset_evidence, category, ans)
+                            ans = _repair_ai_answer(combined, dataset_evidence, category, ans)
                     except Exception:
                         ans = (
                             "I ran into an issue generating the report just now. "
@@ -1739,6 +1904,7 @@ else:
                         "user": st.session_state.user["name"],
                         "query": user_msg,
                         "report": ans,
+                        "attachments": attachment_urls,
                         "timestamp": utc_now(),
                         "project": active,
                     })
@@ -1866,6 +2032,25 @@ else:
                     )
 
         cooldown_remaining = max(0, int(st.session_state.cooldown_until - time.time()))
+
+        # Attachment uploader (case files)
+        attach_label = (
+            '<span class="material-symbols-rounded" style="font-size:18px; vertical-align:-3px;">attach_file</span>'
+            ' Attach case files (PDF / Image)'
+        )
+        st.markdown(
+            f"<div style='display:flex; align-items:center; gap:0.45rem; margin-bottom:0.35rem;'>{attach_label}</div>",
+            unsafe_allow_html=True,
+        )
+        uploaded_files = st.file_uploader(
+            "Attach case files",
+            type=["png", "jpg", "jpeg", "pdf"],
+            accept_multiple_files=True,
+            label_visibility="collapsed",
+            key="jl_case_files",
+            disabled=cooldown_remaining > 0,
+        )
+
         if cooldown_remaining > 0:
             st.info(f"Please wait {cooldown_remaining}s before sending another request.")
             _ = st.chat_input(
@@ -1880,9 +2065,13 @@ else:
                 "Describe a cyber incident, or ask e.g. “Explain Section 66F”",
                 key="jl_chat_input",
             )
-            if user_msg:
+            if user_msg or uploaded_files:
                 st.session_state.cooldown_until = time.time() + 5
-                _handle_user_message(user_msg)
+                _handle_user_message(user_msg or "", uploaded_files)
+                try:
+                    st.session_state.jl_case_files = []
+                except Exception:
+                    pass
                 st.rerun()
 
     elif page == "Vision & Mission":
@@ -1962,22 +2151,22 @@ else:
         st.markdown(
             """
             <div class="jl-card">
-                <h3 style="margin-top:0;">Intermediary Takedown & The 2026 Rules</h3>
+                <h3 style="margin-top:0;">Intermediary Duties & The 2026 Amendment</h3>
                 <p style="color: var(--jl-muted) !important; margin-bottom:0;">
-                    The "Cyber Rules 2026" is our internal designation for critical legal updates that Justice Lens applies to relevant scenarios, particularly those involving harmful user-generated content online.
+                    The “Cyber Rules 2026” refers to the official amendment to the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021 (G.S.R. 120(E), 10 Feb 2026). Justice Lens applies these updates to cyber cases involving phishing, deepfakes, and harmful synthetic content.
                 </p>
                 <h3 style="margin-top:1.5rem;">Key Provision: Intermediary Liability</h3>
                 <p style="color: var(--jl-muted) !important; margin-bottom:0;">
-                   A core component of these rules is the assistant's handling of scenarios involving active phishing websites, deepfakes, or other forms of "Synthetically Generated Information" (SGI).
+                   A core component of these rules is the handling of “synthetically generated information” (SGI), including deepfakes, and fast-track compliance timelines.
                 </p>
                 <ul style="color: var(--jl-muted) !important;">
                     <li><strong>The Law:</strong> Based on amendments to the IT Rules, online platforms like social media networks and hosting providers ("intermediaries") have specific obligations.</li>
                     <li><strong>"Safe Harbor":</strong> Under Section 79 of the IT Act, these intermediaries are granted "safe harbor," which protects them from liability for content posted by their users.</li>
-                    <li><strong>The Condition:</strong> To maintain this protection, they must promptly remove unlawful content upon receiving a valid order from a court or government agency. The 2026 ruleset assumes a strict 3-hour timeline for takedown of certain harmful content to avoid liability.</li>
+                    <li><strong>Updated Timelines (2026):</strong> The amendment shortens key timelines (e.g., 7 days for grievance disposal; 36 hours for certain lawful takedown orders; and 2 hours for non-consensual intimate imagery complaints under Rule 3(2)(b)).</li>
                 </ul>
                  <h3 style="margin-top:1.5rem;">Justice Lens's Analysis</h3>
                 <p style="color: var(--jl-muted) !important; margin-bottom:0;">
-                   When the AI detects a relevant scenario, its Action Plan will include a step referencing the IT Amendment Rules 2026. This step advises the user on issuing a takedown notice to the intermediary, highlighting the platform's obligation to remove such material within a very short timeframe to retain their safe harbor status.
+                   When the AI detects a relevant scenario, its Action Plan references the amended IT Rules 2021 (2026 update). It advises issuing a takedown notice to the intermediary and highlights the updated timelines where applicable.
                 </p>
             </div>
             """,
