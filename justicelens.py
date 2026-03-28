@@ -941,13 +941,13 @@ def _justice_lens_dynamic_scenario_rules(user_input: str) -> str:
     if _is_phishing_portal_or_deepfake(user_input):
         rules.append("""
         - Intermediary compliance (IT Rules 2021 as amended in 2026): If the user mentions an active phishing portal or deepfake/synthetic content, state that "synthetically generated information" (SGI) is covered under the 2026 amendment.
-          Advise issuing a takedown/abuse report to the platform and, where required, seeking a court/government order; intermediaries must act on lawful orders within the amended timelines (3 hours) to retain Section 79 safe-harbor.
+          Advise issuing a takedown/abuse report to the platform and, where required, seeking a court/government order; intermediaries must act on lawful orders within 3 hours to retain Section 79 safe-harbor.
           Include a concrete takedown step in ACTION PLAN.
         """)
 
     if _is_ncii_or_intimate_imagery(user_input):
         rules.append("""
-        - Intimate imagery takedown (IT Rules 2021 as amended 2026): For non-consensual intimate content, the platform must remove/disable access within 2 hours of a valid complaint under Rule 3(2)(b). Include an immediate takedown step.
+        - Intimate imagery takedown (IT Rules 2021 as amended 2026): For non-consensual intimate content, the platform must remove/disable access within 2 hours of a valid complaint under Rule 3(2)(b). Do NOT use 36 hours for NCII. Include an immediate takedown step.
         """)
 
     if _is_data_breach(user_input):
@@ -1150,6 +1150,7 @@ CRITICAL CONSTRAINTS:
 - Identify content as "Synthetically Generated Information (SGI)" if manipulated.
 - Use Section 66C for Identity Theft; 66F ONLY for Cyber Terrorism.
 - If DPDP applies, identify Data Principal rights (access/correction/erasure/grievance).
+- For NCII, mandatory action must be 2 HOURS. For other illegal AI content acting on a lawful order, use 3 HOURS. Never use 36 hours for NCII.
 - Style: Professional technical plain text. No stars (*) or emojis.
 
 REPORT FORMAT:
@@ -1293,6 +1294,30 @@ def _normalize_report_spacing(text: str) -> str:
     text = re.sub(r"[ \t]+\n", "\n", text)
     return text.strip()
 
+def _strip_unwanted_headings(text: str) -> str:
+    if not text:
+        return text
+    remove_set = {
+        "REPORT FORMAT",
+        "CASE DETAILS",
+        "REPORT",
+        "IT ACT 2000",
+        "EVIDENCE-ONLY",
+        "EVIDENCE ONLY",
+        "IT ACT 2000 EVIDENCE-ONLY",
+        "IT ACT 2000 EVIDENCE ONLY",
+    }
+    cleaned = []
+    for raw in text.splitlines():
+        stripped = raw.strip()
+        upper = stripped.upper()
+        if upper in remove_set:
+            continue
+        if cleaned and cleaned[-1].strip() == stripped:
+            continue
+        cleaned.append(raw)
+    return "\n".join(cleaned).strip()
+
 def _out_of_scope_report() -> str:
     return "\n".join([
         "JUSTICE LENS ADVISORY REPORT",
@@ -1332,7 +1357,7 @@ def _repair_ai_answer(user_input: str, law_evidence: str, category: str, bad_ans
     - Maintain professional technical plain text. No stars (*) or emojis.
     - Include the 6-hour CERT-In rule in MANDATORY ACTION.
     - Use the latest applicable updates (IT Rules 2026 amendments, CERT-In 2022 directions, DPDP Rules 2025) when relevant.
-    - If applicable, include the 2-hour NCII takedown, 3-hour lawful order takedown, or 7-day grievance resolution deadline.
+    - If applicable, include the 2-hour NCII takedown, 3-hour lawful order takedown, or 7-day grievance resolution deadline. Never use 36 hours for NCII.
     - If DPDP applies, include the 72-hour detailed report to DPBI (Rule 7).
     - Use IT Act sections/penalties and DPDP provisions only. If a penalty is not specified in IT Act/Rules/DPDP, say “Not specified in Act/Rules”.
 
@@ -1598,7 +1623,7 @@ if not st.session_state.user:
                         <ul style="color: var(--jl-muted) !important;">
                             <li><strong>The Law:</strong> Based on amendments to the IT Rules, online platforms like social media networks and hosting providers ("intermediaries") have specific obligations.</li>
                             <li><strong>"Safe Harbor":</strong> Under Section 79 of the IT Act, these intermediaries are granted "safe harbor," which protects them from liability for content posted by their users.</li>
-                            <li><strong>Updated Timelines (2026):</strong> The amendment shortens key timelines (e.g., 7 days for grievance disposal; 36 hours for certain lawful takedown orders; and 2 hours for non-consensual intimate imagery complaints under Rule 3(2)(b)).</li>
+                            <li><strong>Updated Timelines (2026):</strong> The amendment shortens key timelines (e.g., 7 days for grievance disposal; 3 hours for lawful takedown orders; and 2 hours for non-consensual intimate imagery complaints under Rule 3(2)(b)).</li>
                         </ul>
                          <h3 style="margin-top:1.5rem;">Justice Lens's Analysis</h3>
                         <p style="color: var(--jl-muted) !important; margin-bottom:0;">
@@ -1778,6 +1803,7 @@ else:
             if isinstance(ans, str):
                 ans = ans.replace("**", "")
                 ans = ans.replace("IT Act 2000\nEvidence-Only", "")
+                ans = _strip_unwanted_headings(ans)
 
             history.append({"role": "assistant", "content": ans})
 
@@ -2023,7 +2049,7 @@ else:
                 <ul style="color: var(--jl-muted) !important;">
                     <li><strong>The Law:</strong> Based on amendments to the IT Rules, online platforms like social media networks and hosting providers ("intermediaries") have specific obligations.</li>
                     <li><strong>"Safe Harbor":</strong> Under Section 79 of the IT Act, these intermediaries are granted "safe harbor," which protects them from liability for content posted by their users.</li>
-                    <li><strong>Updated Timelines (2026):</strong> The amendment shortens key timelines (e.g., 7 days for grievance disposal; 36 hours for certain lawful takedown orders; and 2 hours for non-consensual intimate imagery complaints under Rule 3(2)(b)).</li>
+                    <li><strong>Updated Timelines (2026):</strong> The amendment shortens key timelines (e.g., 7 days for grievance disposal; 3 hours for lawful takedown orders; and 2 hours for non-consensual intimate imagery complaints under Rule 3(2)(b)).</li>
                 </ul>
                  <h3 style="margin-top:1.5rem;">Justice Lens's Analysis</h3>
                 <p style="color: var(--jl-muted) !important; margin-bottom:0;">
