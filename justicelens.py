@@ -1332,6 +1332,7 @@ def _collapse_act_headings(text: str) -> str:
         r"^(IT\s+ACT|DPDP\s+ACT|IT\s+RULES|BNS|BNSS|CRPC|IPC|EVIDENCE\s+ACT).*$",
         re.IGNORECASE,
     )
+    tag_line = re.compile(r"^[A-Z]{2,}$")
     lines = text.splitlines()
     out = []
     i = 0
@@ -1346,11 +1347,11 @@ def _collapse_act_headings(text: str) -> str:
             while i < len(lines) and lines[i].strip().upper() not in headings:
                 block.append(lines[i])
                 i += 1
-            has_act = any(act_line.match(b.strip()) and b.strip().endswith(":") for b in block)
+            has_act = any(act_line.match(b.strip()) for b in block)
             if has_act:
                 out.append("ACTS:")
             for b in block:
-                if act_line.match(b.strip()) and b.strip().endswith(":"):
+                if act_line.match(b.strip()) or tag_line.match(b.strip()):
                     continue
                 out.append(b)
             continue
