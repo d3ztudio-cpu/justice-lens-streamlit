@@ -1329,7 +1329,7 @@ def _collapse_act_headings(text: str) -> str:
         "MANDATORY ACTION:",
     }
     act_line = re.compile(
-        r"^(IT\s+ACT|DPDP\s+ACT|IT\s+RULES|BNS|BNSS|CRPC|IPC|EVIDENCE\s+ACT).*$",
+        r"^(IT\s+ACT|DPDP\s+ACT|IT\s+RULES|BNS|BNSS|CRPC|IPC|EVIDENCE\s+ACT|ACT\s*\d{4}|RULES\s*\d{4}).*$",
         re.IGNORECASE,
     )
     tag_line = re.compile(r"^[A-Z]{2,}$")
