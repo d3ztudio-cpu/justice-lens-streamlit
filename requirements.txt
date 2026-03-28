@@ -111,8 +111,4 @@ watchdog==6.0.0
 Werkzeug==3.1.6
 xxhash==3.6.0
 zstandard==0.25.0
-cloudinary==1.41.0
-pdfplumber==0.11.4
-PyPDF2==3.0.1
-pytesseract==0.3.13
 

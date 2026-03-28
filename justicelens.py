@@ -14,8 +14,6 @@ import html
 import urllib.parse
 import base64
 import io
-import cloudinary
-import cloudinary.uploader
 from pinecone import Pinecone
 from langchain_huggingface import HuggingFaceEmbeddings
 import streamlit.components.v1 as components
@@ -32,17 +30,6 @@ LOCAL_LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.png")
 LOGO_SOURCE = LOCAL_LOGO_PATH if os.path.exists(LOCAL_LOGO_PATH) else LOGO_FALLBACK_URL
 APP_TZ = ZoneInfo("Asia/Kolkata")
 
-# Cloudinary (free image hosting)
-CLOUDINARY_CLOUD_NAME = st.secrets.get("CLOUDINARY_CLOUD_NAME", "")
-CLOUDINARY_API_KEY = st.secrets.get("CLOUDINARY_API_KEY", "")
-CLOUDINARY_API_SECRET = st.secrets.get("CLOUDINARY_API_SECRET", "")
-if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:
-    cloudinary.config(
-        cloud_name=CLOUDINARY_CLOUD_NAME,
-        api_key=CLOUDINARY_API_KEY,
-        api_secret=CLOUDINARY_API_SECRET,
-        secure=True,
-    )
 
 def utc_now():
     return datetime.now(timezone.utc)
@@ -889,67 +876,6 @@ def _justice_lens_case_history() -> str:
     - Justice K.S. Puttaswamy vs. Union of India (2017)
     """
 
-def _safe_filename(name: str) -> str:
-    base = re.sub(r"[^a-zA-Z0-9._-]+", "_", name or "file")
-    return base.strip("._") or "file"
-
-def _upload_case_file(file_bytes: bytes, filename: str, content_type: str | None, uid: str | None) -> str | None:
-    # Upload to Cloudinary and return a secure URL
-    if not (CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET):
-        return None
-    try:
-        safe = _safe_filename(filename)
-        uid_part = uid or "anonymous"
-        public_id = f"justice_lens/{uid_part}/{uuid.uuid4().hex}_{safe}"
-        result = cloudinary.uploader.upload(
-            file_bytes,
-            public_id=public_id,
-            resource_type="auto",
-            overwrite=False,
-        )
-        return result.get("secure_url")
-    except Exception:
-        return None
-
-def _clean_extracted_text(text: str) -> str:
-    if not text:
-        return ""
-    text = re.sub(r"[ \t]+", " ", text)
-    text = re.sub(r"\n{3,}", "\n\n", text)
-    return text.strip()
-
-def _extract_text_from_pdf(file_bytes: bytes) -> str:
-    text = ""
-    try:
-        import pdfplumber  # type: ignore
-        with pdfplumber.open(io.BytesIO(file_bytes)) as pdf:
-            parts = [(page.extract_text() or "") for page in pdf.pages]
-            text = "\n".join(parts)
-    except Exception:
-        try:
-            from PyPDF2 import PdfReader  # type: ignore
-            reader = PdfReader(io.BytesIO(file_bytes))
-            text = "\n".join([(p.extract_text() or "") for p in reader.pages])
-        except Exception:
-            text = ""
-    return _clean_extracted_text(text)
-
-def _extract_text_from_image(file_bytes: bytes) -> str:
-    try:
-        from PIL import Image, ImageOps  # type: ignore
-        import pytesseract  # type: ignore
-        img = Image.open(io.BytesIO(file_bytes)).convert("RGB")
-        img = ImageOps.autocontrast(img)
-        text = pytesseract.image_to_string(img)
-        return _clean_extracted_text(text)
-    except Exception:
-        return ""
-
-def _extract_text_from_upload(file_name: str, mime_type: str | None, file_bytes: bytes) -> str:
-    lower = (file_name or "").lower()
-    if lower.endswith(".pdf") or (mime_type and "pdf" in mime_type):
-        return _extract_text_from_pdf(file_bytes)
-    return _extract_text_from_image(file_bytes)
 
 def _contains_any(haystack: str, needles: tuple[str, ...]) -> bool:
     h = str(haystack or "").lower()
@@ -1014,8 +940,8 @@ def _justice_lens_dynamic_scenario_rules(user_input: str) -> str:
 
     if _is_phishing_portal_or_deepfake(user_input):
         rules.append("""
-        - Intermediary compliance (IT Rules 2021 as amended in 2026): If the user mentions an active phishing portal or deepfake/synthetic content, mention that "synthetically generated information" is now covered under the Intermediary Rules (G.S.R. 120(E), 10 Feb 2026).
-          Advise issuing a takedown/abuse report to the platform and, where required, seeking a court/government order; intermediaries must act on lawful orders within the timelines specified in the amended rules to retain Section 79 safe-harbor.
+        - Intermediary compliance (IT Rules 2021 as amended in 2026): If the user mentions an active phishing portal or deepfake/synthetic content, state that "synthetically generated information" (SGI) is covered under the 2026 amendment.
+          Advise issuing a takedown/abuse report to the platform and, where required, seeking a court/government order; intermediaries must act on lawful orders within the amended timelines (3 hours) to retain Section 79 safe-harbor.
           Include a concrete takedown step in ACTION PLAN.
         """)
 
@@ -1026,7 +952,7 @@ def _justice_lens_dynamic_scenario_rules(user_input: str) -> str:
 
     if _is_data_breach(user_input):
         rules.append("""
-        - Data breach obligations (DPDP Act 2023): If a personal data breach is involved, note that the Data Fiduciary must notify the Data Protection Board of India and affected individuals as prescribed under Section 8(6).
+        - DPDP breach notification (DPDP Rules 2025): On becoming aware of a personal data breach, notify affected Data Principals without delay and report to the Data Protection Board. A detailed follow-up report is due within 72 hours (Rule 7).
         """)
 
     if _is_loan_identity_theft(user_input):
@@ -1042,7 +968,7 @@ def _justice_lens_dynamic_scenario_rules(user_input: str) -> str:
 def _justice_lens_2026_scenario_logic() -> str:
     return """
     JUSTICE LENS — CYBER LAW UPDATES (APPLY TO ALL SCENARIO RESPONSES):
-    - Jurisdiction: If the scenario is clearly outside the applicable jurisdiction or not cyber-related, respond with OUT OF SCOPE.
+    - Jurisdiction: Focus strictly on Indian cyber law (IT Act 2000 + IT Rules). If clearly outside scope, respond with OUT OF SCOPE.
     - Phishing/identity theft/personation: Lead with IT Act Sections 66C (Identity Theft) and 66D (Cheating by Personation). Treat Section 43/43A as secondary civil-compensation remedies.
     - CERT-In Directions (28 Apr 2022): If the victim is an organisation/service provider or the incident affects enterprise systems, include reporting to CERT-In within 6 hours of noticing/being notified (for reportable incidents).
     - Golden Hour: In ACTION PLAN, emphasize immediate reporting via 1930/cybercrime.gov.in to maximize lien/freeze chances (avoid promising refunds).
@@ -1064,7 +990,7 @@ def _ensure_intermediary_takedown_mention(answer: str) -> str:
     insertion = (
         '4. (Intermediary takedown) For an active phishing portal/deepfake: cite the IT Rules 2021 as amended in 2026—'
         'synthetically generated information is covered; file a takedown/abuse report with the host/platform and, where required, seek a court/government order. '
-        'Intermediaries must act within the amended timelines to retain Section 79 safe-harbor.'
+        'Intermediaries must act within the amended timelines (3 hours for lawful takedown orders; 2 hours for NCII complaints) to retain Section 79 safe-harbor.'
     )
 
     if "ACTION PLAN:" in answer:
@@ -1203,32 +1129,35 @@ def ask_groq_lawyer(user_input, law_evidence, category):
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
     # SYSTEM PROMPT WITH 8 DYNAMIC PATHS (aligned with final.docx)
     system_prompt = """
-Role: Professional Legal Validator (IT Act 2000, IT Rules 2021 as amended in 2026, CERT-In Directions 2022, and DPDP Act 2023 where relevant).
+Role: Professional Legal Validator (IT Act 2000 + IT Rules 2021 as amended in 2026 + DPDP Act 2023 + DPDP Rules 2025 + CERT-In Directions 2022).
 
-CASE SELECTION RULES (Choose ONLY ONE per report):
-1. Online Fraud/Phishing -> NASSCOM vs. Ajay Sood (2005)
-2. Identity Theft/Impersonation -> CBI vs. Arif Azim (Sony Sambandh Case)
+2026 MANDATORY COMPLIANCE TIMELINES (only use what actually applies):
+- NCII (Private Photos/Deepfake Nudity): 2 HOURS (Rule 3(2)(b)).
+- SGI/Deepfakes (Lawful Orders): 3 HOURS (Rule 3(1)(d)).
+- Cyber Incident Reporting: 6 HOURS (CERT-In Directions 2022).
+- DPDP Breach Notification: Detailed report to DPBI within 72 HOURS (DPDP Rules 2025, Rule 7).
+- Grievance Resolution: 7 DAYS (acknowledgment timelines reduced in Rule 3(2)).
+
+CASE SELECTION RULES (VERIFIED):
+1. Financial/Phishing Fraud -> NASSCOM vs. Ajay Sood (2005)
+2. Identity Theft -> CBI vs. Arif Azim (Sony Sambandh Case)
 3. Cyber Stalking/Obscenity -> State of Tamil Nadu vs. Suhas Katti (2004)
-4. Electronic Evidence/Logs -> Anvar P.V. vs. P.K. Basheer (2014)
-5. Privacy/Fundamental Rights -> Justice K.S. Puttaswamy vs. Union of India (2017)
-6. Free Speech/66A -> Shreya Singhal vs. Union of India (2015)
-7. Corporate Data Negligence -> Justice K.S. Puttaswamy vs. Union of India (2017)
-8. General Computer Offences -> NASSCOM vs. Ajay Sood (2005)
+4. Electronic Evidence -> Anvar P.V. vs. P.K. Basheer (2014)
+5. Privacy -> Justice K.S. Puttaswamy vs. Union of India (2017)
+6. Free Speech/Intermediary -> Shreya Singhal vs. Union of India (2015)
 
 CRITICAL CONSTRAINTS:
-- If the scenario is outside the applicable jurisdiction or not cyber-related, output OUT OF SCOPE NOTICE in plain text (same formatting style).
-- NEVER cite Section 66F (Terrorism) or Section 70 (Critical Systems) unless it involves National/Govt infrastructure.
-- Section 66A is struck down; do NOT cite it for offences.
-- Provide ONLY the single most relevant case. Do NOT list others or explain why they were not chosen.
+- Identify content as "Synthetically Generated Information (SGI)" if manipulated.
+- Use Section 66C for Identity Theft; 66F ONLY for Cyber Terrorism.
+- If DPDP applies, identify Data Principal rights (access/correction/erasure/grievance).
 - Style: Professional technical plain text. No stars (*) or emojis.
-- Use the LATEST applicable updates: IT Rules (2026 amendment on synthetic content and timelines), CERT-In Directions (6-hour reporting where applicable), DPDP Act 2023 (personal data breach notification), and current IT Act sections.
 
 REPORT FORMAT:
-1. LEGAL PROVISIONS: [List specific IT Act sections]
-2. STATUTORY PENALTIES: [List Jail/Fines]
-3. JUDICIAL PRECEDENT: [The single matching case name and one sentence on its significance]
-4. WIN PROBABILITY: [Use evidence-based range. Examples: 80–90% if strong logs + traceable IDs + prompt FIR; 50–70% if partial logs/screenshots; 30–50% if mostly anonymous/no logs. Adjust to facts.]
-5. MANDATORY ACTION: [Must include 6-hour CERT-In rule where applicable]
+1. LEGAL PROVISIONS: [List IT Act sections + DPDP sections + 2026 Rule citations]
+2. STATUTORY PENALTIES: [List IT Act penalties + DPDP penalties where applicable]
+3. JUDICIAL PRECEDENT: [Single matching case name and significance]
+4. WIN PROBABILITY: [Evidence-based range; avoid hard-coded 95/40 unless facts justify]
+5. MANDATORY ACTION: [Must specify 2-hour, 3-hour, 6-hour, or 72-hour benchmarks when relevant]
 """
 
     full_prompt = f"{system_prompt}\nUser Input: {user_input}\nContext: {law_evidence}"
@@ -1374,8 +1303,8 @@ def _out_of_scope_report() -> str:
         "JUSTICE LENS ADVISORY REPORT",
         "-" * 30,
         "OUT OF SCOPE NOTICE",
-        "This query pertains to a topic outside the scope of the assistant.",
-        "Justice Lens provides advisory services exclusively for cyber law under the IT Act and related rules.",
+        "This query pertains to a topic outside the scope of Indian cyber law.",
+        "Justice Lens provides advisory services exclusively for the IT Act and related Indian cyber rules.",
         "Please provide a digital or cyber-related scenario.",
         "-" * 30,
     ])
@@ -1396,7 +1325,7 @@ def _validate_ai_answer(category: str, answer: str) -> bool:
 
 def _repair_ai_answer(user_input: str, law_evidence: str, category: str, bad_answer: str) -> str:
     repair_prompt = f"""
-    You are a Precise Legal Report Tool (IT Act 2000, IT Rules, CERT-In Directions, DPDP Act).
+    You are a Precise Legal Report Tool (IT Act 2000, IT Rules 2021/2026, DPDP Act 2023 + DPDP Rules 2025, CERT-In Directions 2022).
     Rewrite the following draft to STRICTLY follow this exact format (include all headings):
     LEGAL PROVISIONS: ...
     STATUTORY PENALTIES: ...
@@ -1407,7 +1336,10 @@ def _repair_ai_answer(user_input: str, law_evidence: str, category: str, bad_ans
     Rules:
     - Maintain professional technical plain text. No stars (*) or emojis.
     - Include the 6-hour CERT-In rule in MANDATORY ACTION.
-    - Use the latest applicable updates (IT Rules 2026 amendments, CERT-In 2022 directions, DPDP Act 2023) when relevant.
+    - Use the latest applicable updates (IT Rules 2026 amendments, CERT-In 2022 directions, DPDP Rules 2025) when relevant.
+    - If applicable, include the 2-hour NCII takedown, 3-hour lawful order takedown, or 7-day grievance resolution deadline.
+    - If DPDP applies, include the 72-hour detailed report to DPBI (Rule 7).
+    - Use IT Act sections/penalties and DPDP provisions only. If a penalty is not specified in IT Act/Rules/DPDP, say “Not specified in Act/Rules”.
 
     USER QUERY: {user_input}
     DATABASE EVIDENCE: {law_evidence}
@@ -1811,49 +1743,9 @@ else:
         # Keep backward compatibility for other parts of the app
         st.session_state.chat_history = history
 
-        def _handle_user_message(user_msg: str, uploads=None):
-            uploads = uploads or []
-            extracted_chunks = []
-            attachment_urls = []
-            unclear_files = []
-
-            for up in uploads:
-                try:
-                    file_bytes = up.getvalue()
-                except Exception:
-                    file_bytes = b""
-                if not file_bytes:
-                    continue
-                file_name = getattr(up, "name", "attachment")
-                mime_type = getattr(up, "type", None)
-                url = _upload_case_file(
-                    file_bytes=file_bytes,
-                    filename=file_name,
-                    content_type=mime_type,
-                    uid=(st.session_state.user or {}).get("uid"),
-                )
-                if url:
-                    attachment_urls.append(url)
-
-                extracted = _extract_text_from_upload(file_name, mime_type, file_bytes)
-                if extracted and len(extracted) >= 40:
-                    extracted_chunks.append(f"[{file_name}]\n{extracted}")
-                else:
-                    unclear_files.append(file_name)
-
-            if not user_msg and extracted_chunks:
-                user_msg = "Please analyze the attached case file(s) and generate the report."
-
+        def _handle_user_message(user_msg: str):
             if not user_msg:
-                # No usable text and no user message
-                if unclear_files:
-                    ans = (
-                        "The uploaded file(s) were not clear enough to read. "
-                        "Please upload a clearer image or a text-based PDF."
-                    )
-                    history.append({"role": "assistant", "content": ans})
                 return
-
             history.append({"role": "user", "content": user_msg})
 
             with st.spinner("Analyzing scope..."): 
@@ -1877,16 +1769,9 @@ else:
 
                 with st.spinner("Generating legal report..."):
                     try:
-                        if extracted_chunks:
-                            extracted_text = "\n\n".join(extracted_chunks)
-                            combined = (
-                                f"{user_msg}\n\nATTACHMENT TEXT (OCR):\n{extracted_text}"
-                            )
-                        else:
-                            combined = user_msg
-                        ans = ask_groq_lawyer_validated(combined, dataset_evidence, category)
+                        ans = ask_groq_lawyer_validated(user_msg, dataset_evidence, category)
                         if not _validate_ai_answer(category, ans):
-                            ans = _repair_ai_answer(combined, dataset_evidence, category, ans)
+                            ans = _repair_ai_answer(user_msg, dataset_evidence, category, ans)
                     except Exception:
                         ans = (
                             "I ran into an issue generating the report just now. "
@@ -1904,7 +1789,6 @@ else:
                         "user": st.session_state.user["name"],
                         "query": user_msg,
                         "report": ans,
-                        "attachments": attachment_urls,
                         "timestamp": utc_now(),
                         "project": active,
                     })
@@ -2033,24 +1917,6 @@ else:
 
         cooldown_remaining = max(0, int(st.session_state.cooldown_until - time.time()))
 
-        # Attachment uploader (case files)
-        attach_label = (
-            '<span class="material-symbols-rounded" style="font-size:18px; vertical-align:-3px;">attach_file</span>'
-            ' Attach case files (PDF / Image)'
-        )
-        st.markdown(
-            f"<div style='display:flex; align-items:center; gap:0.45rem; margin-bottom:0.35rem;'>{attach_label}</div>",
-            unsafe_allow_html=True,
-        )
-        uploaded_files = st.file_uploader(
-            "Attach case files",
-            type=["png", "jpg", "jpeg", "pdf"],
-            accept_multiple_files=True,
-            label_visibility="collapsed",
-            key="jl_case_files",
-            disabled=cooldown_remaining > 0,
-        )
-
         if cooldown_remaining > 0:
             st.info(f"Please wait {cooldown_remaining}s before sending another request.")
             _ = st.chat_input(
@@ -2065,13 +1931,9 @@ else:
                 "Describe a cyber incident, or ask e.g. “Explain Section 66F”",
                 key="jl_chat_input",
             )
-            if user_msg or uploaded_files:
+            if user_msg:
                 st.session_state.cooldown_until = time.time() + 5
-                _handle_user_message(user_msg or "", uploaded_files)
-                try:
-                    st.session_state.jl_case_files = []
-                except Exception:
-                    pass
+                _handle_user_message(user_msg)
                 st.rerun()
 
     elif page == "Vision & Mission":
