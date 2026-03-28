@@ -1248,12 +1248,7 @@ def _render_report_html(text: str) -> str:
     if title:
         html_parts.append("<div class='jl-report-header'>")
         html_parts.append(f"<div class='jl-report-title'>{html.escape(title)}</div>")
-        html_parts.append(
-            "<div class='jl-report-chips'>"
-            "<span class='jl-chip'>IT Act 2000</span>"
-            "<span class='jl-chip'>Evidence-Only</span>"
-            "</div>"
-        )
+        html_parts.append("<div class='jl-report-chips'></div>")
         html_parts.append("</div>")
     for kind, label, body in rows:
         if kind == "section":
