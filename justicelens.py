@@ -1318,6 +1318,46 @@ def _strip_unwanted_headings(text: str) -> str:
         cleaned.append(raw)
     return "\n".join(cleaned).strip()
 
+def _collapse_act_headings(text: str) -> str:
+    if not text:
+        return text
+    headings = {
+        "LEGAL PROVISIONS:",
+        "STATUTORY PENALTIES:",
+        "JUDICIAL PRECEDENT:",
+        "WIN PROBABILITY:",
+        "MANDATORY ACTION:",
+    }
+    act_line = re.compile(
+        r"^(IT\s+ACT|DPDP\s+ACT|IT\s+RULES|BNS|BNSS|CRPC|IPC|EVIDENCE\s+ACT).*$",
+        re.IGNORECASE,
+    )
+    lines = text.splitlines()
+    out = []
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        stripped = line.strip()
+        upper = stripped.upper()
+        if upper in headings:
+            out.append(line)
+            i += 1
+            block = []
+            while i < len(lines) and lines[i].strip().upper() not in headings:
+                block.append(lines[i])
+                i += 1
+            has_act = any(act_line.match(b.strip()) and b.strip().endswith(":") for b in block)
+            if has_act:
+                out.append("ACTS:")
+            for b in block:
+                if act_line.match(b.strip()) and b.strip().endswith(":"):
+                    continue
+                out.append(b)
+            continue
+        out.append(line)
+        i += 1
+    return "\n".join(out).strip()
+
 def _out_of_scope_report() -> str:
     return "\n".join([
         "JUSTICE LENS ADVISORY REPORT",
@@ -1804,6 +1844,7 @@ else:
                 ans = ans.replace("**", "")
                 ans = ans.replace("IT Act 2000\nEvidence-Only", "")
                 ans = _strip_unwanted_headings(ans)
+                ans = _collapse_act_headings(ans)
 
             history.append({"role": "assistant", "content": ans})
 
