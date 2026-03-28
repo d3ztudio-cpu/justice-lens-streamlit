@@ -893,6 +893,13 @@ def _is_phishing_portal_or_deepfake(user_input: str) -> bool:
         "sgi", "synthetically generated",
     ))
 
+def _is_national_or_govt_infra(user_input: str) -> bool:
+    return _contains_any(user_input, (
+        "critical infrastructure", "protected system", "national security", "defence", "defense",
+        "government", "govt", "ministry", "army", "air force", "navy", "intelligence",
+        "power grid", "nuclear", "railway", "telecom backbone", "space", "satellite", "isro",
+    ))
+
 def _is_loan_identity_theft(user_input: str) -> bool:
     return _contains_any(user_input, (
         "loan", "emi", "nbfc", "lender", "personal loan", "credit card", "cibil", "experian", "credit score",
@@ -1003,6 +1010,14 @@ def _apply_high_priority_refinements(user_input: str, category: str, answer: str
 
     if _is_phishing_portal_or_deepfake(user_input):
         updated = _ensure_intermediary_takedown_mention(updated)
+
+    # Guardrail: Section 66F only for national/govt infrastructure.
+    if not _is_national_or_govt_infra(user_input):
+        updated = re.sub(r"(?i)\bsection\s*66f\b", "", updated)
+        updated = re.sub(r"(?i)\b66f\b", "", updated)
+        updated = re.sub(r"[;,]\s*[;,]", "; ", updated)
+        updated = re.sub(r"\s{2,}", " ", updated)
+        updated = re.sub(r"(?im)^\s*LEGAL PROVISIONS:\s*;?\s*", "LEGAL PROVISIONS: ", updated)
 
     return updated
 
@@ -1128,6 +1143,10 @@ def _looks_like_report(text: str) -> bool:
         or "LEGAL DEFINITION" in upper
         or "STATUTORY PUNISHMENT" in upper
         or "RELEVANT SECTIONS" in upper
+        or "LEGAL PROVISIONS" in upper
+        or "STATUTORY PENALTIES" in upper
+        or "JUDICIAL PRECEDENT" in upper
+        or "MANDATORY ACTION" in upper
         or "ACTION PLAN" in upper
     )
 
@@ -1680,10 +1699,7 @@ else:
             history.append({"role": "user", "content": user_msg})
 
             with st.spinner("Analyzing scope..."):
-                if not _is_cyber_relevant(user_msg):
-                    category = "INVALID"
-                else:
-                    category = get_intent_category(user_msg)
+                category = get_intent_category(user_msg)
 
             if category == "INVALID":
                 ans = _out_of_scope_report()
@@ -1706,8 +1722,6 @@ else:
                         ans = ask_groq_lawyer_validated(user_msg, dataset_evidence, category)
                         if not _validate_ai_answer(category, ans):
                             ans = _repair_ai_answer(user_msg, dataset_evidence, category, ans)
-                        if not _validate_ai_answer(category, ans):
-                            ans = _out_of_scope_report()
                     except Exception:
                         ans = (
                             "I ran into an issue generating the report just now. "
