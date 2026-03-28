@@ -338,8 +338,9 @@ st.markdown(
             font-size: 0.98rem !important;
             padding: 0.7rem 0.85rem !important;
         }
-        .jl-report-row{
-            grid-template-columns: 1fr;
+        .jl-report-header{
+            flex-direction: column;
+            align-items: flex-start;
         }
     }
 
@@ -350,62 +351,98 @@ st.markdown(
         margin-top: 0.35rem;
     }
     .jl-report{
+        position: relative;
         display: flex;
         flex-direction: column;
         gap: 0.85rem;
+        padding: 1.1rem 1.1rem 1.2rem;
+        border-radius: 18px;
+        background: linear-gradient(135deg, rgba(22, 27, 34, 0.96), rgba(13, 17, 23, 0.92));
+        border: 1px solid rgba(88, 166, 255, 0.2);
+        box-shadow: var(--jl-shadow);
+        overflow: hidden;
+    }
+    .jl-report::before{
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 6px;
+        background: linear-gradient(180deg, #58A6FF, #34D399);
+        opacity: 0.95;
+    }
+    .jl-report-header{
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.8rem;
     }
     .jl-report-title{
-        font-size: 1.25rem;
+        font-size: 1.05rem;
         font-weight: 800;
-        letter-spacing: 0.02em;
+        letter-spacing: 0.18em;
         text-transform: uppercase;
         margin: 0;
     }
-    .jl-report-row{
-        display: grid;
-        grid-template-columns: minmax(120px, 160px) 1fr;
-        gap: 0.9rem;
-        align-items: start;
-        padding: 0.65rem 0.75rem;
-        background: rgba(13, 17, 23, 0.5);
-        border: 1px solid var(--jl-border);
-        border-radius: 12px;
+    .jl-report-chips{
+        display: flex;
+        gap: 0.4rem;
+        flex-wrap: wrap;
     }
-    .jl-report-label{
+    .jl-chip{
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        padding: 0.2rem 0.5rem;
+        border-radius: 999px;
+        color: var(--jl-text) !important;
+        background: rgba(88, 166, 255, 0.16);
+        border: 1px solid rgba(88, 166, 255, 0.35);
+    }
+    .jl-report-block{
+        display: grid;
+        gap: 0.4rem;
+        padding: 0.7rem 0.85rem;
+        border-radius: 12px;
+        background: rgba(13, 17, 23, 0.6);
+        border: 1px solid var(--jl-border);
+    }
+    .jl-report-badge{
         font-weight: 800;
-        font-size: 0.86rem;
-        letter-spacing: 0.08em;
+        font-size: 0.7rem;
+        letter-spacing: 0.2em;
         text-transform: uppercase;
         color: var(--jl-muted) !important;
     }
     .jl-report-body{
-        font-size: 1.05rem;
-        line-height: 1.65;
+        font-size: 1.02rem;
+        line-height: 1.6;
     }
     .jl-report-section{
-        font-size: 0.95rem;
+        font-size: 0.8rem;
         font-weight: 800;
-        letter-spacing: 0.12em;
+        letter-spacing: 0.22em;
         text-transform: uppercase;
-        color: var(--jl-primary) !important;
-        margin: 0.25rem 0 0.1rem;
+        color: #7DD3FC !important;
+        margin: 0.4rem 0 0.1rem;
     }
     .jl-report-list{
         list-style: none;
         margin: 0;
         padding: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
+        display: grid;
+        gap: 0.6rem;
     }
     .jl-report-step{
         display: grid;
         grid-template-columns: 32px 1fr;
         gap: 0.7rem;
-        padding: 0.55rem 0.7rem;
-        border-radius: 10px;
-        background: rgba(56, 139, 253, 0.08);
-        border: 1px solid rgba(56, 139, 253, 0.35);
+        padding: 0.6rem 0.75rem;
+        border-radius: 12px;
+        background: rgba(88, 166, 255, 0.08);
+        border: 1px dashed rgba(88, 166, 255, 0.45);
     }
     .jl-report-step-num{
         width: 26px;
@@ -415,9 +452,9 @@ st.markdown(
         align-items: center;
         justify-content: center;
         font-weight: 800;
-        font-size: 0.85rem;
-        color: #FFFFFF !important;
-        background: var(--jl-primary);
+        font-size: 0.8rem;
+        color: #0D1117 !important;
+        background: #34D399;
     }
     .jl-copy-btn{
         background: transparent;
@@ -828,6 +865,74 @@ def _contains_any(haystack: str, needles: tuple[str, ...]) -> bool:
     h = str(haystack or "").lower()
     return any(n.lower() in h for n in needles)
 
+def _mentions_section_66(text: str) -> bool:
+    if not text:
+        return False
+    return _contains_any(text, ("section 66", "sec 66", "s. 66", "section-66", "section66"))
+
+def _evidence_has_section_66(text: str) -> bool:
+    if not text:
+        return False
+    return _mentions_section_66(text)
+
+def _ensure_section_66_in_answer(user_input: str, law_evidence: str, category: str, answer: str) -> str:
+    if not answer:
+        return answer
+
+    trigger = _mentions_section_66(user_input) or _contains_any(
+        user_input,
+        ("hacking", "unauthorized access", "unauthorised access", "account hacked", "login hacked"),
+    )
+    if not trigger:
+        return answer
+
+    evidence_has = _evidence_has_section_66(law_evidence)
+    already_has = _mentions_section_66(answer)
+    if already_has:
+        return answer
+
+    category_upper = str(category or "").upper()
+    if "EXPLAIN" in category_upper:
+        title_value = "Section 66"
+        if not evidence_has:
+            title_value += " (not found in database evidence)"
+        if re.search(r"(?im)^OFFICIAL TITLE:\s*.*$", answer):
+            answer = re.sub(
+                r"(?im)^OFFICIAL TITLE:\s*.*$",
+                f"OFFICIAL TITLE: {title_value}",
+                answer,
+                count=1,
+            )
+        else:
+            answer = f"OFFICIAL TITLE: {title_value}\n{answer}"
+
+        if not evidence_has:
+            answer = re.sub(
+                r"(?im)^DEFINITION:\s*.*$",
+                "DEFINITION: Not available in database evidence.",
+                answer,
+                count=1,
+            )
+            answer = re.sub(
+                r"(?im)^EXACT PUNISHMENT:\s*.*$",
+                "EXACT PUNISHMENT: Not available in database evidence.",
+                answer,
+                count=1,
+            )
+        return answer
+
+    # Scenario report: append to RELEVANT SECTIONS if present.
+    suffix = "Section 66" + (" (not found in database evidence)" if not evidence_has else "")
+    if re.search(r"(?im)^RELEVANT SECTIONS:\s*(.*)$", answer):
+        def _append(m):
+            val = m.group(1).strip()
+            if not val:
+                return f"RELEVANT SECTIONS: {suffix}"
+            return f"RELEVANT SECTIONS: {val}; {suffix}"
+        return re.sub(r"(?im)^RELEVANT SECTIONS:\s*(.*)$", _append, answer, count=1)
+
+    return f"RELEVANT SECTIONS: {suffix}\n{answer}"
+
 def _is_phishing_portal_or_deepfake(user_input: str) -> bool:
     return _contains_any(user_input, (
         "phishing", "phish", "fake login", "spoof", "credential harvest", "otp page", "login page", "portal", "malicious link",
@@ -842,34 +947,12 @@ def _is_loan_identity_theft(user_input: str) -> bool:
     ))
 
 def _justice_lens_dynamic_scenario_rules(user_input: str) -> str:
-    rules = []
-
-    if _is_phishing_portal_or_deepfake(user_input):
-        rules.append("""
-        - 2026 Intermediary Takedown Rules: If the user mentions an active phishing portal or deepfake content, you MUST mention the IT Amendment Rules 2026.
-          State that intermediaries/hosting platforms must remove unlawful "Synthetically Generated Information" (SGI) within 3 hours of a valid order/notice to maintain their "Safe Harbor" immunity under Section 79.
-          Include this as a concrete takedown step in ACTION PLAN.
-        """)
-
-    if _is_loan_identity_theft(user_input):
-        rules.append("""
-        - Loan identity-theft recovery (CIBIL/RBI): If a loan/credit product is taken in the victim's name, ACTION PLAN MUST include:
-          (a) Raise a dispute on the CIBIL/Experian portal (resolution required within 30 days).
-          (b) If the lender does not resolve the identity theft claim within 30 days, escalate to the RBI Ombudsman via the CMS Portal (cms.rbi.org.in).
-          WIN PROBABILITY MUST be calibrated to 40–60% and must acknowledge that reversing a financial loan has a heavy burden of proof (Police FIR + forensic audit/lender investigation) to establish non-authorization.
-        """)
-
-    return "\n".join(rules).strip()
+    # Evidence-only mode: do not inject extra legal rules outside database evidence.
+    return ""
 
 def _justice_lens_2026_scenario_logic() -> str:
-    return """
-    JUSTICE LENS — 2026 LEGAL LOGIC UPDATES (APPLY TO ALL SCENARIO RESPONSES):
-    - Phishing/identity theft/personation: Lead with IT Act Sections 66C (Identity Theft) and 66D (Cheating by Personation). Treat Section 43/43A as secondary civil-compensation remedies.
-    - RBI compensation (2026 draft directions): If the user’s monetary loss is <= ₹50,000, explicitly mention they may be eligible for 85% compensation (capped at ₹25,000) if they report to the bank AND the 1930 helpline within 5 days (advise confirming current bank/RBI circular applicability).
-    - Golden Hour: In ACTION PLAN, emphasize that financial fraud should be reported within the first 2 hours via the 1930 helpline or CFCFRMS (via cybercrime.gov.in) to maximize lien/freeze chances.
-    - Liability nuance: Do NOT claim “0% liability” as a blanket rule. Clarify victim is not liable for hacker’s subsequent scams, but has a duty to report promptly and secure the breach (passwords/2FA/session revokes) to mitigate further harm.
-    - Evidence strategy (primary): Advise preserving Email Headers, UPI Transaction IDs, and URL Metadata, and referencing Section 65B (Indian Evidence Act) for admissibility of electronic records.
-    """
+    # Deprecated: avoid inserting time-bound or extra-statutory guidance outside evidence.
+    return ""
 
 def _ensure_intermediary_takedown_mention(answer: str) -> str:
     if not answer:
@@ -1011,32 +1094,45 @@ def get_intent_category(user_input):
         return "INVALID"
 
 def ask_groq_lawyer(user_input, law_evidence, category):
-    """Generates professional, non-repetitive legal reports."""
+    """Generates evidence-only legal reports."""
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
-    system_prompt = """
-Role: Professional Legal Validator (Indian IT Act 2000).
-CASE SELECTION RULES (Choose ONLY ONE per report):
-1. Financial/UPI/Bank Fraud -> Dhule Vikas Bank vs. Axis Bank (2025)
-2. Identity Theft/Impersonation -> CBI vs. Arif Azim (Sony Sambandh Case)
-3. Deepfakes/AI Harassment -> Delhi HC Deepfake Injunction (2025)
-4. Hacking/Login Theft -> State vs. N.G. Arun Kumar (2011)
-5. Privacy/Fundamental Rights -> Justice K.S. Puttaswamy vs. Union of India
-6. Social Media/Intermediary -> Shreya Singhal vs. Union of India
-7. Electronic Evidence/Logs -> Anvar P.V. vs. P.K. Basheer (2014)
-8. Cyber Stalking/Obscenity -> State of Tamil Nadu vs. Suhas Katti
+
+    category_upper = str(category or "").upper()
+    if "EXPLAIN" in category_upper:
+        system_prompt = """
+Role: Evidence-Only Legal Reference (Indian IT Act 2000).
 CRITICAL CONSTRAINTS:
-- NEVER cite Section 66F (Terrorism) or Section 70 (Critical Systems) unless it involves National/Govt infrastructure.
-- Provide ONLY the single most relevant case. Do NOT list others or explain why they were not chosen.
-- Style: Professional technical plain text. No stars (*) or emojis.
-REPORT FORMAT:
-1. LEGAL PROVISIONS: [List specific IT Act sections]
-2. STATUTORY PENALTIES: [List Jail/Fines]
-3. JUDICIAL PRECEDENT: [The single matching case name and one sentence on its significance]
-4. WIN PROBABILITY: [95% if logs exist, 40% if anonymous]
-5. MANDATORY ACTION: [Must include 6-hour CERT-In rule]
+- Use ONLY the DATABASE EVIDENCE provided below.
+- If a detail is missing, respond with "Not available in database evidence."
+- Do NOT invent sections, punishments, timelines, or case names.
+- Style: Professional plain text. No stars (*) or emojis.
+OUTPUT FORMAT (exactly these three fields, in order):
+OFFICIAL TITLE: ...
+DEFINITION: ...
+EXACT PUNISHMENT: ...
 """
-    full_prompt = f"{system_prompt}\nUser Input: {user_input}\nContext: {law_evidence}"
+    else:
+        system_prompt = """
+Role: Evidence-Only Legal Report (Indian IT Act 2000).
+CRITICAL CONSTRAINTS:
+- Use ONLY the DATABASE EVIDENCE provided below.
+- If a detail is missing, respond with "Not available in database evidence."
+- Do NOT invent sections, punishments, timelines, or case names.
+- If a case is mentioned, it must appear verbatim in DATABASE EVIDENCE.
+- Style: Professional plain text. No stars (*) or emojis.
+OUTPUT FORMAT (include all headings):
+RELEVANT SECTIONS: ...
+PUNISHMENTS: ...
+CASE HISTORY: ...
+WIN PROBABILITY: ...
+ACTION PLAN:
+1. ...
+2. ...
+3. ...
+"""
+
+    full_prompt = f"{system_prompt}\nUSER QUERY: {user_input}\nDATABASE EVIDENCE: {law_evidence}"
     data = {
         "model": "llama-3.1-8b-instant",
         "messages": [{"role": "user", "content": full_prompt}],
@@ -1118,15 +1214,23 @@ def _render_report_html(text: str) -> str:
 
     html_parts = ["<div class='jl-report'>"]
     if title:
+        html_parts.append("<div class='jl-report-header'>")
         html_parts.append(f"<div class='jl-report-title'>{html.escape(title)}</div>")
+        html_parts.append(
+            "<div class='jl-report-chips'>"
+            "<span class='jl-chip'>IT Act 2000</span>"
+            "<span class='jl-chip'>Evidence-Only</span>"
+            "</div>"
+        )
+        html_parts.append("</div>")
     for kind, label, body in rows:
         if kind == "section":
             html_parts.append(f"<div class='jl-report-section'>{html.escape(label)}</div>")
             continue
         if kind == "kv":
             html_parts.append(
-                "<div class='jl-report-row'>"
-                f"<div class='jl-report-label'>{html.escape(label)}</div>"
+                "<div class='jl-report-block'>"
+                f"<div class='jl-report-badge'>{html.escape(label)}</div>"
                 f"<div class='jl-report-body'>{html.escape(body)}</div>"
                 "</div>"
             )
@@ -1196,33 +1300,25 @@ def _validate_ai_answer(category: str, answer: str) -> bool:
     return all(x in upper for x in required_sections)
 
 def _repair_ai_answer(user_input: str, law_evidence: str, category: str, bad_answer: str) -> str:
-    legal_anchor = _justice_lens_legal_anchor()
-
     category_upper = str(category).upper()
     if "EXPLAIN" in category_upper:
         repair_prompt = f"""
-        {legal_anchor}
-        You are a Precise Legal Reference Tool.
+        You are a Precise Evidence-Only Legal Reference Tool (Indian IT Act 2000).
         Rewrite the following draft to STRICTLY comply:
         - Output ONLY these three fields, in this order:
           1) OFFICIAL TITLE:
           2) DEFINITION:
           3) EXACT PUNISHMENT:
+        - Use ONLY DATABASE EVIDENCE. If missing, say "Not available in database evidence."
         - Do NOT include: Win Probability, Action Plan, Case History, steps, URLs, or extra sections.
-        - Use definitions and punishments exactly as provided in INTERNAL REFERENCE.
 
         USER QUERY: {user_input}
         DATABASE EVIDENCE: {law_evidence}
         DRAFT (FIX THIS): {bad_answer}
         """
     else:
-        case_history = _justice_lens_case_history()
-        dynamic_rules = _justice_lens_dynamic_scenario_rules(user_input)
         repair_prompt = f"""
-        {legal_anchor}
-        {case_history}
-        {_justice_lens_2026_scenario_logic()}
-        {dynamic_rules}
+        You are a Precise Evidence-Only Legal Report Tool (Indian IT Act 2000).
         Rewrite the following draft to STRICTLY follow this exact format (include all headings):
         RELEVANT SECTIONS: ...
         PUNISHMENTS: ...
@@ -1232,6 +1328,10 @@ def _repair_ai_answer(user_input: str, law_evidence: str, category: str, bad_ans
         1. ...
         2. ...
         3. ...
+
+        Rules:
+        - Use ONLY DATABASE EVIDENCE. If missing, say "Not available in database evidence."
+        - Do NOT invent sections, punishments, timelines, or case names.
 
         USER QUERY: {user_input}
         DATABASE EVIDENCE: {law_evidence}
@@ -1647,7 +1747,7 @@ else:
                 ans = _out_of_scope_report()
             else:
                 with st.spinner("Querying legal database..."):
-                    dataset_evidence = "General context."
+                    dataset_evidence = "No database evidence found."
                     try:
                         idx, emb = get_backend()
                         if idx and emb:
@@ -1655,13 +1755,16 @@ else:
                             m = idx.query(vector=v, top_k=3, include_metadata=True)
                             dataset_evidence = " ".join(
                                 [x.get("metadata", {}).get("text", "") for x in m.get("matches", [])]
-                            ) or "General context."
+                            ) or "No database evidence found."
                     except Exception:
                         pass
 
                 with st.spinner("Generating legal report..."):
                     try:
                         ans = ask_groq_lawyer_validated(user_msg, dataset_evidence, category)
+                        if not _validate_ai_answer(category, ans):
+                            ans = _repair_ai_answer(user_msg, dataset_evidence, category, ans)
+                        ans = _ensure_section_66_in_answer(user_msg, dataset_evidence, category, ans)
                     except Exception:
                         ans = (
                             "I ran into an issue generating the report just now. "
