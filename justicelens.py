@@ -1780,6 +1780,9 @@ else:
                 if category != "INVALID":
                     ans = _format_report_body(ans)
 
+            if isinstance(ans, str):
+                ans = ans.replace("**", "")
+
             history.append({"role": "assistant", "content": ans})
 
             if db:
