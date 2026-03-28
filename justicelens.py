@@ -1856,7 +1856,7 @@ else:
 
             history.append({"role": "user", "content": user_msg})
 
-            with st.spinner("Analyzing scope..."):
+            with st.spinner("Analyzing scope..."): 
                 category = get_intent_category(user_msg)
 
             if category == "INVALID":
