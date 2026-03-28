@@ -867,6 +867,25 @@ def _contains_any(haystack: str, needles: tuple[str, ...]) -> bool:
 
 ## Section 66 enforcement removed to keep responses aligned with backend prompt logic.
 
+def _is_cyber_relevant(user_input: str) -> bool:
+    if not user_input:
+        return False
+    text = str(user_input).lower()
+    if re.search(r"\b(section|sec|s\.)\s*\d+\b", text):
+        return True
+    if _contains_any(text, ("it act", "information technology act", "cyber", "cybercrime", "cyber crime")):
+        return True
+    return _contains_any(text, (
+        "hacking", "hack", "unauthorized access", "unauthorised access",
+        "phishing", "otp", "upi", "bank fraud", "digital fraud",
+        "identity theft", "impersonation", "deepfake", "morphed",
+        "data breach", "privacy violation", "doxing",
+        "malware", "ransomware", "spyware",
+        "account hacked", "login hacked", "credential", "credential theft",
+        "social media", "whatsapp scam", "sms scam", "email scam",
+        "cyber stalking", "obscenity", "revenge porn",
+    ))
+
 def _is_phishing_portal_or_deepfake(user_input: str) -> bool:
     return _contains_any(user_input, (
         "phishing", "phish", "fake login", "spoof", "credential harvest", "otp page", "login page", "portal", "malicious link",
@@ -1661,7 +1680,10 @@ else:
             history.append({"role": "user", "content": user_msg})
 
             with st.spinner("Analyzing scope..."):
-                category = get_intent_category(user_msg)
+                if not _is_cyber_relevant(user_msg):
+                    category = "INVALID"
+                else:
+                    category = get_intent_category(user_msg)
 
             if category == "INVALID":
                 ans = _out_of_scope_report()
@@ -1684,6 +1706,8 @@ else:
                         ans = ask_groq_lawyer_validated(user_msg, dataset_evidence, category)
                         if not _validate_ai_answer(category, ans):
                             ans = _repair_ai_answer(user_msg, dataset_evidence, category, ans)
+                        if not _validate_ai_answer(category, ans):
+                            ans = _out_of_scope_report()
                     except Exception:
                         ans = (
                             "I ran into an issue generating the report just now. "
