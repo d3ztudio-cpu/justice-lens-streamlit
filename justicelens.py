@@ -1333,6 +1333,7 @@ def _collapse_act_headings(text: str) -> str:
         re.IGNORECASE,
     )
     tag_line = re.compile(r"^[A-Z]{2,}$")
+    label_act_line = re.compile(r"^(IT|DPDP|IT\s+RULES)\s*:\s*.*$", re.IGNORECASE)
     lines = text.splitlines()
     out = []
     i = 0
@@ -1351,7 +1352,7 @@ def _collapse_act_headings(text: str) -> str:
             if has_act:
                 out.append("ACTS:")
             for b in block:
-                if act_line.match(b.strip()) or tag_line.match(b.strip()):
+                if act_line.match(b.strip()) or tag_line.match(b.strip()) or label_act_line.match(b.strip()):
                     continue
                 out.append(b)
             continue
