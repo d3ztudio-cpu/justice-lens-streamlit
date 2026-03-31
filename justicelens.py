@@ -777,6 +777,17 @@ def _session_store_ref():
         .collection("sessions")
     )
 
+def _chat_store_ref():
+    if not db:
+        return None
+    return (
+        db.collection("artifacts")
+        .document("justicelens-law")
+        .collection("public")
+        .document("data")
+        .collection("chats")
+    )
+
 def _get_sid():
     try:
         return st.query_params.get("sid")
@@ -817,11 +828,71 @@ def _restore_session_from_sid():
         pass
 
 _restore_session_from_sid()
+_ensure_chats_loaded()
 
 if "projects" not in st.session_state:
     st.session_state.projects = {"Default": st.session_state.get("chat_history", [])}
 if "active_project" not in st.session_state:
     st.session_state.active_project = "Default"
+if "jl_chats_loaded" not in st.session_state:
+    st.session_state.jl_chats_loaded = False
+
+def _load_chats_for_user(uid: str):
+    if not db or not uid:
+        return
+    ref = _chat_store_ref()
+    if not ref:
+        return
+    try:
+        docs = ref.document(uid).collection("projects").stream()
+        loaded = {}
+        for doc in docs:
+            data = doc.to_dict() or {}
+            msgs = data.get("messages") or []
+            if isinstance(msgs, list):
+                loaded[doc.id] = msgs
+        if loaded:
+            st.session_state.projects = loaded
+            if st.session_state.active_project not in st.session_state.projects:
+                st.session_state.active_project = next(iter(loaded.keys()))
+    except Exception:
+        pass
+
+def _persist_chat_for_user(uid: str, project: str, history: list):
+    if not db or not uid or not project:
+        return
+    ref = _chat_store_ref()
+    if not ref:
+        return
+    try:
+        # Keep a reasonable cap to avoid oversized documents.
+        trimmed = list(history)[-50:]
+        ref.document(uid).collection("projects").document(project).set({
+            "messages": trimmed,
+            "updated_at": utc_now(),
+        }, merge=True)
+    except Exception:
+        pass
+
+def _delete_chat_for_user(uid: str, project: str):
+    if not db or not uid or not project:
+        return
+    ref = _chat_store_ref()
+    if not ref:
+        return
+    try:
+        ref.document(uid).collection("projects").document(project).delete()
+    except Exception:
+        pass
+
+def _ensure_chats_loaded():
+    if st.session_state.jl_chats_loaded:
+        return
+    user = st.session_state.get("user") or {}
+    uid = user.get("uid")
+    if uid:
+        _load_chats_for_user(uid)
+        st.session_state.jl_chats_loaded = True
 
 # --- AUTH SYSTEM ---
 def authenticate(email, password):
@@ -1374,6 +1445,7 @@ def show_sidebar():
                                     "email": e_val,
                                     "uid": u_obj.uid
                                 }
+                                st.session_state.jl_chats_loaded = False
                                 st.session_state.view = "AI Assistant"
                                 if db:
                                     sid = str(uuid.uuid4())
@@ -1389,6 +1461,7 @@ def show_sidebar():
                                         pass
                                 st.session_state.show_login = False  # Hide login form
                                 sync_user(st.session_state.user)
+                                _ensure_chats_loaded()
                                 st.rerun()
                         else:
                             st.error("Invalid Credentials.")
@@ -1409,6 +1482,8 @@ def show_sidebar():
                 st.session_state.user = {"name": f"Guest_{gid}", "email": "guest@justicelens.io",
                                          "uid": f"guest_{gid}"}
                 st.session_state.show_login = False  # Hide login form
+                st.session_state.jl_chats_loaded = False
+                _ensure_chats_loaded()
                 if db:
                     sid = str(uuid.uuid4())
                     try:
@@ -1466,6 +1541,7 @@ def show_sidebar():
                     active = st.session_state.active_project
                     st.session_state.projects[active] = []
                     st.session_state.chat_history = []
+                    _delete_chat_for_user(st.session_state.user.get("uid"), active)
                     st.rerun()
 
                 st.markdown("### Chats")
@@ -1475,6 +1551,7 @@ def show_sidebar():
                     if name and name not in st.session_state.projects:
                         st.session_state.projects[name] = []
                         st.session_state.active_project = name
+                        _persist_chat_for_user(st.session_state.user.get("uid"), name, [])
                         st.rerun()
 
                 project_names = list((st.session_state.get("projects") or {}).keys())
@@ -1508,6 +1585,7 @@ def show_sidebar():
                 st.session_state.user = None
                 st.session_state.admin_mode = False
                 st.session_state.chat_history = []
+                st.session_state.jl_chats_loaded = False
                 st.session_state.show_login = True  # Show login form
                 st.rerun()
 
@@ -1618,8 +1696,10 @@ if not st.session_state.user:
                                 st.error("Access Forbidden.")
                             else:
                                 st.session_state.user = {"name": u_obj.display_name or m_email.split('@')[0], "email": m_email, "uid": u_obj.uid}
+                                st.session_state.jl_chats_loaded = False
                                 st.session_state.view = "AI Assistant"
                                 st.session_state.mobile_login_open = False
+                                _ensure_chats_loaded()
                                 if db:
                                     sid = str(uuid.uuid4())
                                     try:
@@ -1651,6 +1731,8 @@ if not st.session_state.user:
                     gid = str(uuid.uuid4())[:8]
                     st.session_state.user = {"name": f"Guest_{gid}", "email": "guest@justicelens.io", "uid": f"guest_{gid}"}
                     st.session_state.mobile_login_open = False
+                    st.session_state.jl_chats_loaded = False
+                    _ensure_chats_loaded()
                     if db:
                         sid = str(uuid.uuid4())
                         try:
@@ -1749,6 +1831,7 @@ else:
                         )
 
             history.append({"role": "assistant", "content": ans})
+            _persist_chat_for_user(st.session_state.user.get("uid"), active, history)
 
             if db:
                 try:
