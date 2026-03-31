@@ -1066,6 +1066,18 @@ def get_intent_category(user_input):
     STRICT GATEKEEPER:
     Prevents physical crimes (murder, theft) from being processed.
     """
+    # Deterministic local gate: block obvious physical/off-topic crimes before LLM call.
+    if not _is_cyber_relevant(user_input):
+        return "INVALID"
+    if _contains_any(user_input, (
+        "murder", "killed", "kill", "homicide", "manslaughter",
+        "assault", "battery", "stabbing", "shooting",
+        "rape", "sexual assault",
+        "robbery", "burglary", "theft", "physical theft",
+        "acid attack", "sulphuric", "sulfuric",
+    )):
+        return "INVALID"
+
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
     classifier_prompt = f"""
