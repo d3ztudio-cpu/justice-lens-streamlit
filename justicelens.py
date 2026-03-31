@@ -146,6 +146,7 @@ st.markdown(
     header[data-testid="stHeader"]{
         background: transparent !important;
         border-bottom: none !important;
+        pointer-events: none !important;
     }
 
     /* Hide Streamlit's sidebar toggle controls; use custom hamburger on mobile only */
@@ -488,7 +489,7 @@ st.markdown(
         position: fixed;
         top: 0.9rem;
         left: 0.9rem;
-        z-index: 10001;
+        z-index: 10005;
         width: 42px;
         height: 42px;
         border-radius: 10px;
@@ -685,6 +686,27 @@ components.html(
         if (openBtn) openBtn.click();
       };
       ensureDesktopSidebar();
+      const bindToggleHandlers = () => {
+        const toggle = doc.querySelector("[data-jl-drawer-toggle]");
+        const backdrop = doc.querySelector("[data-jl-drawer-backdrop]");
+        if (toggle && !toggle.__jlBound){
+          const open = (e) => { e.preventDefault(); openDrawer(); };
+          toggle.addEventListener("click", open, true);
+          toggle.addEventListener("touchstart", open, {passive: false, capture: true});
+          toggle.__jlBound = true;
+        }
+        if (backdrop && !backdrop.__jlBound){
+          const close = (e) => { e.preventDefault(); closeDrawer(); };
+          backdrop.addEventListener("click", close, true);
+          backdrop.addEventListener("touchstart", close, {passive: false, capture: true});
+          backdrop.__jlBound = true;
+        }
+      };
+      bindToggleHandlers();
+      const bindTimer = setInterval(() => {
+        bindToggleHandlers();
+        if (doc.querySelector("[data-jl-drawer-toggle]")) clearInterval(bindTimer);
+      }, 600);
       doc.defaultView && doc.defaultView.addEventListener("resize", () => {
         if (!isMobile()) {
           closeDrawer();
