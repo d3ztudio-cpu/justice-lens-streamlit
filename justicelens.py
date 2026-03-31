@@ -145,7 +145,7 @@ st.markdown(
         height: 0 !important;
     }
 
-    /* Permanently fix sidebar by hiding the collapse controls */
+    /* Keep sidebar controls visible so users can re-open it if collapsed */
     [data-testid="collapsedControl"],
     [data-testid="stSidebarCollapseButton"],
     [data-testid="stSidebarCollapsedControl"],
@@ -155,10 +155,8 @@ st.markdown(
     button[title="Close sidebar"],
     button[title="Show sidebar"],
     button[title="Hide sidebar"] {
-        display: none !important;
+        display: inline-flex !important;
     }
-
-    /* (Removed custom sidebar overlay/hamburger styles) */
 
     /* Buttons */
     .stButton > button, .stFormSubmitButton > button, .stDownloadButton > button{
