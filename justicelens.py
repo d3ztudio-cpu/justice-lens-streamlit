@@ -1425,7 +1425,7 @@ def show_sidebar():
 
             st.markdown("---")
             st.caption("Resources")
-            public_pages = ["AI Assistant", "About", "Terms", "Cyber Rules 2026"]
+            public_pages = ["AI Assistant", "About", "Terms"]
             try:
                 default_index = public_pages.index(st.session_state.view)
             except ValueError:
@@ -1446,7 +1446,7 @@ def show_sidebar():
                 unsafe_allow_html=True,
             )
 
-            opts = ["AI Assistant", "Vision & Mission", "About", "Terms", "Cyber Rules 2026"]
+            opts = ["AI Assistant", "Vision & Mission", "About", "Terms"]
             if st.session_state.user['email'] == "d3ztudio@gmail.com":
                 st.markdown(
                     '<span style="color:var(--jl-primary); font-weight:800; font-size:0.7rem; letter-spacing:0.12em;">SYSTEM COMMANDER</span>',
@@ -1516,7 +1516,7 @@ show_sidebar()
 
 # --- MAIN CONTENT ---
 if not st.session_state.user:
-    if st.session_state.view in ("Vision & Mission", "About", "Terms", "Cyber Rules 2026"):
+    if st.session_state.view in ("Vision & Mission", "About", "Terms"):
         l_pad, main, r_pad = st.columns([1, 8, 1])
         with main:
             with st.container():
@@ -1545,7 +1545,7 @@ if not st.session_state.user:
                         </p>
                         <ol style="color: var(--jl-muted) !important;">
                             <li><strong>Intent Classification:</strong> It first determines the nature of your query to understand if it's a real-world scenario, a request for a legal explanation, or a general question.</li>
-                            <li><strong>Database Retrieval:</strong> It then queries its legal knowledge base, which includes statutory provisions, landmark case law, and dynamic rules updated for 2026, to find the most relevant legal precedents and sections.</li>
+                            <li><strong>Database Retrieval:</strong> It then queries its legal knowledge base, which includes statutory provisions, landmark case law, and dynamic rule updates, to find the most relevant legal precedents and sections.</li>
                             <li><strong>Structured Response Generation:</strong> Finally, it synthesizes this information into a clear, structured report, including an action plan and evidence preservation steps.</li>
                         </ol>
                         <p style="color: var(--jl-muted) !important; margin-top:1rem; margin-bottom:0;">
@@ -1574,31 +1574,6 @@ if not st.session_state.user:
                          <h3 style="margin-top:1.5rem;">4. Limitation of Liability</h3>
                         <p style="color: var(--jl-muted) !important; margin-bottom:0;">
                             While we strive for accuracy, the legal landscape is constantly evolving. We do not warrant the completeness or accuracy of the information provided. The developers of Justice Lens shall not be liable for any damages arising out of the use of the information provided.
-                        </p>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-            else:  # Cyber Rules 2026
-                st.markdown(
-                    """
-                    <div class="jl-card">
-                        <h3 style="margin-top:0;">Intermediary Duties & The 2026 Amendment</h3>
-                        <p style="color: var(--jl-muted) !important; margin-bottom:0;">
-                            The “Cyber Rules 2026” refers to the official amendment to the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021 (G.S.R. 120(E), 10 Feb 2026). Justice Lens applies these updates to cyber cases involving phishing, deepfakes, and harmful synthetic content.
-                        </p>
-                        <h3 style="margin-top:1.5rem;">Key Provision: Intermediary Liability</h3>
-                        <p style="color: var(--jl-muted) !important; margin-bottom:0;">
-                           A core component of these rules is the handling of “synthetically generated information” (SGI), including deepfakes, and fast-track compliance timelines.
-                        </p>
-                        <ul style="color: var(--jl-muted) !important;">
-                            <li><strong>The Law:</strong> Based on amendments to the IT Rules, online platforms like social media networks and hosting providers ("intermediaries") have specific obligations.</li>
-                            <li><strong>"Safe Harbor":</strong> Under Section 79 of the IT Act, these intermediaries are granted "safe harbor," which protects them from liability for content posted by their users.</li>
-                            <li><strong>Updated Timelines (2026):</strong> The amendment shortens key timelines (e.g., 7 days for grievance disposal; 3 hours for lawful takedown orders; and 2 hours for non-consensual intimate imagery complaints under Rule 3(2)(b)).</li>
-                        </ul>
-                         <h3 style="margin-top:1.5rem;">Justice Lens's Analysis</h3>
-                        <p style="color: var(--jl-muted) !important; margin-bottom:0;">
-                           When the AI detects a relevant scenario, its Action Plan references the amended IT Rules 2021 (2026 update). It advises issuing a takedown notice to the intermediary and highlights the updated timelines where applicable.
                         </p>
                     </div>
                     """,
@@ -1964,7 +1939,7 @@ else:
                 </p>
                 <ol style="color: var(--jl-muted) !important;">
                     <li><strong>Intent Classification:</strong> It first determines the nature of your query to understand if it's a real-world scenario, a request for a legal explanation, or a general question.</li>
-                    <li><strong>Database Retrieval:</strong> It then queries its legal knowledge base, which includes statutory provisions, landmark case law, and dynamic rules updated for 2026, to find the most relevant legal precedents and sections.</li>
+                    <li><strong>Database Retrieval:</strong> It then queries its legal knowledge base, which includes statutory provisions, landmark case law, and dynamic rule updates, to find the most relevant legal precedents and sections.</li>
                     <li><strong>Structured Response Generation:</strong> Finally, it synthesizes this information into a clear, structured report, including an action plan and evidence preservation steps.</li>
                 </ol>
                 <p style="color: var(--jl-muted) !important; margin-top:1rem; margin-bottom:0;">
@@ -2001,32 +1976,6 @@ else:
             unsafe_allow_html=True,
         )
 
-    elif page == "Cyber Rules 2026":
-        st.title("Cyber Rules 2026")
-        st.markdown(
-            """
-            <div class="jl-card">
-                <h3 style="margin-top:0;">Intermediary Duties & The 2026 Amendment</h3>
-                <p style="color: var(--jl-muted) !important; margin-bottom:0;">
-                    The “Cyber Rules 2026” refers to the official amendment to the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021 (G.S.R. 120(E), 10 Feb 2026). Justice Lens applies these updates to cyber cases involving phishing, deepfakes, and harmful synthetic content.
-                </p>
-                <h3 style="margin-top:1.5rem;">Key Provision: Intermediary Liability</h3>
-                <p style="color: var(--jl-muted) !important; margin-bottom:0;">
-                   A core component of these rules is the handling of “synthetically generated information” (SGI), including deepfakes, and fast-track compliance timelines.
-                </p>
-                <ul style="color: var(--jl-muted) !important;">
-                    <li><strong>The Law:</strong> Based on amendments to the IT Rules, online platforms like social media networks and hosting providers ("intermediaries") have specific obligations.</li>
-                    <li><strong>"Safe Harbor":</strong> Under Section 79 of the IT Act, these intermediaries are granted "safe harbor," which protects them from liability for content posted by their users.</li>
-                    <li><strong>Updated Timelines (2026):</strong> The amendment shortens key timelines (e.g., 7 days for grievance disposal; 3 hours for lawful takedown orders; and 2 hours for non-consensual intimate imagery complaints under Rule 3(2)(b)).</li>
-                </ul>
-                 <h3 style="margin-top:1.5rem;">Justice Lens's Analysis</h3>
-                <p style="color: var(--jl-muted) !important; margin-bottom:0;">
-                   When the AI detects a relevant scenario, its Action Plan references the amended IT Rules 2021 (2026 update). It advises issuing a takedown notice to the intermediary and highlights the updated timelines where applicable.
-                </p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
 
     elif page == "Admin Dashboard" and st.session_state.admin_mode:
         st.title("Admin Dashboard")
