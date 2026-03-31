@@ -827,9 +827,6 @@ def _restore_session_from_sid():
     except Exception:
         pass
 
-_restore_session_from_sid()
-_ensure_chats_loaded()
-
 if "projects" not in st.session_state:
     st.session_state.projects = {"Default": st.session_state.get("chat_history", [])}
 if "active_project" not in st.session_state:
@@ -893,6 +890,9 @@ def _ensure_chats_loaded():
     if uid:
         _load_chats_for_user(uid)
         st.session_state.jl_chats_loaded = True
+
+_restore_session_from_sid()
+_ensure_chats_loaded()
 
 # --- AUTH SYSTEM ---
 def authenticate(email, password):
