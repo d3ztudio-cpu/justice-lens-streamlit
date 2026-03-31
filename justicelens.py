@@ -1,6 +1,6 @@
 ﻿import streamlit as st
 import pandas as pd
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from zoneinfo import ZoneInfo
 import firebase_admin
 from firebase_admin import credentials, firestore, auth
@@ -2090,6 +2090,140 @@ else:
 
             st.divider()
 
+            # --- Admin chat retention + cleanup tools ---
+            def _to_dt(value):
+                if isinstance(value, datetime):
+                    return value
+                if hasattr(value, "to_datetime"):
+                    try:
+                        return value.to_datetime()
+                    except Exception:
+                        return None
+                return None
+
+            def _iter_chat_project_docs():
+                docs = []
+                for ud in users:
+                    try:
+                        proj_ref = (
+                            db.collection("artifacts")
+                            .document("justicelens-law")
+                            .collection("public")
+                            .document("data")
+                            .collection("chats")
+                            .document(ud["uid"])
+                            .collection("projects")
+                        )
+                        docs.extend(list(proj_ref.stream()))
+                    except Exception:
+                        continue
+                return docs
+
+            def _cleanup_chats_older_than(days: int):
+                cutoff = utc_now() - timedelta(days=days)
+                deleted = 0
+                scanned = 0
+                for doc in _iter_chat_project_docs():
+                    scanned += 1
+                    data = doc.to_dict() or {}
+                    updated_at = _to_dt(data.get("updated_at"))
+                    if updated_at and updated_at < cutoff:
+                        doc.reference.delete()
+                        deleted += 1
+                return deleted, scanned
+
+            def _delete_all_chats():
+                deleted = 0
+                for doc in _iter_chat_project_docs():
+                    doc.reference.delete()
+                    deleted += 1
+                return deleted
+
+            st.markdown("### Chat Retention & Cleanup")
+            settings_ref = (
+                db.collection("artifacts")
+                .document("justicelens-law")
+                .collection("public")
+                .document("data")
+                .collection("settings")
+                .document("chat_retention")
+            )
+            settings = {}
+            try:
+                settings_doc = settings_ref.get()
+                if settings_doc and settings_doc.exists:
+                    settings = settings_doc.to_dict() or {}
+            except Exception:
+                settings = {}
+
+            retention_options = {
+                "Off": 0,
+                "15 days": 15,
+                "30 days": 30,
+                "60 days": 60,
+            }
+            saved_days = int(settings.get("days") or 0)
+            if saved_days not in retention_options.values():
+                saved_days = 30
+            saved_label = next((k for k, v in retention_options.items() if v == saved_days), "30 days")
+            saved_enabled = bool(settings.get("enabled", False))
+
+            c1, c2, c3 = st.columns([2, 2, 1])
+            with c1:
+                retention_label = st.selectbox(
+                    "Auto-delete chats after",
+                    list(retention_options.keys()),
+                    index=list(retention_options.keys()).index(saved_label),
+                    key="admin_chat_retention_days",
+                )
+            with c2:
+                retention_enabled = st.checkbox(
+                    "Enable auto-delete",
+                    value=saved_enabled,
+                    key="admin_chat_retention_enabled",
+                )
+            with c3:
+                st.caption("Admins only")
+
+            save_col, run_col = st.columns([1, 1])
+            with save_col:
+                if st.button("Save retention settings", use_container_width=True):
+                    days_val = retention_options.get(retention_label, 0)
+                    settings_ref.set(
+                        {
+                            "enabled": bool(retention_enabled) and days_val > 0,
+                            "days": int(days_val),
+                            "updated_at": utc_now(),
+                        },
+                        merge=True,
+                    )
+                    st.success("Retention settings saved.")
+            with run_col:
+                if st.button("Run cleanup now", use_container_width=True, type="secondary"):
+                    days_val = retention_options.get(retention_label, 0)
+                    if days_val <= 0:
+                        st.info("Select a retention period above to run cleanup.")
+                    else:
+                        with st.spinner("Deleting old chats..."):
+                            deleted, scanned = _cleanup_chats_older_than(days_val)
+                        settings_ref.set({"last_cleanup": utc_now()}, merge=True)
+                        st.success(f"Cleanup complete: {deleted} chat documents removed (scanned {scanned}).")
+
+            # Auto-cleanup runs only for admins and no more than twice per day (uses saved settings).
+            auto_days = int(settings.get("days") or 0)
+            auto_enabled = bool(settings.get("enabled", False))
+            if auto_enabled and auto_days > 0:
+                last_cleanup = _to_dt(settings.get("last_cleanup"))
+                if (not last_cleanup) or (utc_now() - last_cleanup).total_seconds() > 12 * 3600:
+                    with st.spinner("Auto-cleanup running..."):
+                        deleted, scanned = _cleanup_chats_older_than(auto_days)
+                    settings_ref.set({"last_cleanup": utc_now()}, merge=True)
+                    if deleted:
+                        st.info(f"Auto-cleanup removed {deleted} old chat documents.")
+
+            st.caption("Use manual cleanup for immediate removal or set auto-delete to remove old chats automatically.")
+            st.divider()
+
             f1, f2 = st.columns([3, 1])
             with f1:
                 search_q = st.text_input("Search user (name/email)", key="admin_user_search")
@@ -2133,7 +2267,7 @@ else:
                 badge_class = "jl-badge-banned" if ud["is_banned"] else "jl-badge-active"
 
                 with st.container(border=True):
-                    info_col, ban_col, del_col = st.columns([4, 1, 1])
+                    info_col, ban_col, del_col, chat_del_col = st.columns([4, 1, 1, 1])
                     with info_col:
                         st.markdown(
                             f"**{ud['name']}** <span class='jl-badge {badge_class}'>{status_text}</span>",
@@ -2159,6 +2293,28 @@ else:
                                 st.rerun()
                             except Exception as e:
                                 st.error(f"Error: {e}")
+                    with chat_del_col:
+                        if st.button("Delete Chats", key=f"delchats_{ud['doc_id']}", use_container_width=True):
+                            try:
+                                deleted = 0
+                                for doc in db.collection("artifacts").document("justicelens-law").collection("public").document("data").collection("chats").document(ud["uid"]).collection("projects").stream():
+                                    doc.reference.delete()
+                                    deleted += 1
+                                st.success(f"Deleted {deleted} chat documents.")
+                            except Exception as e:
+                                st.error(f"Error deleting chats: {e}")
+
+            st.divider()
+            st.markdown("### Global Chat Delete")
+            confirm_delete_all = st.checkbox(
+                "I understand this will permanently delete all chats for all users.",
+                key="admin_delete_all_chats_confirm",
+            )
+            if st.button("Delete ALL Chats", use_container_width=True, type="secondary", disabled=not confirm_delete_all):
+                with st.spinner("Deleting all chats..."):
+                    deleted = _delete_all_chats()
+                settings_ref.set({"last_cleanup": utc_now()}, merge=True)
+                st.success(f"Deleted {deleted} chat documents in total.")
         else:
             st.error("Database not available.")
                     

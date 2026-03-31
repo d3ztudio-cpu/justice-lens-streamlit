@@ -191,6 +191,8 @@ Each of these uses `.jl-card` HTML blocks for clean typography and spacing.
 **19) Admin Dashboard UI**
 Admins see a dashboard with:
 - Metric cards (total, active, banned, guest users)
+- Chat retention settings (auto-delete after 15/30/60 days) + manual cleanup
+- Per-user "Delete Chats" action and global "Delete ALL Chats" control (admin-only)
 - Search + status filter controls
 - CSV download button
 - User directory list with Ban/Unban and Delete buttons  
