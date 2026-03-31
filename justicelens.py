@@ -135,14 +135,17 @@ st.markdown(
         pointer-events: none !important;
     }
 
-    /* Remove Streamlit header/toolbar (removes default toggle & deployment chrome) */
-    header[data-testid="stHeader"],
+    /* Remove Streamlit toolbar/decorations but keep header so sidebar toggle can appear */
     [data-testid="stToolbar"],
     [data-testid="stDecoration"],
     #MainMenu {
         display: none !important;
         visibility: hidden !important;
         height: 0 !important;
+    }
+    header[data-testid="stHeader"]{
+        background: transparent !important;
+        border-bottom: none !important;
     }
 
     /* Keep sidebar controls visible so users can re-open it if collapsed */
