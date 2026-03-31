@@ -1,0 +1,1124 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{mathptmx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{dirtytalk}
+\usepackage{fancyhdr}
+\usepackage{wrapfig}
+\usepackage{booktabs}
+\usepackage{rotating}
+\usepackage{lscape}
+\usepackage{longtable}
+\usepackage{multirow,bigstrut}
+\usepackage{graphicx}
+\usepackage{times}
+\usepackage{tocloft}
+\usepackage{fancybox}
+\usepackage[a4paper,bindingoffset=0.2in,%
+            left=1in,right=1in,top=1in,bottom=1in,%
+            footskip=.25in]{geometry}
+\usepackage[pagestyles]{titlesec}
+\usepackage{setspace}
+\usepackage{sectsty}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{amsthm}
+\usepackage{pdfpages}
+\usepackage{algorithm}
+\usepackage{algpseudocode,algorithm}
+\captionsetup[table]{labelsep=space}
+%\captionsetup[table]{skip=-4pt}
+\setlength{\belowcaptionskip}{-6pt}
+\captionsetup[figure]{skip=-4pt}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{}
+
+%%%%% Header part - Type your seminar title here %%%%%%%%%%%%
+\rhead{\fontsize{8}{12} \selectfont Justice Lens: AI Powered Legal Assistant Chatbot}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\rfoot{\fontsize{8}{12} \selectfont \thepage}
+\lfoot{\fontsize{8}{12} \selectfont Department of Computer Science and Engineering  }
+\setlist{nosep}
+\renewcommand{\footrulewidth}{}
+\renewcommand{\headrulewidth}{}
+\sectionfont{\fontsize{12}{15}\MakeUppercase\selectfont}
+\subsectionfont{\normalfont\fontsize{12}{15}\selectfont}
+\subsubsectionfont{\normalfont\fontsize{12}{15}\selectfont}
+\parindent=0cm
+\renewcommand{\cfttoctitlefont}{\normalfont\normalsize\bfseries\MakeUppercase}
+\renewcommand{\cftloftitlefont}{\normalfont\normalsize\bfseries\MakeUppercase}
+\renewcommand{\cftlottitlefont}{\normalfont\normalsize\bfseries\MakeUppercase}
+
+\sectionfont{\fontsize{12}{15}}
+\sectionfont{\MakeUppercase}
+
+%\numberwithin{figure}{section}
+%\numberwithin{table}{section}
+
+\titleformat{\chapter}[display]
+{\normalfont\huge\bfseries\centering}{\centering\chaptertitlename\ \thechapter}{14pt}{\huge}
+\titlespacing*{\chapter}
+{0pt}{50pt}{40pt}
+ 
+\newpagestyle{mystyle}{\sethead{}{}{}\setfoot{}{\thepage}{}}
+\pagestyle{mystyle}
+
+
+\begin{document}
+\pagenumbering{roman}
+\renewcommand\bibname{REFERENCES}
+\renewcommand*{\thepage}{\footnotesize\roman{page}} % For Roman Page No
+\renewcommand{\figurename}{Fig.}
+
+
+
+
+%%%%%%%%%%%COVER PAGE %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{titlepage}
+\newgeometry{left=1in,right=1in,top=1in,bottom=1in}
+\begin{center}
+\onehalfspacing
+{\fontsize{21}{23}\selectfont \textbf{Justice Lens: AI Powered Legal Assistant Chatbot}
+\\} %CAPITAL LETTERS
+ %CAPITAL LETTERS
+\vspace{1.1 cm}
+{\fontsize{16}{14}\selectfont {  PROJECT REPORT }}\\
+\vspace{0.7 cm}
+\onehalfspacing
+{\fontsize{14}{16}\selectfont{submitted by}}	\\
+
+\vspace{1 cm}
+{\fontsize{16}{14}\selectfont \textbf{DOLUS K SHYJU}
+{\fontsize{12}{14}\selectfont \textbf{[ECE22CS017]}}\\
+
+\vspace{0.5 cm}
+{to}\\
+\vspace{0.5 cm}
+{\fontsize{14}{14}\selectfont \\The APJ Abdul Kalam Technological University}\\
+{\fontsize{14}{14}\selectfont \\in partial fulfillment of the requirements for the award of the Degree}\\
+
+\vspace{0.5 cm}
+{of }\\
+\vspace{0.5cm}
+{\fontsize{14}{14}\selectfont Bachelor of Technology}\\
+\vspace{0.2cm}
+{in}\\
+\vspace{0.2cm}
+{\fontsize{14}{14}\selectfont \textit{Computer Science and Engineering}}\\
+\\
+\\
+\vspace{0.1cm}
+\begin{figure}[hbtp]
+\centering
+\includegraphics[scale=0.04]{iccs logo.png}
+\end{figure}
+\vspace{0.4cm}
+{\fontsize{14}{14}\selectfont \textbf{Department of Computer Science and Engineering}}
+\vspace{0.2cm}
+{\fontsize{14}{16}\selectfont \\ICCS College of Engineering and Management,\\ Injakundu P O , Thrissur - 680312}\\
+\vspace{0.8cm}
+{\fontsize{14}{16}\selectfont{\upshape March 2026}}
+\end{center}
+\end{titlepage}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%DECLARATION%%%%%%%%%%%%%%%%%%%
+\newpage
+\pagestyle{plain}
+
+\begin{center}
+\section*{DECLARATION}
+\end{center}
+\onehalfspacing
+I undersigned hereby declare that my project report \textbf{`` Justice Lens: AI Powered Legal Assistant Chatbot''}, submitted for partial fulfillment of the requirements for the award of degree of Bachelor of Technology of the APJ Abdul Kalam Technological University, Kerala is a bonafide work done by me under the supervision of my Project Guide, \textbf{Ms.Amulya P M} Assistant Professor, Department of Computer Science and Engineering, and Project coordinator \textbf{Ms.Divya Jose},  Head of the Department of Computer Science and Engineering from the ICCS College of Engineering and Management. This submission represents my ideas in my own words and where ideas or words of others have been included, I have adequately and accurately cited and referenced all the original sources. I also declare that I have adhered to ethics of academic honesty and integrity and have not misrepresented or fabricated any data or idea or fact or source in my submission. I understand that any violation of the above will be a cause for disciplinary action by the institute and/or the University and can also evoke penal action from the sources which have thus not been properly cited or from whom proper permission has not been obtained. This project report has not been previously formed the basis for the award of any degree, diploma or similar title of any other University.\\
+\\
+\\
+Injakundu
+\newline
+31-03-2026
+\begin{flushright}
+    \begin{minipage}{4cm} % You can adjust this width
+        \raggedright % This left-aligns the text INSIDE the minipage
+        \textbf{DOLUS K SHYJU} \\
+    \end{minipage}
+\end{flushright}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%CERTIFICATE%%%%%%%%%%%%%%%%%%%%%%%
+\begin{titlepage}
+\newgeometry{left=1in,right=1in,top=1in,bottom=1in}
+\onehalfspacing
+\begin{center}
+{\fontsize{16}{10}\selectfont\textbf{DEPARTMENT OF COMPUTER SCIENCE \& ENGINEERING}}\\
+\vspace{0.3cm}
+{\fontsize{14}{14}\selectfont\textbf{ICCS  COLLEGE OF ENGINEERING AND MANAGEMENT,}}\\ \vspace{0.3cm} 
+{\fontsize{14}{14}\selectfont\textbf{INJAKUNDU, THRISSUR - 680312}}\\
+\end{center}
+\begin{figure}[hbtp]
+\centering
+\includegraphics[scale=0.04]{iccs logo.png}
+\end{figure}
+\vspace{.1in}
+\begin{center}
+{\fontsize{16}{16}\selectfont\textbf{CERTIFICATE}}\\
+\vspace{.1in}
+\end{center}
+\doublespacing
+{\fontsize{14}{16}\selectfont{ This is to certify that the report entitled 
+\textbf{"Justice Lens: AI Powered Legal Assistant Chatbot”} submitted by \textbf{DOLUS K SHYJU [ECE22CS015]} to the APJ Abdul Kalam Technological University in partial fulfillment of the requirements for the award of Degree of Bachelor of Technology in Computer Science and Engineering, is a bonafide record of the project work carried out by them under my guidance and supervision. This project report in any form has not been submitted to any other University or Institute for any purpose.}}
+\vspace{02cm}\\
+\noindent % Prevents the line from being indented
+\begin{minipage}[t]{0.3\textwidth}
+    \raggedright % Left-aligns text in this block
+    \textbf{Project Supervisor}
+    
+    Ms. Amulya P M \\
+    Assistant Professor\\
+    Department of
+     Computer Science and Engineering
+\end{minipage}%
+\hfill % Adds flexible space between the blocks
+\begin{minipage}[t]{0.3\textwidth}
+    \raggedright
+    \textbf{Project Coordinator}
+    
+    Ms. Simi Cheriyan\\
+    Assistant Professor \\
+    Department of
+    Computer Science and Engineering
+\end{minipage}%
+\hfill % Adds flexible space between the blocks
+\begin{minipage}[t]{0.3\textwidth}
+    \raggedright
+    \textbf{Head Of Department}
+   
+    Ms. Divya Jose \\
+    Assistant Professor \\
+    Department of
+    Computer Science and Engineering
+\end{minipage}
+
+%\begin{flushleft}
+%\textbf{Kodakara}\\
+%\textbf{10-06-2021}
+%\end{flushleft}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%ACKNOWLEDGMENT%%%%%%%%%%%%%%%%%%%
+\newpage
+\pagestyle{plain}
+\phantomsection
+\addcontentsline{toc}{section}{\textnormal{\textbf{ACKNOWLEDGMENT}}}
+\begin{center}
+\section*{ACKNOWLEDGMENT}
+\end{center}
+\onehalfspacing
+\hspace*{0.5cm}\hspace*{0.3cm}To the grace and the generous blessings of almighty, I attribute the successful completion of my project. I must respectfully offer my sincere gratitude to all the people who have kindly offered their valuable suggestions, guidance, and support.\\
+
+\hspace*{0.3cm}I would like to express my deep gratitude and sincere thanks to my Chairman \textbf{Dr. Sojan V. Avirachan},  Executive Director \textbf{Prof. Dr. Jai M Paul}, and  Principal \textbf{Dr. Vibin Antony P}, and Vice principal \textbf{Prof. Dr. Bravilin jiju K }, ICCS College of Engineering and Management, who have been a source of motivation to all the staff members and the students of my college. 
+
+\hspace*{0.5cm} I deeply and wholeheartedly thank \textbf{Ms. Divya Jose}, Head of the Department of Computer Science and Engineering for her extremely valuable advice and encouragement. I would also like to extend my heartfelt thanks to my project coordinator \textbf{Ms. Simi Cheriyan}, project guide \textbf{Ms. Amulya P M}, Assistant Professor of Computer Science and Engineering for their meticulous guidance and support that helped me in the completion of my project.\\
+
+\hspace*{0.5cm}Before I culminate, I would like to extend my heartfelt gratitude and thanks to all the teachers and the staff members of the Department of the Computer Science and Engineering, ICCS College of Engineering and Management for their immense co-operation and the whole-hearted support. Last but not the least, I thank all my family members and my classmates who in some way or the other helped me in the successful completion of this work.\\\\
+\\
+\\
+\begin{flushright}
+    \begin{minipage}{4cm} % You can adjust this width
+        \raggedright % This left-aligns the text INSIDE the minipage
+        \textbf{ARCHANA V S} \\
+        \textbf{DOLUS K SHYJU} \\
+        \textbf{ROSE SANIYA P X} \\
+        \textbf{SREERAJ S P} \\
+    \end{minipage}
+\end{flushright}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%ABSTRACT%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\phantomsection
+\addcontentsline{toc}{section}{\textnormal{\textbf{ABSTRACT}}}
+\begin{center}
+ \section*{\Large{\textbf{ABSTRACT}}}
+\end{center}
+\onehalfspacing
+
+Access to justice is a foundational pillar of a democratic society, yet for a significant portion of the Indian population, particularly marginalized communities, navigating the legal system remains an "enormous challenge". The inherent complexity of legal language and the difficulty in accessing relevant judicial information create significant barriers, often leaving citizens unable to understand or act upon their rights. My project, "Justice Lens: AI-Powered Legal Assistant Chatbot," directly addresses this critical issue by leveraging advanced artificial intelligence to democratize legal knowledge in India.
+\newline
+
+I proposed an AI-based chatbot specifically designed to improve access to legal and judicial information. My initial literature survey revealed a distinct gap in current legal technology, with existing solutions being either too theoretical for practical, "real world" use or reliant on outdated, less effective methods like the "TF-IDF algorithm". To bridge this gap, Justice Lens builds upon the effective approach of its base paper, "Bettercall: AI based legal assistant," by implementing a practical system using "semantic search using deep learning-based vector embeddings". This core technology allows the system to understand the contextual meaning of user queries, moving beyond simple keyword matching to provide highly relevant and accurate information.
+\newline
+
+The primary objective of Justice Lens is to provide a tool that offers primary legal aid, supports informed decision-making, and promotes overall legal awareness. By converting vast and complex legal texts into structured, searchable vector embeddings, the chatbot will give users "instant access to their legal rights and information". This functionality is intended to serve a wide audience, including citizens seeking initial guidance, law students, and legal professionals performing research.
+\newline
+
+ This initial phase lays the critical groundwork for developing a robust and scalable application.Ultimately, by harnessing the power of advanced AI, Justice Lens aims to make a tangible contribution to the legal ecosystem. The project is designed not only as a technological solution but as a means to promote "fairness, efficiency, and accessibility in the justice system," empowering individuals with the knowledge they need to assert their rights and navigate legal processes with greater confidence
+
+
+
+%%%%%%%%%%%%%%CONTENTS%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\pagestyle{empty}
+\begin{center}
+\tableofcontents 
+\end{center}
+\newpage
+{\setlength{\baselineskip}{1\baselineskip}
+\begin{center}
+\end{center}
+}
+%%%%%%%%%%%List of Fig%%%%%%%%%%%%%%%%%%%%%
+{\setlength{\baselineskip}{1\baselineskip}
+\begin{center}
+\listoffigures				%for adding list of figures
+\end{center}
+\addcontentsline{toc}{section}{LIST OF FIGURES}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%List of abbre%%%%%%%%%%%%
+
+\newpage
+\pagestyle{plain}
+
+\begin{center}
+\section*{{\bf ABBREVIATIONS}}			%for adding list of Abbreviations
+\end{center}
+
+\addcontentsline{toc}{section}{ABBREVIATIONS}
+
+\pagestyle{plain}
+\vspace{1cm}
+\begin{center}
+\begin{table}[h!]
+ \begin{tabular}{p{3cm}p{8cm}}
+ \\
+AI&Artificial Intelligence\\
+\\
+API&Application Programming Interface \\
+\\
+DB&Database\\
+\\
+DBMS&Database Management System\\
+\\
+DFD&Data Flow Diagram\\
+\\
+ECHR&European Convention on Human Rights\\
+\\
+IDE&Integrated Development Environment\\
+\\
+IoT&Internet of Things \\
+\\
+JSON&JavaScript Object Notation\\
+\\
+LLM& Large Language Model\\
+\\
+OCR&Optical Character Recognition\\
+\\
+PERN&PostgreSQL, Express.js, React.js, Node.js\\
+\\
+SDK&Software Development Kit\\
+\\
+SQL&Structured Query Language\\
+\\
+TF-IDF&Term Frequency-Inverse Document Frequency\\
+\\
+UI&User Interface\\
+\\
+USDA&United States Department of Agriculture\\
+\\
+VS Code&Visual Studio Code\\
+\\
+XAI&Explainable AI
+
+
+
+
+
+
+\end{tabular}
+\end{table}
+\end{center}
+
+%&&&&&&&&&&&&&&&&&&&chapters&&&&&&&&&&&&&&&&&&&&&&
+\newpage
+
+\pagenumbering{arabic}
+
+\renewcommand{\chaptername}{CHAPTER}
+\chapter{INTRODUCTION}
+\thispagestyle{empty}
+\pagestyle{fancy}
+\renewcommand*{\thepage}{\footnotesize\arabic{page}} % 
+\onehalfspacing
+
+\setlength{\parindent}{10ex} 
+\hspace{2 cm}
+
+\section{BACKGROUND}
+The Indian legal system, presents a significant accessibility challenge for a vast portion of its population. The complexity of legal terminology, coupled with the sheer volume of judicial documents, creates a formidable barrier for the average citizen seeking to understand their rights and obligations. This "enormous challenge" is particularly acute for "marginalized communities," who often lack the resources to navigate the legal landscape, thereby hindering their access to justice. The resulting information gap not only affects individuals but also places a considerable strain on legal professionals who spend countless hours on research. My project, "Justice Lens: AI-Powered Legal Assistant Chatbot," directly confronts this issue by leveraging cutting-edge artificial intelligence to democratize access to legal information in India.
+
+A comprehensive literature survey revealed a critical gap in the existing legal technology space. Current solutions are often polarized: on one end, there are advanced but highly theoretical research models that are not ready for "real world" application, and on the other, there are practical systems that rely on outdated methods like the "TF-IDF algorithm," which fails to capture the deep semantic context of legal queries. My project tries to bridge this gap, drawing inspiration from the practical and effective approach of its base paper, "Bettercall: AI based legal assistant".
+
+My proposed solution is an AI-based chatbot specifically designed to improve access to legal and judicial information within India. The core of the system is the implementation of a practical and advanced "semantic search using deep learning-based vector embeddings". This technology allows the chatbot to move beyond simple keyword matching and understand the contextual meaning of a user's query. By converting complex legal texts into numerical vector representations, Justice Lens can instantly find and present the most relevant information in an easily digestible format.
+\\
+\\
+The primary objectives of this project are to provide primary legal aid, support informed decision-making, and promote overall legal awareness among the population. By giving users "instant access to their legal rights and information," the chatbot will serve as a first point of contact for legal inquiries, empowering citizens and assisting legal professionals. Ultimately, my project aims to contribute to a more equitable legal environment by promoting "fairness, efficiency, and accessibility in the judicial system".
+
+%%%%%%%%%%%%%LITERATURE SURVEY %%%%%%%%%%%%%%%%%%
+\section{EXISTING SYSTEM}
+\thispagestyle{empty}
+\onehalfspacing
+\hspace*{0.5cm}
+\par
+Legal AI has seen remarkable advancements, particularly with the rise of systems designed for case prediction and conversational assistance. Traditional methods and existing legal applications often face challenges such as reliance on specialized, domain-specific datasets (e.g., Chinese or ECHR law), limited generalization across diverse legal fields (e.g., Indian legal domains), or a primary focus on prediction tasks without providing interactive, conversational guidance. Furthermore, many suffer from high computational costs or risk generating incomplete or incorrect responses for complex, real-world queries. This chapter introduces JUSTICE LENS: AI-Powered Legal Assistant Chatbot, a novel semantic search framework designed to overcome these limitations. My system takes user-submitted natural language queries as input, leveraging Python libraries to process queries using deep learning-based vector embeddings and semantic search to retrieve and generate accurate, explanatory legal answers.
+\vspace{0.3cm}
+
+\subsection{CHATLAW: MULTI-AGENT COLLABORATIVE LEGAL ASSISTANT} 
+ChatLaw is an advanced AI-driven legal assistant that integrates multiple expert models to handle queries across different legal domains. It employs a collaborative framework combining large language models with structured legal knowledge to provide accurate and context-aware advice.
+\begin{itemize}
+  \item Built using a Mixture-of-Experts (MoE) model architecture that routes queries to specialized sub-models.
+
+  \item Enhanced with legal knowledge graphs to reduce hallucinations and maintain factual accuracy.
+
+  \item Mimics law-firm workflows using predefined Standard Operating Procedures (SOPs) for legal tasks.
+
+  \item Outperforms standard LLMs (including GPT-4) in benchmark evaluations on LawBench and national legal exams.
+\end{itemize}
+However, the system remains computationally expensive and complex to maintain. Its performance may vary across different jurisdictions due to differences in legal systems and data representation.
+
+\vspace{0.5cm}
+\subsection{ILDC \& CJPE:JUDGMENT PREDICTION AND \newline EXPLANATION SYSTEM} 
+The Indian Legal Documents Corpus (ILDC) and Court Judgment Prediction and Explanation (CJPE) systems focus on predicting judicial outcomes and providing AI-generated explanations for those results. They were developed using Supreme Court of India data to enhance transparency in legal analytics:
+\begin{itemize}
+  \item Built on hierarchical deep learning models that analyze case facts and reasoning sections.
+
+  \item Trained on over 35,000 Indian court judgments with annotated decisions and outcomes.
+
+  \item Generates both judgment predictions and textual explanations, aiding interpretability.
+
+  \item Helps legal professionals understand outcome trends through data-driven analysis.
+ \end{itemize}
+ These apps primarily address food redistribution rather than household-level grocery tracking and automation.
+\vspace{0.5cm}
+\subsection{ CAIL2018: LARGE-SCALE JUDGMENT PREDICTION SYSTEM}
+The Chinese AI and Law Challenge (CAIL2018) introduced one of the largest datasets for AI-based judgment prediction. It aims to classify legal cases, identify relevant laws, and predict final verdicts using large-scale machine learning models.
+\begin{itemize}
+ \item Contains 2.6 million criminal case documents from the Chinese Supreme People’s Court.
+ \item Predicts law articles, charges, and sentencing terms based on factual text descriptions.
+ \item Establishes benchmark datasets and evaluation standards for legal AI research.
+ \item Encourages further research on fairness and explainability in judicial prediction.\\
+\end{itemize}
+However, the dataset is domain-specific to the Chinese legal system, limiting its adaptability. Moreover, it focuses solely on prediction tasks without providing interactive or conversational capabilities.
+\vspace{0.5cm}
+\subsection{LAW CHATBOT}
+Law Chatbot is a conversational AI system designed to assist users in understanding legal concepts and obtaining quick guidance on various legal matters. It utilizes natural language processing to interpret user queries and provide relevant responses in plain language.
+\begin{itemize}
+    \item Built using NLP-based text retrieval and response generation techniques.
+    \item Offers support across multiple legal domains, including civil, criminal, and property law.
+    \item Designed for deployment across web and messaging platforms for user accessibility.
+    \item Focuses on legal awareness and self-service consultation for citizens.\\
+\end{itemize}
+Despite its accessibility, Law Chatbot’s advice accuracy depends heavily on its training data. It may generate incomplete or incorrect responses for complex or jurisdiction-specific queries.
+\vspace{0.5cm}
+\subsection{ LEGAL JUDDGMENT PREDICTION VIA\newline MULTI-PERSPECTIVE BI-FEEDBACK NETWORK}
+This model introduces a novel deep learning framework for predicting legal judgments by combining forward and backward reasoning. It aims to improve inter-task consistency among sub-tasks such as charge prediction, applicable law identification, and sentencing estimation:
+
+\begin{itemize}
+    \item Employs a Bi-Feedback neural network integrating multi-task learning.
+    \item Uses word collocation attention to distinguish between similar case descriptions.
+    \item Establishes cross-validation among subtasks, enhancing logical coherence in predictions.
+    \item Demonstrates improved precision and contextual awareness compared to traditional models.\\
+\end{itemize}
+
+Although efficient, the system’s success depends on the completeness of case facts. It lacks conversational interaction and focuses solely on outcome prediction rather than public legal assistance.
+
+\section{PROBLEM STATEMENT}
+
+Access to timely, transparent, and comprehensible judicial information remains a significant barrier for the majority of the Indian population, severely impeding the principles of legal fairness and equity.
+
+While AI-driven legal tools have emerged, they primarily fall into two categories:
+
+\begin{itemize}
+    \item Black-Box Prediction Models: These systems (e.g., ILDC/CJPE) often struggle to generalize across diverse legal domains and, critically, fail to replicate the nuanced human reasoning necessary for legal trust, achieving only moderate accuracy (around 78\%).
+    \item  Generic Conversational Chatbots: These models (e.g., Law Chatbot) lack the specialized training data and semantic depth to handle complex or jurisdiction-specific queries, often leading to incomplete or potentially incorrect advice.
+\end{itemize}
+    
+This gap creates a situation where legal stakeholders lack reliable, data-driven, and explainable decision support. Lawyers waste valuable time searching manually for precedents, judges lack a standardized view of case patterns, and citizens remain unprepared and intimidated by the judicial process.Therefore, the core problem is the absence of an integrated, Explainable AI (XAI) framework that can accurately predict legal case outcomes and provide transparent, data-backed reasoning by citing similar past precedents and explaining the critical legal factors involved.
+
+\section{OBJECTIVE}
+To achieve the goals of my project, the primary objective is to develop and implement an Explainable AI (XAI)-powered Legal Assistant Chatbot for the Indian judicial domain that overcomes the limitations of generic systems and black-box prediction models. This involves integrating predictive machine learning models to accurately estimate legal case outcomes (e.g., sentencing, bail status, conviction) and relevant legal factors (e.g., applicable charges) based on factual input. Crucially, the system must incorporate an Explainable AI component to transparently generate the reasoning and confidence level for its prediction, simultaneously retrieving and citing similar historical court precedents to validate the outcome, thereby providing citizens, lawyers, and judges with data-backed, accessible, and trustworthy legal guidance.
+
+\section{SCOPE}
+The scope of my project is to design, develop, and deploy an AI-powered legal assistant chatbot as a responsive web application, specifically tailored to the Indian legal system. The primary function of the system is to provide primary legal aid by offering users "instant access to their legal rights and information" through an intuitive, natural language interface. The core technology will be an advanced semantic search using deep learning-based vector embeddings, enabling the chatbot to understand the contextual meaning of queries rather than just matching keywords. It also includes the implementation of advanced features such as Case Outcome Prediction module, which will use a "time-decay function" to prioritize recent precedents, and an Explainable AI layer that provides structured reasoning for its answers using knowledge graphs. The target audience includes citizens, particularly from marginalized communities, as well as legal professionals and students seeking to expedite research. It is important to note that while my system aims to provide accurate information, it is not intended to replace professional legal counsel but to act as a first point of contact for legal awareness and support.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{LITERATURE  SURVEY}
+\thispagestyle{empty}
+\onehalfspacing
+\hspace*{0.5cm}
+\par
+
+This chapter discusses various research papers referred to during the development of Justice Lens. Each paper has been analyzed for its contributions to the field of AI-powered legal assistance and how its methodologies influenced the design and architecture of this project.
+
+\section{PILOT: LEGAL CASE OUTCOME PREDICTION WITH CASE LAW}
+
+\par
+The paper, \textbf{PILOT: Legal Case Outcome Prediction} with Case Law, introduces a framework that predicts legal case outcomes by using precedent cases and adapting to temporal shifts in law. The primary goal is to improve the accuracy of legal prediction by addressing challenges like poor precedent retrieval and the inability of models to handle the evolution of legal standards over time.
+\\
+\\
+The system leverages advanced techniques such as Legal-BERT with contrastive learning for creating accurate case embeddings and a time-decay function with a drift predictor to handle temporal shifts, ensuring that recent precedents are weighted appropriately.
+\\
+\\
+In developing Justice Lens, PILOT provided significant inspiration, particularly for the Case Outcome Prediction feature and the methodology of adapting to legal changes with a "time-decay function". However, Justice Lens differs by focusing on being a practical, user-focused legal assistant for broad information retrieval rather than a specialized prediction tool. While the authors of PILOT state their model "cannot be applied in the real world directly," Justice Lens integrates these advanced concepts into a system designed for accessible, real-world legal aid.
+
+\subsection {{ADVANTAGES}}
+\begin{itemize}
+
+    \item Predictive Power with Precedents: The framework is designed to effectively predict legal case outcomes by leveraging precedent cases, which is a core component of legal reasoning. 
+    \item Adaptation to Legal Evolution: It introduces a sophisticated method to handle temporal shifts in law by using a time-decay function and a drift predictor, making its predictions more relevant over time.
+    \item Advanced Contextual Understanding: The paper utilizes state-of-the-art "Legal-BERT + contrastive learning for embeddings," allowing for a deep and nuanced understanding of legal texts beyond simple keyword matching.
+    \item Evidence-Based Reasoning: By retrieving similar precedent cases as part of its process, the system provides a form of evidence-based reasoning for its predictions, which is crucial for transparency and trust in the legal domain.
+    \item Directly Solves Key Challenges: The methodology directly addresses two major problems in legal AI: "poor precedent retrieval and inability to handle temporal shifts," which are known to cause lower accuracy in outcome prediction.
+    \end{itemize}
+    
+\subsection {{LIMITATIONS}}
+
+\begin{itemize}
+
+    \item Theoretically Advanced but Practically Unusable: Despite its sophisticated approach, the framework is ultimately a preliminary research model that its own authors state cannot be applied in the real world directly. This admission renders its predictive power purely academic and not suitable for a deployable tool.
+    \item Impractically Resource-Intensive: The model's advanced features, which enable its deep understanding, are "computationally heavy" due to the combined use of BERT, contrastive learning, and temporal models. This high resource requirement makes it too expensive and slow for real-time use in a public-facing legal assistant.
+    \item Extremely Narrow and Non-Transferable Scope: The model's impressive performance is confined to a highly specific, non-global dataset of European Court of Human Rights (ECHR) cases. This domain-specific training means its advanced understanding and predictive capabilities are not transferable to other legal systems, such as the Indian one.
+    \item Purely a Research-Focused Endeavor: The paper is explicitly "more research-focused" and is not designed to be "directly deployable as a public tool". This indicates that its evidence-based reasoning and other advantages exist only in a controlled, academic environment, not as a practical solution.
+    \item Solves Problems Only on Paper: While the framework claims to solve key challenges like temporal shifts, it does so in a theoretical context that lacks real-world validation or a path to implementation. The conclusion that it is not ready for direct application means that its solutions, however innovative, have no current practical value.
+    
+\end{itemize}
+    
+\section{PREDICTING OUTCOMES OF LEGAL CASES BASED ON LEGAL FACTORS USING CLASSIFIERS} 
+
+The paper, \textbf{Predicting Outcomes of Legal Cases based on Legal Factors using Classifiers} introduces a pioneering effort to forecast judicial decisions in murder cases within the Indian legal system using machine learning. The application enables the prediction of binary outcomes like 'Acquittal' or 'Conviction' by training classic classifiers on 18 manually extracted legal factors from court judgments. The primary goal is to understand judicial decision-making and achieve high predictive accuracy on a specific legal dataset.
+
+In developing Justice Lens, this paper served as an important proof-of-concept, demonstrating that machine learning could be effectively applied to Indian legal data. However, Justice Lens is architected for a much broader and more scalable purpose. While this paper relies on a "tedious" manual feature extraction process on a very small dataset of only 86 cases, Justice Lens automates the understanding of vast legal texts using advanced semantic search. Instead of classifying cases based on predefined factors, my system focuses on information retrieval and generation, allowing users to ask complex questions in natural language and receive detailed, explanatory answers.
+
+\subsection{{ADVANTAGES}}
+
+\begin{itemize}
+
+    \item High Prediction Accuracy: The study achieves a notable prediction accuracy, reaching up to 91.86\% with the CART classifier, demonstrating the effectiveness of classic machine learning models on legal data.
+    \item Pioneering Research on Indian Legal Data: The paper is significant as it represents a pioneering research effort in applying predictive analytics to an Indian legal dataset. This is a valuable contribution, as much of the existing research focuses on legal systems from other countries.
+    \item Successful Validation of Legal Factors: The methodology successfully identifies and validates the relevance of specific legal factors in determining the outcomes of murder-related cases. By pinpointing which factors are most influential, the research provides valuable insights into judicial decision-making processes.
+
+    \end{itemize}
+    
+\subsection {{LIMITATIONS}}
+
+\begin{itemize}
+
+    \item Critically Flawed by a Small Dataset: The most significant drawback is that the model is built on an extremely small dataset of only 86 cases. While it boasts a high accuracy of 91.86\%, this result is statistically questionable and lacks generalizability. An accuracy score derived from such a tiny sample is likely a case of overfitting and does not prove the model's effectiveness on a larger, more diverse set of legal cases.
+    \item Impractical and Unscalable Methodology manual work: The system's entire foundation relies on a "tedious and time-consuming" manual process of extracting 18 specific features from legal texts. This manual approach is fundamentally unscalable and defeats the purpose of an automated AI assistant. For a project like Justice Lens, which needs to process thousands of documents, such a method is completely impractical.
+    \item Fails in Real-World Complexity: The model demonstrates poor performance in complex cases, particularly those involving multiple accused persons who have different outcomes.The inability to handle nuance and complexity means the model's high accuracy is only applicable to the most straightforward cases, making it unreliable for a comprehensive legal tool.
+    
+\end{itemize}
+    
+\section{ CHREXPERT: AN AI-DRIVEN COURT OF HUMAN RIGHTS EXPERTS ASSISTANT FOR LEGAL PRACTITIONERS UTILIZING TRANSFORMER MODELS} 
+
+Navigating the dense and complex world of human rights litigation presents a significant challenge for legal professionals, who often struggle with the sheer volume of documents and the nuances of judicial discretion. This paper, \textbf{CHRExpert: An AI-Driven Court of Human Rights Expert Assistant for Legal Practitioners} introduces a highly specialized solution to this problem: an AI assistant powered by a fine-tuned GPT transformer model designed to help practitioners analyze judicial decisions and predict case outcomes. The system aims for a deep contextual understanding by leveraging a 28-layer DNN and knowledge graphs to provide structured, explainable recommendations. While CHRExpert showcases the power of domain-specific AI, its deep but narrow focus and researcher-oriented design stand in contrast to the goals of Justice Lens, which aims to provide a broad, user-friendly, and accessible legal tool for a wider audience.
+
+\subsection{{ADVANTAGES}}
+
+\begin{itemize}
+
+    \item Strong Domain Specialization: The system is highly specialized for Human Rights Law, allowing for a deep and focused understanding within that specific legal field.
+    \item Deep Contextual Understanding: It uses powerful Transformer models like GPT for a sophisticated, contextual analysis of legal documents, going beyond simple keyword matching.
+    \item Provides Explainability: The model offers transparent and structured recommendations by leveraging knowledge graphs and explainable AI, which is crucial for building trust in its legal analysis.
+       
+\end{itemize}
+
+\subsection {{LIMITATIONS}}
+
+\begin{itemize}
+
+    \item So Specialized It's Practically Useless: The system's "strong domain specialization" is actually its greatest weakness, as it is domain-limited and focused mainly on Human Rights cases. This narrow scope means its deep contextual understanding is not transferable to broader legal fields, making it completely irrelevant for a multi-domain tool like Justice Lens.
+    \item Too Expensive to Actually Run: The powerful Transformer models that provide its "deep contextual understanding" come at a high computational cost for training and fine-tuning. This makes the system prohibitively expensive and slow for a real-time, public-facing application, rendering its advanced capabilities impractical for real-world deployment.
+    \item Fails to Scale Beyond Its Niche: The specialized architecture may not scale well to broader legal fields, meaning its impressive features are confined to a single, narrow area of law. Its explainability and structured reasoning are therefore not a blueprint for a versatile legal assistant but rather a feature of a niche research tool.
+    \item Built for Researchers, Not for Users: The entire system is "researcher-focused" rather than user-friendly, standing in stark contrast to the accessible design of "Bettercall". This academic focus means that even with its powerful features, it fails the most basic test of a legal assistant: being accessible and usable for the people who need legal help.
+    
+    \end{itemize}
+    
+\section{CYBER LAW AND CYBER CRIME – A COMPREHENSIVE STUDY} 
+
+In an age where crime transcends physical borders, the digital world presents a complex battlefield where outdated laws and low public awareness often hinder justice. The paper, **"CYBER LAW and CYBER CRIME – A COMPREHENSIVE STUDY,"** dives into this critical area, providing a foundational overview of cybercrime, its challenges, and the Indian legal frameworks designed to combat it, such as the IT Act and IPC. While this comprehensive study offers a strong legal and regulatory foundation, it remains largely descriptive and does not propose the AI-driven, real-time solutions needed to tackle modern digital threats. This highlights a crucial gap that Justice Lens aims to fill, moving beyond theoretical analysis to provide an instant, AI-powered tool for practical legal aid and awareness in the digital age.
+
+\subsection{{ADVANTAGES}}
+
+\begin{itemize}
+
+    \item Strong Legal Foundation: The paper provides a robust legal and regulatory overview of cybercrime, which is essential for understanding the core issues.
+    \item Focus on Indian Frameworks: It specifically covers Indian legal frameworks like the IT Act and IPC, making it highly relevant to the context of the Justice Lens project.
+    \item Practical Case Studies: The study includes real case studies, which aids in a practical and concrete understanding of how cyber laws are applied.
+    
+    \end{itemize}
+    
+\subsection {{LIMITATIONS}}
+
+\begin{itemize}
+
+    \item Merely Descriptive, Not Actionable: The paper's "strong legal foundation" is its primary weakness; it is "largely descriptive" with a "less technical focus". It  describes the problem of cybercrime without providing any engineering blueprint or technical solution, making its insights useless for actually building an AI assistant.
+    \item Offers No Modern Solutions: It "suggests no AI-driven or real-time solutions". While it outlines the Indian legal frameworks, it fails to connect them to the very technology needed to make that information instantly accessible and useful, rendering its content purely theoretical and non-functional.
+    \item Highlights Problems It Cannot Solve: The paper details critical issues like "jurisdiction \& evidence challenges" but leaves them completely "unresolved". Its case studies, therefore, don't serve as practical examples but as illustrations of a broken system that the paper offers no innovative way to fix, making its analysis a dead end for a solutions-oriented project.
+    
+    
+\end{itemize}
+
+\section{AUTOMATION SYSTEM BASED ON NLP FOR \newline LEGAL CLINIC ASSISTANCE}
+
+For legal clinics providing free aid to low-income citizens, the overwhelming volume of consultation requests often leads to critical delays and high operational costs. The paper, "Automation System Based on NLP for Legal Clinic Assistance," tackles this efficiency problem head-on by introducing an automated system that uses Natural Language Processing to classify legal issues. By comparing five different models, the system successfully uses an N-Gram model to achieve approximately 95\% accuracy in identifying a user's problem, thereby accelerating the initial consultation and case routing process. While this paper offers a powerful solution for operational efficiency, its function is primarily classification; in contrast,my project aims to move beyond routing by using more advanced semantic search to generate specific, detailed answers to a user's query, focusing on direct information retrieval rather than just categorization.
+
+\subsection{{ADVANTAGES}}
+
+\begin{itemize}
+
+    \item High Accuracy for Issue Identification: The system demonstrates high performance, with the best model (N-Gram) achieving around 95\% accuracy for identifying legal issues.
+    \item Increased Operational Efficiency: The system is specifically designed to accelerate the initial legal consultation process, which helps in reducing both processing delays and operational costs for legal clinics.
+    \item Improves Access to Justice: The primary aim is to increase the number of advised low-income users by automating the first, crucial step of legal assistance, thereby making legal aid more accessible.
+    
+\end{itemize}
+
+\subsection{{LIMITATIONS}}
+
+\begin{itemize}
+
+    \item Accuracy is Misleading Due to Overfitting: The high 95\% accuracy is likely unreliable because it was achieved after duplicating data for minority classes, which can lead to model overfitting. This means the model may have just memorized the training data and would perform poorly on new, unseen legal problems.
+    \item Uses Outdated and Shallow Technology: The system relies on traditional NLP models like N-Gram and TF-IDF, which may not capture the deep semantic context of a user's query as well as modern models. This technology is less intelligent and can't understand the nuances of a legal problem, only surface-level keywords.
+    \item Too Vague to Be Truly Helpful: The system's main function is to classify issues into very broad categories like "Civil" or "Labor," not to understand the specific details of the legal problem. This makes it a simple sorting tool, not a smart assistant that can provide the detailed, specific answers.
+    
+\end{itemize}
+
+\section{ARTIFICIAL INTELLIGENCE FOR LEGAL CHATBOT}
+
+The paper, "Artificial Intelligence for Legal Chatbot," proposes a system to provide precise guidance on common issues like traffic violations and criminal cases using an AI chatbot. The system is built using the Term Frequency-Inverse Document Frequency (TF-IDF) algorithm and a Gradio web interface to simplify complex legal terminology for the average user. However, this approach is fundamentally limited by its reliance on what is considered "Inferior Technology" that lacks verifiable results. Unlike this keyword-based method, Justice Lens implements a more advanced semantic search using deep learning-based vector embeddings, allowing it to understand the contextual meaning of a user's query for more nuanced and accurate information retrieval.
+
+\subsection{{ADVANTAGES}}
+
+\begin{itemize}
+
+    \item Simplifies Complex Legal Language: The system is specifically designed to simplify complex legal terminology into plain language, making it more accessible to users without a legal background.
+    \item Provides a User-Friendly Platform: It offers a user-friendly and secure platform that allows users to seek advice without the limitations of time or location.
+    \item Aims for Precise Guidance: The chatbot's goal is to provide precise guidance on specific legal issues like traffic violations and criminal allegations, making it a targeted tool for common problems.
+    
+\end{itemize}
+
+\subsection{{LIMITATIONS}}
+
+\begin{itemize}
+
+    \item Uses Inferior Technology That Can't Give "Precise" Advice: The system is built on the outdated TF-IDF algorithm, a traditional method that only matches keywords, not meaning. This "Inferior Technology" is incapable of understanding the deep context of a legal query, making its goal of providing "precise guidance" impossible to achieve.
+    \item Lacks Verifiable Results to Prove It's User-Friendliness: The paper makes claims about its capabilities but provides no specific, quantitative performance metrics like accuracy or precision scores.
+    \item Has an Unclear and Undefined Implementation: The paper's implementation and user interaction flow are unclear and undefined, with key functions like case outcome prediction mentioned but never demonstrated with results.
+    
+\end{itemize}
+
+\chapter{SYSTEM ANALYSIS}
+\thispagestyle{empty}
+\onehalfspacing
+\hspace{2 cm}
+
+\section{EXPECTED SYSTEM REQUIREMENTS}
+\subsection{{FUNCTION REQUIREMENT}}
+A functional requirement defines a function of a software system or its components. Functional requirements may be calculations, technical details, data manipulation, processing, and other specific functionality that define what a system is supposed to accomplish. Behavioral requirements describing all the cases where the system uses functional requirements are captured in use cases. The plan for implementing functional requirements is detailed in the system design.
+\newline
+The functional requirements of my project, Justice Lens, are:
+\begin{itemize}
+    \item User Query Submission: The user must be able to submit a legal query in natural language through a chat-based interface on the dashboard.
+    \item Query Processing: The system must perform Data Preprocessing to clean the user's query and then use Feature Extraction to convert the query into a vector embedding.
+    \item Information Retrieval: The system must use the query's vector embedding to perform a semantic search against the Vector Store to find the most relevant legal documents from the Legal Data Store.
+    \item Answer Generation: The system must synthesize the retrieved information into a coherent, human-readable answer or report.
+    \item Display Output: The final generated answer must be displayed to the user on the Dashboard.
+    \item Case Outcome Prediction: If the user provides structured case facts, the system must generate a predicted outcome based on its trained models.
+    \item Model Updating: The system must have an offline Model Training Pipeline to update the AI models and embeddings with new legal data to ensure continuous improvement.
+\end{itemize}
+
+\subsection{{NON FUNCTIONAL REQUIREMENTS}}
+A non-functional requirement describes how my software will operate, not just what it will do. These requirements define the system's quality and user experience and are often evaluated subjectively. For my project, key non-functional requirements include Performance, ensuring the chatbot provides instant access to information without long delays; Usability, guaranteeing the interface is user-friendly and accessible, especially for marginalized communities and Reliability, ensuring the system is consistently available and handles legal queries securely. The plan for meeting these standards is detailed in the project's specified hardware and software resources.
+
+In this chapter, I discuss the proposed system for JusticeLens, including the methodology used in its design and implementation. The system is developed to overcome the limitations of existing legal information systems by integrating advanced natural language processing, legal knowledge representation, explainable AI, and intelligent case outcome prediction into a single, scalable platform. The proposed system aims to provide accessible, transparent, and explainable legal support to users across various domains.
+
+\section{FEASIBILITY ANALYSIS}
+The basic idea behind feasibility is to determine whether the project is feasible or not.Feasibility is conducted to identify a best system that meets all the requirements.This includes an identification, description, an evaluation of a proposed system and selection of the best system for the job.The requirements of a system are specified with a set of
+constrains such as system objectives and the description of the outputs. It is then the duty of the analyst to evaluate feasibility of the proposed system to generate the above results.Three key factors are to be considered during the feasibility study. Technical Feasibility, Operational Feasibility and Economical Feasibility.
+
+\subsection{{TECHNICAL FEASIBILITY}}
+ The main consideration is to be given to the study of available resources of the organization where the software is to be implemented. Here the system analyst evaluates
+ the technical merits of the system giving emphasis on the performance, reliability, maintainability and productivity. By taking into consideration before developing the proposed
+ system, the resources availability of the organisation was studied. The organisation was immense computer facilities equipped with sophisticated machines and the software hence this is technically feasible. Technical feasibility is frequently the most difficult are to achieve at the stage of product engineering process. Considering that are normally associated with the technical feasibility include;
+ • Development risk
+ • Resource Availability
+ • Technology
+ The proposed system is technically feasible since no advanced technical features or assistance is needed for running the application except the basic technical requirements. The technical complexity of the system is very high. Hence, the proposed system is technically
+ feasible.
+
+\subsection{{OPERATIONAL FEASIBILITY}}
+An estimate must be made to determine the effort required to develop an intuitive and trustworthy system, as the primary goal is to ensure ease of use with minimal to no user training. A key operational concern is whether potential users— citizens, students, and legal professionals will be reluctant to trust an AI-based system with important legal matters. To overcome this, significant effort must be dedicated to creating a user-friendly interface and generating clear, reliable answers that build user confidence without formal instruction.
+
+The purpose of the operational feasibility study is to determine whether the new system will be actively used if it is developed and installed, and whether there will be resistance from users that could undermine its potential benefits. During this study, the proposed system is checked for its ability to run on universal standards, such as standard web browsers on various devices. The proposed system is considered operationally feasible because it is designed as a responsive web application, making it accessible on any platform with an internet connection. Since the system directly addresses the enormous challenge of accessing legal information and is designed to be highly intuitive, it is expected to achieve high user acceptance and meet the core requirements of its intended audience.
+
+\subsection{{ECONOMIC FEASIBILITY}}
+ Justice Lens is highly economically feasible because it offers significant social value for minimal financial investment.My project's costs are low as it is built primarily using free, open-source software like Python, FastAPI, and PyTorch, and the required hardware is already available to the development team. The primary benefit is social, as the application will be free for anyone to use, providing accessible legal information to empower citizens and improve efficiency for legal professionals. Since the system delivers high value with low development costs, it is considered economically sound.
+
+\section{HARDWARE REQUIREMENTS}
+1]Processor (CPU): A multi-core processor like a Core i5 is required to run the application server and handle data preprocessing. It is recommended for smoother performance, especially for model training and handling multiple users.
+\newline
+2]GPU (Graphics Processing Unit): A GPU is essential for accelerating the complex calculations involved in deep learning. A minimum of an NVIDIA GTX 1050 (4 GB VRAM) is needed for basic model inference, while an NVIDIA RTX 3060 (8 GB VRAM or higher) is recommended for efficient model training.
+\newline
+3]RAM (Random Access Memory): 16 GB RAM is required to run the development environment and to handle the large datasets and AI models like Legal-BERT without performance issues during training and inference.
+\newline
+Storage (SSD - Solid State Drive):A 512 GB SSD is used to store the project's datasets, AI models, and vector embeddings. The high-speed data access of an SSD is critical for quickly loading the necessary files, which directly improves the application's responsiveness.
+
+\section{{SOFTWARE REQUIREMENTS}}
+1]Python is an open-source, high-level programming language known for its simple syntax and extensive libraries, making it dominant in AI and web development. For Justice Lens, Python is the core language for the backend, used with frameworks like FastAPI to build the API and libraries like PyTorch and Hugging Face Transformers to develop and run the AI models.
+\newline
+2]JavaScript is the primary language for building interactive front-end web applications. In my project, JavaScript, will be used to create the client-side user interface, including the Dashboard and the chat functionality that the user interacts with.
+\newline
+3]FastAPI is a modern, high-performance Python web framework for building APIs. I use FastAPI to create the application's backend server, which acts as an API gateway to handle incoming user queries from the frontend, process them, and send them to the AI core for a response.
+\newline
+4]PyTorch is an open-source machine learning library widely used for deep learning applications like Natural Language Processing. In Justice Lens, PyTorch is the foundational library for training and fine-tuning the Legal-BERT model, enabling the creation of the vector embeddings that power the semantic search engine.
+\newline
+5]A Vector Database (Pinecone ) is a specialized database designed to store and query high-dimensional vectors, which are numerical representations of data. For me, it is a critical component that stores the vector embeddings of all legal documents. This allows the Semantic Retrieval Engine to perform incredibly fast and accurate similarity searches to find the most relevant legal text for a user's query.
+\newline
+MongoDB is a NoSQL database used for storing general application data, such as user information and case data. Unlike the vector database, which stores AI-specific embeddings, MongoDB will handle the operational data needed for the application to function, such as user accounts or saved query history.
+
+\chapter{METHODOLOGY }
+
+JusticeLens operates through a series of sequential and parallel processes designed to extract, analyze, and deliver accurate legal insights from complex judicial texts. The overall objective is to transform raw legal data into meaningful and actionable information through intelligent retrieval, reasoning, and explanation mechanisms.
+\\
+\\
+Some of the key processes involved in this methodology are:
+
+\section{{KNOWLEDGE BASE PREPARATION}}
+The first phase involves building a comprehensive legal knowledge base, which serves as the foundation for all AI-driven reasoning and prediction tasks.
+
+\begin{itemize}
+    \item Data Collection: A large corpus of Indian legal documents, including statutes, case laws, and judicial verdicts, is collected from verified open-source repositories and law databases.
+    \item Preprocessing: A structured text preprocessing pipeline is implemented to clean and organize the raw data. This includes tokenization, removal of noise, normalization, and chunking of long texts into smaller, context-rich passages for precision retrieval.
+    \item Storage: The cleaned and structured data is indexed for fast search and retrieval, ensuring scalability and efficiency during inference.
+\end{itemize}
+
+\section{{ENGINEERING THE AI CORE}}
+At the heart of JusticeLens lies the AI Core, a high-precision module designed for deep semantic understanding of legal content.
+
+\begin{itemize}
+    \item Model Architecture: The system employs a fine-tuned Legal-BERT transformer model specifically adapted for legal language comprehension.
+    \item Contrastive Learning: To enhance contextual accuracy, contrastive learning is used for creating vector embeddings that capture relationships between legal cases and queries.
+    \item Vector Indexing: All embeddings are stored in a high-speed vector database, allowing instant and semantically rich retrieval during user interactions.
+\end{itemize}
+\newline
+This component ensures the system understands both the literal and contextual meanings behind user queries, enabling accurate and relevant responses.
+
+\section{{ADVANCED ANALYTICAL FEATURES}}
+JusticeLens integrates advanced analytical mechanisms to provide decision-support capabilities and interpretability in legal predictions.
+
+\begin{itemize}
+    \item Case Outcome Prediction: The model incorporates a time-decay function that prioritizes more recent and relevant case precedents, ensuring that legal reasoning aligns with current judicial trends.
+    \item Explainable AI: My project leverages knowledge graphs to produce transparent, structured reasoning behind each answer. This helps users understand why a certain legal outcome or interpretation is provided, promoting accountability and trust.
+\end{itemize}
+\newline
+Together, these features make the system not only intelligent but also explainable, bridging the gap between automation and legal reasoning.
+
+\section{{APPLICATION DEVELOPMENT AND DEPLOYMENT}}
+The final phase involves transforming the intelligent backend into a fully functional, user-friendly legal assistant.
+
+\begin{itemize}
+    \item Interface Design: A chat-based interface is developed using Gradio, offering an intuitive and interactive user experience. Users can ask queries in natural language and receive detailed, structured legal insights instantly.
+    \item Deployment: The system is deployed on a scalable cloud platform, ensuring high availability, fast performance, and secure data handling for all users.
+    \item Testing and Validation: Rigorous testing is conducted to ensure the system's reliability and accuracy. This includes using tools like Postman for API testing to validate backend functionality and performing user acceptance testing to ensure the interface is intuitive and the generated answers are correct and helpful.
+
+\end{itemize}
+
+\vspace{2cm}
+
+\section{{ OVERALL WORKFLOW }}
+JusticeLens follows a logical and modular workflow from data collection and preprocessing, to AI-driven retrieval and explanation, culminating in an interactive user interface. Each layer of the system contributes to its overarching goal: democratizing legal knowledge through artificial intelligence.
+
+
+\chapter {SYSTEM DESIGN}
+
+\section {SYSTEM ARCHITECTURE}
+
+The proposed architecture for Justice Lens: AI-Powered Legal Assistant Chatbot follows a modular, three-tiered design to ensure seamless, secure, and efficient processing of natural language legal queries. This design separates the user-facing interaction from the complex machine learning and data operations, which is crucial for stability and scalability. The system is compartmentalized into three key components, as illustrated in the Architecture Diagram: the Frontend, the Backend, and the AI & Data Core.
+\subsection{
+{FRONTEND (USER INTERACTION LAYER)}}
+\begin{itemize}
+    \item The Frontend serves as the user interface for both query input and result visualization.
+
+     \item User Input and Flow: Users (citizens, lawyers) interact directly with the Frontend to input case facts or view analytical results.
+
+    \item Data Upload & Management: This component handles the initiation of a legal query \newline (text input) and manages user-specific data and query history.
+
+   \item Dashboard: This module is responsible for displaying the final structured output, \newline including the prediction result, the XAI-generated reasoning, and the list of precedent cases.
+    \end{itemize}
+\subsection{
+{BACKEND (PROCESSING AND ORCHESTRATION LAYER)}}
+\begin{itemize}
+    \item The Backend acts as the central logic unit, managing all data flow and orchestrating the interactions between the Frontend and the heavy-duty AI processing.
+
+    \item  Data Preprocessing: It receives the raw user query and performs necessary cleaning, normalization, and feature labeling before sending it to the AI Core.
+
+    \item  Feature Extraction: This module extracts both structured (metadata, facts) and unstructured (text) features essential for the predictive models.
+
+     \item Model Training & Updating: This control module manages the deployment of the latest predictive models and initiates the Model Training Pipeline based on new or updated legal data.
+
+     \item Model Training Pipeline: This is a critical loop that pulls raw data from the Legal Data Store, processes it, trains new models, and updates the Vector Store & Models in the AI Core, ensuring the prediction system remains current and accurate.
+     \end{itemize}
+ \subsection{{AI & DATA CORE (INTELLIGENCE LAYER}}
+ 
+\begin{itemize}
+    \item The AI & Data Core is the proprietary intelligence engine that houses the system's training data, semantic understanding capabilities, and predictive models.
+
+    \item AI Core (NLP, Embeddings): This is the heart of the system, responsible for generating vector embeddings of both the user's query and the historical case facts using deep learning (NLP) models. These embeddings enable the semantic search for precedents.
+
+    \item Legal Data Store: This database holds the vast collection of raw, historical legal documents and court judgments used for training and retrieval.
+
+    \item Vector Store \& Models: This specialized store houses the high-dimensional vector representations of all precedent cases and the final, trained predictive models ready for inference (prediction). The Backend queries this store to obtain the final prediction results.
+    \end{itemize}
+    
+The overall flow ensures that a user's query is transformed into a vector, analyzed against a massive library of precedent vectors, processed through the predictive model, and returned as an explainable, data-backed result.
+
+\newline
+\begin{figure}[htbp]
+\includegraphics[width=6in,height=3.5in]{Architecture Diagram.png}
+\centering
+\newline
+\caption{Architecture of Justicelens}
+\label{fig}
+\end{figure}
+\newline
+
+\pagebreak
+\section{DATA FLOW DIAGRAM}
+In this section the discussion is regarding preliminary data flow procedures that is in my project.A Data Flow Diagram (DFD) is a visual representation of how data moves within a system. It helps in understanding the system’s processes, data inputs, storage, and outputs. For the Justice Lens, DFD is divided into three levels: Level 0, Level 1, and Level 2. Each level provides an increasingly detailed view of the system’s operations, starting from a high level overview and breaking it down into specific sub-processes.
+
+\newline
+\begin{figure}[htbp]
+\includegraphics[width=6in,height=3.3in]{dfd 0.png}
+\centering
+\newline
+\caption{Data Flow Diagram Level 0}
+\label{fig}
+\end{figure}
+\newline
+
+DFD Level 0, also known as the Context Diagram, represents the Justice Lens system as a single process and shows how it interacts with external entities. It provides a broad view of data flow without detailing internal processes.\\
+In Justice Lens system, legal professionals can either manually enter case details or upload a legal document for automatic analysis. When a document is uploaded, the system processes it using an OCR module to extract key legal information and case facts. The extracted data is then filtered to remove non-substantive text before being added to the
+Legal Knowledge Base. Once added, the system tracks critical deadlines, such as statutes of limitations or filing dates, and notifies users when they are approaching. Based on the facts
+of a case, the system also provides relevant precedent suggestions to help legal professionals build stronger arguments.\\
+The Justice Lens system is designed to simplify case management and legal research, reduce manual error, and improve professional efficiency through automated document analysis and smart legal recommendations.\\\\
+
+\newline
+\begin{figure}[htbp]
+\includegraphics[width=6.2in,height=4.2in]{dfd 1.png}\\
+\centering
+\caption{Data Flow Diagram Level 1}
+\label{fig}
+\end{figure}
+\newline
+
+DFD Level 1 for the Justice Lens system provides a more detailed view by breaking down the main process into its core subprocesses: Manage Legal Data (P1), Train AI Models (P2), and Process User Inquiry (P3).\\
+The interaction starts when the User/Client submits a Query Input or Raw Legal Data to the Manage Legal Data (P1) module. This process acts as the central hub, responsible for cleaning the incoming data and storing the refined Cleaned Data in the Legal Data Store (D1). It also routes information to other parts of the system.\\
+The clean Legal Data is fed from P1 into the Train AI Models (P2) process.This module uses the information from the Legal Data Store (D1) to build and update machine learning models, saving the resulting Trained Models Embeddings into the AI Model Repository (D2).\\
+When auser submits a query, P1 passes it to the Process User Inquiry (P3) module. This process retrieves the necessary models from the AI Model Repository (D2) to analyze the query, generate a response, and send the final Output to the user’s Dashboard. A Feedback loop allows the user to provide input back into the Manage Legal Data process,
+enabling continuous improvement of the system’s knowledge base.\\
+DFD Level 2 provides a granular view by exploding a single process from the Level 1 diagram. The following describes the internal workings of the Process User Inquiry module.\\
+The process is initiated when a User Query is received by the Parse Query sub-process. This stage normalizes the text, identifies key legal terms, and prepares the input for analysis. The parsed query is then sent to the Generate Query Embedding module, which uses a specialized model from the AI Model Repository to convert the query into a semantic vector.\\
+
+\newline
+\begin{figure}[htbp]
+\includegraphics[width=6.2in,height=4.2in]{dfd 2.png}\\
+\centering
+\caption{Data Flow Diagram Level 2}
+\label{fig}
+\end{figure}
+\newline
+
+This vector is used by the Retrieve Relevant Documents process to perform a high-speed similarity search against the indexed Legal Data Store. This fetches a ranked list of the most relevant case files, statutes, and precedents.\\
+Both the original query and the retrieved documents are passed to the Synthesize Answer module. This subprocess utilizes a large language model from the AI Model Repository to analyze the context and formulate a comprehensive, factually grounded response.\\
+Finally, the user’s Response Action is captured. This feedback is routed back to the Data Collection process, creating a continuous improvement loop that enhances the system’s knowledge and accuracy over time.
+
+\section{USECASE DIAGRAMS}
+Use case diagrams are used to gather the requirements of a system including internal and external influences. These requirements are mostly design requirements. Hence, when a system is analyzed to gather its functionalities, use cases are prepared and actors are identified.To model a system, the most important aspect is to capture the dynamic behavior. Dynamic behavior means the behavior of the system when it is running/operating. Only static behavior is not sufficient to model a system, rather dynamic behavior is more important than static behavior.\\
+This use case diagram illustrates the interactions between users and the core functionalities of my system. There are two main actors: the Legal Professional (the primary user) and the System Administrator.\\
+The Legal Professional is the main user who interacts with the system’s legal analysis features. Their primary actions include submitting information, such as by Uploading a Legal Document or Manually Entering Case Details. Once data is in the system, they
+can perform a Search Query on the legal knowledge base, Access Case Files, and View Legal Data Store. The system provides intelligent assistance, such as helping them Track Deadlines Receive Notifications for important dates.\\
+The diagram also shows advanced, conditional interactions using extended relationships. For example, a standard Search Query can be extended to Generate Precedent Suggestions or Synthesize a Legal Answer, providing deeper analysis beyond simple document retrieval. Furthermore, users can Provide Feedback on data and answers, which
+includes a process to Verify Data Integrity using a blockchain, ensuring a secure and tamper-proof audit trail.\\
+The System Administrator is responsible for the maintenance and management of the Justice Lens platform. Their use cases are technical and operational. They are tasked with standard administrative duties like Managing User Accounts and Monitoring System Performance to ensure the system runs smoothly. Crucially, they also oversee the AI components by performing tasks like Training AI Models with new data and Updating AI Models to improve their accuracy and capabilities over time.
+
+\newline
+\begin{figure}[htbp]
+\includegraphics[width=6.2in,height=4.2in]{use case diagram.png}\\
+\centering
+\caption{Usecase diagram of Justice Lens}
+\label{fig}
+\end{figure}
+\newline
+
+\chapter{IMPLEMENTATIONS}
+\section{USERS OF THE SYSTEM}
+Different categories of the user make use of the software. They are mainly: Administrator and User.\\
+
+Administrator has to register and login to the backend application. After login to the system, the administrator uploads the raw legal datasets (PDFs, JSONs) containing acts and judgments, as required for the knowledge base. If the uploaded documents are compatible with the embedding model and contain valid text, then the app processes them into vector embeddings and stores them in the Pinecone index. Otherwise, the document is flagged as corrupted or invalid.\\
+
+The User logs into his account, which consists of an AI-powered chat interface. He then enters a legal query or question into the search bar, and checks if the response generated by the AI is accurate based on the retrieved context. The user verifies the answer using the source citations (Section IDs and Page Numbers) provided by the system. Relevant legal sections and case details are available in the user application.
+\section{MODULARITY CRITERIA}
+The Justice Lens system is architected as a collection of independent, cohesive modules, each responsible for a distinct aspect of the application’s functionality. This modular design ensures maintainability, scalability, and ease of debugging, allowing individual components to be updated or replaced without disrupting the entire system. The software is divided into the following key modules:\\
+
+\section{MODULE 1 DATA INGESTION AND PREPROCESSING MODULE}
+
+This module serves as the initial entry point for all legal data entering the system. It is responsible for reading raw legal documents, such as PDFs of the Indian Constitution or text files containing case judgments, and converting them into a machine-readable format. The module performs essential cleaning tasks to remove formatting errors or irrelevant metadata before segmenting the text into smaller, semantic chunks. Once chunked, these text segments are passed through an embedding model, specifically a legal-domain BERT model, which transforms the textual data into high-dimensional vector representations suitable for numerical analysis and storage.\\
+
+\section{VECTOR DATABASE MANAGEMENT MODULE}
+The Vector Database Management Module acts as the long-term memory of the system, designed to handle the efficient storage and retrieval of high-dimensional vector embeddings. Utilizing Pinecone as the underlying infrastructure, this module indexes the vectors generated by the ingestion process, ensuring they are organized for rapid similarity searches. When a query is received, this module is responsible for performing a semantic search operation, comparing the query vector against the stored index to identify and retrieve the most relevant legal sections or case precedents based on cosine similarity scores.\\
+
+\section{LLM REASONING AND GENERATION MODULE}
+This module functions as the cognitive engine of the application, leveraging the Google Gemini API to process natural language. It receives the user’s query along with the relevant legal context retrieved by the database module. The primary responsibility of this module is to synthesize this information, applying a retrieval-augmented generation (RAG) approach to formulate a coherent, legally accurate response. It ensures that the generated answer is strictly grounded in the provided context, minimizing hallucinations while formatting the output to be easily understandable for the end user.\\
+
+\section{BACKEND ORCHESTRATION MODULE}
+Serving as the central nervous system of the application, the Backend Orchestration Module is built using the FastAPI framework. It exposes RESTful API endpoints that facilitate communication between the frontend interface and the internal logic of the system. This module manages the data flow, receiving HTTP requests from the client, dispatching tasks to the database and reasoning modules, and aggregating the results into a structured JSON response. It also handles essential middleware functions, including Cross-Origin Resource Sharing (CORS) configurations and error handling, to ensure secure and stable connectivity.\\
+
+\section{USER INTERFACE MODULE}
+The User Interface Module provides the visual layer through which end users interact with the Justice Lens system. Developed using standard web technologies, it renders a clean, intuitive chat interface that allows users to input legal queries and view responses. This module manages the client-side logic, including sending asynchronous API requests to the backend, displaying loading states during processing, and formatting the final AI-generated responses with clear typography and citation highlights. It ensures a seamless user experience by abstracting the complex underlying technical operations from the user.\\
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{TESTING}
+Software testing is an investigation conducted to provide stakeholders with information about the quality of the software product or service under test. It involves the execution of a software component or system to evaluate one or more properties of interest. The primary objective of testing is to identify software bugs, errors, or defects and to verify that the system satisfies the specified requirements and is fit for use. For a domain-specific application like Justice Lens, testing is critical not only for ensuring code stability but also for validating the accuracy of the AI-generated legal advice. Since the system relies on a complex Retrieval-Augmented Generation (RAG) pipeline involving vector databases and large language models, rigorous testing is essential to minimize hallucinations and ensure that the legal citations provided to the user are factually correct. This chapter outlines the various testing methodologies employed to validate the functionality, reliability, and performance of the Justice Lens system, ensuring a seamless and accurate experience for the end-user.//
+
+\section{UNIT TESTING}
+Unit testing is the process of validating the smallest testable parts of an application, known as units, to ensure they function correctly in isolation. In the context of my project, this involves rigorously testing individual functions and components within both the backend and frontend systems before they are integrated. The primary goal is to isolate each part of the code and verify that it performs as expected, allowing developers to catch and fix logic errors early in the development cycle.\\
+
+
+In the backend development of my project, unit tests are focused on specific Python functions responsible for data processing. For instance, the text extraction logic is tested to verify that it accurately reads content from PDF documents without losing critical legal formatting. Similarly, the "chunking" algorithm, which splits large legal texts into smaller segments, is tested to ensure it respects sentence boundaries and does not cut off important context. Mock objects are often used to simulate the behavior of external services like Pinecone, allowing the core logic of the application to be tested without making actual API calls.\\
+
+On the client side, unit testing is applied to the individual user interface components. Tests are written to verify that the chat input field correctly captures user text and that the "Send" button triggers the appropriate event handlers. Furthermore, the message display component is tested to ensure that it correctly renders both user queries and AI responses, including the proper formatting of citations and line breaks. By confirming the reliability of these fundamental building blocks, the stability of the entire application is significantly improved.\\
+
+\section{INTEGRATION TESTING}
+
+While unit testing ensures individual components are sound, integration testing focuses on the "handshake" between modular units of the Justice Lens system. The objective is to verify that the Frontend, the Backend (FastAPI), and the AI Data Core function as a cohesive, high-performance ecosystem. In a project involving complex data transitions—from raw text to high-dimensional vectors and finally into structured legal reasoning—integration testing is the primary defense against data integrity loss and system latency.\\
+
+\begin{itemsize}
+
+1. Interface Integration Frontend to Backend\\
+The first layer of integration testing focuses on the seamless communication between the user interface and the processing orchestration layer.
+
+\item Natural Language Query Flow: This test validates that user inputs from the chat dashboard are correctly captured and transmitted to the FastAPI endpoints without character loss or encoding errors.
+
+\item Test Case: Submitting a query containing complex legal citations and verifying that the backend receives the exact string for preprocessing.
+
+\item Verification: Ensuring the backend returns a successful 200 OK status code and that the frontend initiates the "Processing" state indicator.
+
+2. OCR and Document Pipeline\\
+For legal professionals uploading files, I test the integration between the OCR module and the Data Preprocessing logic.
+
+\item Test Scenario: Uploading a scanned legal judgment (PDF).
+Validation: The test confirms that the extracted text is successfully piped into the cleaning functions, ensuring that headers, footers, and non-substantive text are filtered before reaching the AI Core.
+
+3. AI Data Core Integration: Semantic Retrieval\\
+
+This phase tests the technical "heart" of Justice Lens—the interaction between the embedding models and the vector database.
+
+\item Vector Embedding and Storage Handshake: I verify that the Feature Extraction module correctly sends cleaned text to the Legal-BERT model and that the resulting 768-dimensional vector is compatible with the Pinecone Vector Database.
+
+\item Logic Check: Ensuring that when a new document is added to the Legal Data Store, its corresponding vector is correctly indexed in the Vector Store with its unique document ID.
+
+\item  Semantic Retrieval Engine Accuracy: The integration test verifies the retrieval loop where the query vector is used to find relevant precedents.
+
+\item Verification: Testing the "Similarity Search" to ensure the database returns the top-ranked results based on semantic meaning rather than just keyword matching. This includes verifying that the Time-Decay Function correctly weights recent case laws over historical ones as per the system design.
+
+4. Analytic Feature Integration: Prediction and XAI\\
+Justice Lens provides more than just search; it provides structured reasoning. This requires multi-module integration.
+
+\item Case Outcome Prediction Loop: This test ensures that case facts move from the user input through the prediction models (e.g., for bail or sentencing probability) and return a structured result to the dashboard.
+
+\item Data Flow Verification: Facts -> Feature Matrix -> ML Model -> Confidence Score -> UI Meter.
+
+\item Explainable AI (XAI) and Knowledge Graph Mapping: I test the integration between the retrieval engine and the XAI layer.
+
+\item Test Scenario: When a prediction is made, the system must pull specific citations from the retrieved precedents and map them to the Knowledge Graph to generate a data-backed explanation.
+
+\item Consistency Check: Verifying that the generated explanation aligns with the cited statutes (e.g., ensuring an explanation for a Section 302 charge actually references Section 302 precedents).
+
+5. Security and Session Integration\\
+Integration testing also covers the security of the data pipeline across the public and private data stores.
+
+\item Auth-to-Database Mapping: Testing that a user can only access their private case history (Private Data Store) and that public search results are globally accessible but read-only.
+
+\item Concurrency Stress Test: Simulating multiple simultaneous users to ensure the FastAPI backend correctly manages session state and prevents data leaks between different user dashboards.
+
+6. Conclusion of Integration Testing.
+The successful integration of these modules confirms that Justice Lens is a robust, production-ready framework. By validating the interaction between deep learning models, vector databases, and modern web interfaces, I ensure that the system provides a reliable and transparent tool for democratizing legal knowledge in India.\\ 
+
+\section{VALIDATION TESTING}
+Validation testing is intended to ensure a product, service, or system results in a product, service, or system that meets the operational needs of the user. In my application, this phase is critical to confirm that the software actually solves the user's problem—providing accurate and understandable legal assistance—rather than just functioning without errors. For a new development flow or verification flow, validation procedures may involve modeling either flow and using simulations to predict faults or gaps that might lead to invalid or incomplete verification or development of a product, service, or system.\\
+
+In the context of Justice Lens, these simulations involve running complex legal queries to verify if the RAG pipeline correctly identifies the relevant legal context. For instance, if a user asks about "cyber terrorism," the validation process ensures that the system retrieves Section 66F of the IT Act and not an unrelated section. A set of validation requirements, specifications, and regulations may then be used as a basis for qualifying an iteration flow for a product, service, or system. For this project, these requirements include the accuracy of the citations, the relevance of the generated answer, and the system's ability to refuse to answer non-legal questions, ensuring the final product is reliable and trustworthy for end-users.\\
+
+\section{SYSTEM TESTING}
+System testing of software or hardware is testing conducted on a complete, integrated system to evaluate the system’s compliance with its specified requirements. In my project, this involves testing the fully assembled application—where the frontend, backend, and AI services are all connected—to ensure it functions correctly as a unified product. System testing falls within the scope of black-box testing, and as such, should require no knowledge of the inner design of the code or logic.\\
+
+As a rule, system testing takes, as its input, all of the “integrated” software components that have passed integration testing and also the software system itself integrated with any applicable hardware system(s). In this case, it validates that the user's query travels correctly from the interface to the cloud server and back. The purpose of integration testing is to detect any inconsistencies between the software units that are integrated together or between any of the assemblages and the hardware. System testing is a more limited type of testing; it seeks to detect defects both within the “inter-assemblages” and also within the system as a whole.\\
+
+System testing focuses on testing the system as a whole. It is a crucial step in the Quality Management Process. In the Software Development Life Cycle, System Testing is the first level where the System is tested as a whole. My system is tested to verify whether it meets the functional and technical requirements, such as accurate legal retrieval and low latency. The application/System is tested in an environment that closely resembles the production environment where the application will be finally deployed.\\
+
+\section{USER ACCEPTANCE TESTING}
+User Acceptance Testing is the final phase of the testing process where the system is tested by a small client community to see if the program met the requirements defined in the analysis stage. For the my project, this involved releasing the application to a select group of users, including law students, legal professionals, and general users seeking legal information. The primary objective was to verify that the AI legal assistant could accurately interpret natural language queries and provide relevant, citation-backed legal advice in a way that was helpful and easy to understand. This phase ensures that the system works in real-world scenarios and not just in a controlled development environment.
+
+In this phase, the system is fully tested by the client community against the requirements defined in the analysis and design stages. The users evaluated the application based on several key performance indicators, such as the relevance of the legal sections retrieved, the clarity of the AI-generated explanations, and the responsiveness of the user interface. Feedback was collected regarding any incorrect citations or "hallucinations" produced by the model. Based on this feedback, corrections were made as required—such as refining the prompt engineering or updating the vector database—and the production system was built.
+
+The feedback from the client community was found to be satisfactory, confirming that the application effectively bridges the gap between complex legal jargon and the common user. User acceptance of the system is a key factor for the success of the system. Since Justice Lens is designed to provide critical legal information, ensuring that the users trust the system's output and find the interface intuitive is paramount. The successful completion of this testing phase signified that the system under consideration was ready for final deployment.
+
+\chapter{RESULTS}
+
+\begin{figure}[htbp]
+\includegraphics[width=5.5in,height=3.2in]{home pg.jpeg}\\
+\centering
+\caption{Home Page of Justice Lens}
+\label{fig}
+\end{figure}
+
+\begin{figure}[htbp]
+\includegraphics[width=5.5in,height=2.2in]{creat account.jpeg}\\
+\centering
+\caption{Create account of justice lens}
+\label{fig}
+\end{figure}
+
+\begin{figure}[htbp]
+\includegraphics[width=5.5in,height=2.2in]{login.jpeg}\\
+\centering
+\caption{ Login to the Website}
+\label{fig}
+\end{figure}
+
+\begin{figure}[htbp]
+\includegraphics[width=5.5in,height=2.2in]{chat.jpeg}\\
+\centering
+\caption{ Chat Screen of justice lens}
+\label{fig}
+\end{figure}
+
+\begin{figure}[htbp]
+\includegraphics[width=5.5in,height=2.2in]{input and output.jpeg}\\
+\centering
+\caption{ Input and Output of Justice Lens}
+\label{fig}
+\end{figure}
+
+\chapter{CONCLUSION}
+\thispagestyle{empty}
+
+
+Justice Lens project was conceived to address a fundamental challenge in the modern legal landscape: the overwhelming volume of information that legal professionals must navigate to achieve justice. The successful development of my system’s architecture and core functionalities represents a significant step towards augmenting legal expertise with the power of artificial intelligence. This report has detailed the system’s design, from its high-level context to the granular flow of data through its various subsystems. In conclusion, the Justice Lens system effectively demonstrates a robust framework for transforming raw legal data into actionable intelligence, thereby enhancing efficiency, accuracy, and strategic insight inlegal practice.\\
+The architectural design of Justice Lens, as illustrated through its Data Flow Diagrams (DFDs), is a testament to its comprehensive approach. The journey of information begins with a versatile Data Collection module, capable of ingesting unstructured data from
+uploaded legal documents and structured input from users. The system’s ability to process this raw data using OCR and advanced preprocessing techniques ensures that the Legal Data Store is populated with clean, high-quality information.\\
+This repository serves as the foundation for the system’s dual-pathway intelligence. The AI Model Training pipeline leverages this data to continuously refine its understanding of legal language, while the Feature Extraction pipeline uses NLP to convert incoming user queries into semantic embeddings. The convergence of these paths at the Information Retrieval Engine is the technical heart of Justice Lens. This core module successfully moves beyond archaic keyword searching, instead performing nuanced, context-aware searches that mirror the associative reasoning of a human expert. The final steps of Answer
+Synthesis and presentation on the Dashboard ensure that the system’s output is not just a list of documents, but a coherent and relevant response, effectively bridging the gap between complex data and clear, actionable insight.\\
+Beyond its solid architecture, the Justice Lens project makes several key contributions to the field of legal technology:\\
+AI-Powered Semantic Search:The project’s principal innovation is its implementation  of a true semantic search engine for legal documents. By using vector embeddings, the system understands the intent and context behind a query, allowing it to find relevant precedents and statutes that would be missed by traditional search methods. This capability has the potential to drastically reduce research time and uncover critical connections that could alter the outcome of a case.\\
+Proactive Case Management: Justice Lens is not merely a reactive research tool. By integrating features like automated deadline tracking and notification, it provides proactive assistance that helps mitigate the risk of human error in managing complex cases. This
+demonstrates a holistic understanding of a legal professional’s workflow, extending the system’s utility beyond research into day-to-day case management.\\
+While the Justice Lens has its primary objectives, a comprehensive evaluation requires acknowledging its limitations and the challenges inherent in such a system. The most significant of these is the dependency on data quality. The adage ”garbage in, garbage
+out” is especially true for AI models; the system’s performance is fundamentally tied to the quality, breadth, and lack of bias in the legal data it is trained on. Sourcing and curating a sufficiently diverse and representative dataset is a monumental task that requires ongoing effort.\\
+Secondly, the issue of interpretability, often referred to as the ”black box” problem of AI, remains a challenge. While the system can provide highly relevant answers, explaining the precise chain of reasoning its neural networks followed to arrive at a conclusion is not always straightforward. For legal professionals who must justify their every argument, this lack of transparency can be a barrier to trust and adoption. Finally, the computational resources required to train, store, and run the advanced models used in Justice Lens are substantial, posing practical considerations for scalability and operational cost.\\
+Future Scope and Potential Enhancements\\
+The current architecture of Justice Lens provides a robust foundation for numerous future enhancements that could further revolutionize legal practice. The most promising avenues for future development include:\\
+1. Predictive Analytics: With a sufficiently large and well-structured dataset, the system could be extended to perform predictive analytics, offering insights into the likely outcomes of cases based on historical precedents and judicial patterns.\\
+2. Automated Document Generation: The Answer Synthesis module could be
+enhanced to automatically draft routine legal documents, such as motions, discovery requests, or case summaries, freeing up professionals to focus on higher-level strategic tasks.\\
+3. Multimodal Data Integration: Future iterations could be designed to accept and analyze multimodal data, including audio from court proceedings (via speech-to-text) and video evidence, creating a truly comprehensive case analysis platform.\\
+4. Integration with External Systems: An API could be developed to allow Justice Lens to integrate seamlessly with existing legal practice management software, creating a unified and streamlined workflow for law firms.\\
+
+In conclusion, Justice Lens stands as a successful proof-of-concept for a new generation of AI-powered legal tools. It successfully addresses the core challenges of information overload and inefficient research by providing a smart, proactive, and secure platform. Although challenges related to data quality, interpretability, and cost remain, they are surmountable. The path forward involves continuous model refinement, a focus on user centric design, and an unwavering commitment to ethical AI principles. Justice Lens is not envisioned as a replacement for the legal professional, but as a powerful, indispensable tool that augments human intellect, allowing practitioners to navigate the complexities of the law with greater clarity and confidence, ultimately better serving the cause of justice.
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{thebibliography}{999}
+\thispagestyle{empty}
+\addcontentsline{toc}{chapter}{REFERENCES}
+
+\bibitem{1}{ Manikrao Dhore, Aryan Vimal, Avish Agrawal, Raghav Bajaj, Rohan Barde, "Bettercall: AI based legal assistant", 2024 5th International Conference on Image Processing and Capsule Networks (ICIPCN), DOI 10.1109/ICIPCN63822.2024.00048}
+
+\bibitem{1}{ Yupeng Chang, Xu Wang, Jindong Wang, Yuan , Linyi Yang, Kaijie Zhu, Hao Chen, Xiaoyuan Yi: A Survey on Evaluation of Large Language Model. arXiv 2023 }
+
+\bibitem{1}{ K. Nikolskaia and V. Naumov, ”Artificial Intelligence in Law,” 2020 International Multi-Conference on Industrial Engineering and Modern Technologies (FarEastCon), 
+Vladivostok, Russia, 2020, pp. 1-4, doi:10.1109/FarEastCon50210.2020.9271095.}
+
+\bibitem{1}{ Marc Queudot, ´ Eric Charton and Marie-Jean Meurs: Improving Access to Justice with Legal Chatbot.}
+
+\bibitem{1}{ Aletras, N., Tsarapatsanis, D., Preot¸iuc-Pietro, D., & Lampos, V. (2016). Predicting judicial decisions of the European Court of Human Rights: a Natural Language Processing
+perspective}
+
+\bibitem{1}{ Lang Cao, Zifeng Wang, Cao Xiao, Jimeng Sun, "PILOT: Legal Case Outcome Prediction with Case Law",  arXiv:2401.15770v2}
+
+\bibitem{1}{ Rafe Athar Shaikh, Tirath Prasad Sahu, Veena Anand, "Predicting Outcomes of Legal Cases based on Legal Factors using Classifiers", International Conference on Computational Intelligence and Data Science (ICCIDS 2019)}
+
+\bibitem{1}{ YAHYA AL-SHAREEF, "CHRExpert: An AI-Driven Court of Human Rights Expert Assistant for Legal Practitioners Utilizing Transformer Models", doi:10.1109/ACCESS.2025.3547763}
+
+\bibitem{1}{ Rudranil Bhandari, "CYBER LAW and CYBER CRIME – A
+COMPREHENSIVE STUDY", 2024 IJNRD | Volume 9, Issue 4 April 2024| ISSN: 2456-4184 | IJNRD.ORG, IJNRD2404415}
+
+\bibitem{1}{Daniel A Rincon-Riverose, Sergio M  abcd   
+Salazar-Molina,  William A Pinto-Caserus, Sindy P Amaya, Juan M Calderon, " Automation System Based on NLP for Legal Clinic Assistance", IFAC PapersOnLine 54-13 (2021) 283–288 }
+
+\bibitem{1}{Swapna Marrivagu, Dr. Aruna Rao S.L, " Artificial Intelligence for Legal Chatbot", Journal of Engineering Sciences Vol 15 Issue 09,2024, ISSN:0377-9254}
+
+\bibitem{1}{N. Jain and G. Goel, ”An Approach to Get Legal Assistance Using Artificial Intelligence,” 2020 8th International Conference on Reliability, Infocom Technologies and Optimization (Trends and Future Directions) (ICRITO), Noida, India, 2020, pp. 768-771, doi:10.1109/ICRITO48877.2020.9198029.}
+
+\bibitem{1}{V.Socatiyanurak et al., ”LAW-U: Legal Guidance Through Artificial Intelligence Chat-bot for Sexual Violence Victims and Survivors,” in IEEE Access, vol. 9, pp. 131440131461, 2021, doi: 10.1109/ACCESS.2021.3113172}
+
+\bibitem{1}{Antoniak, M. Mimno, D. (2018). Evaluating the Stability of Embedding- based Word Similarities. Transactions of the Association for Computational Linguistics}
+
+\bibitem{1}{ Li, S., Zhang, H., Ye, L., Guo, X.,Fang, B. (Year). MANN: A Multichannel Attentive Neural Network for Legal Judgment Prediction}
+
+\end{thebibliography}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\pagebreak
+
+\chapter{APPENDIX}
+
+\begin{figure}[htbp]
+\includegraphics[width=6.5in,height=6.0in]{9.png}\\
+\centering
+\caption{code used in justice lens}
+\label{fig}
+\end{figure}
+
+\begin{figure}[htbp]
+\includegraphics[width=6.5in,height=7.5in]{11.png}\\
+\centering
+\caption{code used in justice lens}
+\label{fig}
+\end{figure}
+
+\begin{figure}[htbp]
+\includegraphics[width=6.5in,height=6.5in]{12.png}\\
+\centering
+\caption{code used in justice lens}
+\label{fig}
+\end{figure}
+
+\begin{figure}[htbp]
+\includegraphics[width=6.5in,height=6.5in]{13.png}\\
+\centering
+\caption{code used in justice lens}
+\label{fig}
+\end{figure}
+
+\end{document}
+
+
+

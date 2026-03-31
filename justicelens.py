@@ -5,6 +5,7 @@ from zoneinfo import ZoneInfo
 import firebase_admin
 from firebase_admin import credentials, firestore, auth
 import os
+import sys
 import json
 import uuid
 import requests
@@ -19,12 +20,12 @@ from langchain_huggingface import HuggingFaceEmbeddings
 import streamlit.components.v1 as components
 
 # ==========================================
-# ⚙️ CONFIGURATION & API KEYS
+# CONFIGURATION
 # ==========================================
 PINECONE_KEY = st.secrets.get("PINECONE_KEY", "")
+INDEX_NAME = "justice-lens"
 GROQ_API_KEY = st.secrets.get("GROQ_API_KEY", "")
 FIREBASE_WEB_API_KEY = st.secrets.get("FIREBASE_WEB_API_KEY", "AIzaSyAklh23Fu6-P5vNsGDh2-U9titgRvqzJaU")
-INDEX_NAME = "justice-lens"
 LOGO_FALLBACK_URL = "https://i.ibb.co/mCP4BQC5/width-1200.jpg"
 LOCAL_LOGO_PATH = os.path.join(os.path.dirname(__file__), "logo.png")
 LOGO_SOURCE = LOCAL_LOGO_PATH if os.path.exists(LOCAL_LOGO_PATH) else LOGO_FALLBACK_URL
@@ -1060,39 +1061,6 @@ def _apply_high_priority_refinements(user_input: str, category: str, answer: str
 
     return updated
 
-def _normalize_intent_category(raw_category: str) -> str:
-    upper = str(raw_category or "").strip().upper()
-    for known in ("CYBER_SCENARIO", "CYBER_EXPLAIN", "INVALID"):
-        if known in upper:
-            return known
-    return "INVALID"
-
-def _groq_chat(messages, timeout=18, temperature=0.0):
-    if not GROQ_API_KEY:
-        return None, "Missing GROQ API key."
-    url = "https://api.groq.com/openai/v1/chat/completions"
-    headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
-    data = {"model": "llama-3.1-8b-instant", "messages": messages, "temperature": temperature}
-    last_err = None
-    for _ in range(2):
-        try:
-            response = requests.post(url, headers=headers, json=data, timeout=timeout)
-            if not response.ok:
-                last_err = f"HTTP {response.status_code}"
-                continue
-            payload = response.json() or {}
-            content = (
-                payload.get("choices", [{}])[0]
-                .get("message", {})
-                .get("content")
-            )
-            if content:
-                return content, None
-            last_err = "Empty response"
-        except Exception as e:
-            last_err = str(e)
-    return None, last_err or "Request failed"
-
 def get_intent_category(user_input):
     """
     STRICT GATEKEEPER:
@@ -1102,13 +1070,12 @@ def get_intent_category(user_input):
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
     classifier_prompt = f"""
     Analyze user input: "{user_input}"
-    CRITICAL RULES:
-    - If the query is clearly outside the applicable jurisdiction, return 'INVALID'.
-    - If the query is about PHYSICAL CRIMES (Murder, Physical Theft, Assault, Physical Robbery)
-      or non-legal topics (Math, Greetings), return 'INVALID'.
+    CRITICAL RULE:
+    If the query is about PHYSICAL CRIMES (Murder, Physical Theft, Assault, Physical Robbery)
+    or non-legal topics (Math, Greetings), you MUST return 'INVALID'.
     Categories:
-    1. CYBER_SCENARIO: Cybercrime scenarios only.
-    2. CYBER_EXPLAIN: IT Act 2000/IT Rules/CERT-In/DPDP Act section requests.
+    1. CYBER_SCENARIO: Digital crimes only (Hacking, Phishing, Identity Theft).
+    2. CYBER_EXPLAIN: IT Act 2000 section requests.
     3. INVALID: All other topics.
     Respond with ONLY the category name.
     """
@@ -1127,38 +1094,31 @@ def ask_groq_lawyer(user_input, law_evidence, category):
     """Generates professional, non-repetitive legal reports."""
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
-    # SYSTEM PROMPT WITH 8 DYNAMIC PATHS (aligned with final.docx)
+    # SYSTEM PROMPT WITH 8 DYNAMIC PATHS
     system_prompt = """
-Role: Professional Legal Validator (IT Act 2000 + IT Rules 2021 as amended in 2026 + DPDP Act 2023 + DPDP Rules 2025 + CERT-In Directions 2022).
+Role: Professional Legal Validator (Indian IT Act 2000).
 
-2026 MANDATORY COMPLIANCE TIMELINES (only use what actually applies):
-- NCII (Private Photos/Deepfake Nudity): 2 HOURS (Rule 3(2)(b)).
-- SGI/Deepfakes (Lawful Orders): 3 HOURS (Rule 3(1)(d)).
-- Cyber Incident Reporting: 6 HOURS (CERT-In Directions 2022).
-- DPDP Breach Notification: Detailed report to DPBI within 72 HOURS (DPDP Rules 2025, Rule 7).
-- Grievance Resolution: 7 DAYS (acknowledgment timelines reduced in Rule 3(2)).
-
-CASE SELECTION RULES (VERIFIED):
-1. Financial/Phishing Fraud -> NASSCOM vs. Ajay Sood (2005)
-2. Identity Theft -> CBI vs. Arif Azim (Sony Sambandh Case)
-3. Cyber Stalking/Obscenity -> State of Tamil Nadu vs. Suhas Katti (2004)
-4. Electronic Evidence -> Anvar P.V. vs. P.K. Basheer (2014)
-5. Privacy -> Justice K.S. Puttaswamy vs. Union of India (2017)
-6. Free Speech/Intermediary -> Shreya Singhal vs. Union of India (2015)
+CASE SELECTION RULES (Choose ONLY ONE per report):
+1. Financial/UPI/Bank Fraud -> Dhule Vikas Bank vs. Axis Bank (2025)
+2. Identity Theft/Impersonation -> CBI vs. Arif Azim (Sony Sambandh Case)
+3. Deepfakes/AI Harassment -> Delhi HC Deepfake Injunction (2025)
+4. Hacking/Login Theft -> State vs. N.G. Arun Kumar (2011)
+5. Privacy/Fundamental Rights -> Justice K.S. Puttaswamy vs. Union of India
+6. Social Media/Intermediary -> Shreya Singhal vs. Union of India
+7. Electronic Evidence/Logs -> Anvar P.V. vs. P.K. Basheer (2014)
+8. Cyber Stalking/Obscenity -> State of Tamil Nadu vs. Suhas Katti
 
 CRITICAL CONSTRAINTS:
-- Identify content as "Synthetically Generated Information (SGI)" if manipulated.
-- Use Section 66C for Identity Theft; 66F ONLY for Cyber Terrorism.
-- If DPDP applies, identify Data Principal rights (access/correction/erasure/grievance).
-- For NCII, mandatory action must be 2 HOURS. For other illegal AI content acting on a lawful order, use 3 HOURS. Never use 36 hours for NCII.
+- NEVER cite Section 66F (Terrorism) or Section 70 (Critical Systems) unless it involves National/Govt infrastructure.
+- Provide ONLY the single most relevant case. Do NOT list others or explain why they were not chosen.
 - Style: Professional technical plain text. No stars (*) or emojis.
 
 REPORT FORMAT:
-1. LEGAL PROVISIONS: [List IT Act sections + DPDP sections + 2026 Rule citations]
-2. STATUTORY PENALTIES: [List IT Act penalties + DPDP penalties where applicable]
-3. JUDICIAL PRECEDENT: [Single matching case name and significance]
-4. WIN PROBABILITY: [Evidence-based range; avoid hard-coded 95/40 unless facts justify]
-5. MANDATORY ACTION: [Must specify 2-hour, 3-hour, 6-hour, or 72-hour benchmarks when relevant]
+1. LEGAL PROVISIONS: [List specific IT Act sections]
+2. STATUTORY PENALTIES: [List Jail/Fines]
+3. JUDICIAL PRECEDENT: [The single matching case name and one sentence on its significance]
+4. WIN PROBABILITY: [95% if logs exist, 40% if anonymous]
+5. MANDATORY ACTION: [Must include 6-hour CERT-In rule]
 """
 
     full_prompt = f"{system_prompt}\nUser Input: {user_input}\nContext: {law_evidence}"
@@ -1365,54 +1325,11 @@ def _out_of_scope_report() -> str:
         "JUSTICE LENS ADVISORY REPORT",
         "-" * 30,
         "OUT OF SCOPE NOTICE",
-        "This query pertains to a topic outside the scope of Indian cyber law.",
-        "Justice Lens provides advisory services exclusively for the IT Act and related Indian cyber rules.",
+        "This query pertains to a topic outside the scope of Indian Cyber Law.",
+        "Justice Lens provides advisory services exclusively for the IT Act, 2000.",
         "Please provide a digital or cyber-related scenario.",
         "-" * 30,
     ])
-
-def _validate_ai_answer(category: str, answer: str) -> bool:
-    if not answer or not isinstance(answer, str):
-        return False
-
-    upper = answer.upper()
-    required_sections = (
-        "LEGAL PROVISIONS",
-        "STATUTORY PENALTIES",
-        "JUDICIAL PRECEDENT",
-        "WIN PROBABILITY",
-        "MANDATORY ACTION",
-    )
-    return all(x in upper for x in required_sections)
-
-def _repair_ai_answer(user_input: str, law_evidence: str, category: str, bad_answer: str) -> str:
-    repair_prompt = f"""
-    You are a Precise Legal Report Tool (IT Act 2000, IT Rules 2021/2026, DPDP Act 2023 + DPDP Rules 2025, CERT-In Directions 2022).
-    Rewrite the following draft to STRICTLY follow this exact format (include all headings):
-    LEGAL PROVISIONS: ...
-    STATUTORY PENALTIES: ...
-    JUDICIAL PRECEDENT: ...
-    WIN PROBABILITY: ...
-    MANDATORY ACTION: ...
-
-    Rules:
-    - Maintain professional technical plain text. No stars (*) or emojis.
-    - Include the 6-hour CERT-In rule in MANDATORY ACTION.
-    - Use the latest applicable updates (IT Rules 2026 amendments, CERT-In 2022 directions, DPDP Rules 2025) when relevant.
-    - If applicable, include the 2-hour NCII takedown, 3-hour lawful order takedown, or 7-day grievance resolution deadline. Never use 36 hours for NCII.
-    - If DPDP applies, include the 72-hour detailed report to DPBI (Rule 7).
-    - Use IT Act sections/penalties and DPDP provisions only. If a penalty is not specified in IT Act/Rules/DPDP, say “Not specified in Act/Rules”.
-
-    USER QUERY: {user_input}
-    DATABASE EVIDENCE: {law_evidence}
-    DRAFT (FIX THIS): {bad_answer}
-    """
-
-    content, err = _groq_chat([{"role": "user", "content": repair_prompt}], timeout=18)
-    return content if content else bad_answer
-
-def ask_groq_lawyer_validated(user_input: str, law_evidence: str, category: str) -> str:
-    return ask_groq_lawyer(user_input, law_evidence, category)
 
 def show_sidebar():
     with st.sidebar:
@@ -1831,22 +1748,18 @@ else:
 
                 with st.spinner("Generating legal report..."):
                     try:
-                        ans = ask_groq_lawyer_validated(user_msg, dataset_evidence, category)
-                        if not _validate_ai_answer(category, ans):
-                            ans = _repair_ai_answer(user_msg, dataset_evidence, category, ans)
+                        report = ask_groq_lawyer(user_msg, dataset_evidence, category)
+                        ans = "\n".join([
+                            "JUSTICE LENS ADVISORY REPORT",
+                            "-" * 30,
+                            report,
+                            "-" * 30,
+                        ])
                     except Exception:
                         ans = (
                             "I ran into an issue generating the report just now. "
                             "Please try again in a moment. If it persists, rephrase the query."
                         )
-                if category != "INVALID":
-                    ans = _format_report_body(ans)
-
-            if isinstance(ans, str):
-                ans = ans.replace("**", "")
-                ans = ans.replace("IT Act 2000\nEvidence-Only", "")
-                ans = _strip_unwanted_headings(ans)
-                ans = _collapse_act_headings(ans)
 
             history.append({"role": "assistant", "content": ans})
 
@@ -2165,7 +2078,7 @@ else:
                     mime="text/csv",
                     use_container_width=True
                 )
-
+                
             st.divider()
             st.markdown("### User Directory")
             if not filtered_users:
