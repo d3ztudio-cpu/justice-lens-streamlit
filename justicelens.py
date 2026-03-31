@@ -498,6 +498,8 @@ st.markdown(
         justify-content: center;
         cursor: pointer;
         box-shadow: var(--jl-shadow-sm);
+        pointer-events: auto;
+        touch-action: manipulation;
     }
     .jl-mobile-toggle span{
         display: block;
@@ -525,8 +527,10 @@ st.markdown(
             pointer-events: none;
             transition: opacity 0.2s ease;
         }
-        body.jl-drawer-open .jl-drawer-backdrop{ opacity: 1; pointer-events: auto; }
-        body.jl-drawer-open{
+        body.jl-drawer-open .jl-drawer-backdrop,
+        html.jl-drawer-open .jl-drawer-backdrop{ opacity: 1; pointer-events: auto; }
+        body.jl-drawer-open,
+        html.jl-drawer-open{
             --sidebar-width: var(--jl-drawer-width);
         }
         section[data-testid="stSidebar"]{
@@ -545,15 +549,38 @@ st.markdown(
             overflow-y: auto;
             border-right: none !important;
         }
-        body.jl-drawer-open section[data-testid="stSidebar"]{ transform: translateX(0); }
+        body.jl-drawer-open section[data-testid="stSidebar"],
+        html.jl-drawer-open section[data-testid="stSidebar"]{ transform: translateX(0); }
         section[data-testid="stSidebar"] [data-testid="stSidebarContent"]{
             width: 100% !important;
             min-width: 100% !important;
         }
     }
     @media (min-width: 701px){
+        body{
+            --jl-desktop-sidebar: 20rem;
+            --sidebar-width: var(--jl-desktop-sidebar);
+        }
         section[data-testid="stSidebar"]{
+            display: block !important;
+            position: sticky !important;
+            top: 0 !important;
+            height: 100vh !important;
+            width: var(--jl-desktop-sidebar) !important;
+            min-width: var(--jl-desktop-sidebar) !important;
+            max-width: var(--jl-desktop-sidebar) !important;
             transform: none !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+        }
+        section[data-testid="stSidebar"][aria-expanded="false"]{
+            width: var(--jl-desktop-sidebar) !important;
+            min-width: var(--jl-desktop-sidebar) !important;
+            max-width: var(--jl-desktop-sidebar) !important;
+            transform: none !important;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
     }
     </style>
@@ -639,9 +666,16 @@ components.html(
       window.__jlDrawerInit = true;
       const doc = window.parent && window.parent.document ? window.parent.document : document;
       const body = doc.body;
+      const root = doc.documentElement || doc;
       const OPEN_CLASS = "jl-drawer-open";
-      const openDrawer = () => body.classList.add(OPEN_CLASS);
-      const closeDrawer = () => body.classList.remove(OPEN_CLASS);
+      const openDrawer = () => {
+        body && body.classList.add(OPEN_CLASS);
+        root && root.classList.add(OPEN_CLASS);
+      };
+      const closeDrawer = () => {
+        body && body.classList.remove(OPEN_CLASS);
+        root && root.classList.remove(OPEN_CLASS);
+      };
       const isMobile = () => doc.defaultView && doc.defaultView.matchMedia("(max-width: 700px)").matches;
       const ensureDesktopSidebar = () => {
         if (isMobile()) return;
@@ -682,8 +716,8 @@ components.html(
           closeDrawer();
         }
       };
-      doc.addEventListener("click", handler);
-      doc.addEventListener("touchstart", handler, {passive: true});
+      doc.addEventListener("click", handler, true);
+      doc.addEventListener("touchstart", handler, {passive: true, capture: true});
     })();
     </script>
     """,
