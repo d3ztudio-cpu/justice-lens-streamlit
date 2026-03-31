@@ -148,7 +148,7 @@ st.markdown(
         border-bottom: none !important;
     }
 
-    /* Keep sidebar controls visible so users can re-open it if collapsed */
+    /* Hide Streamlit's sidebar toggle controls; use custom hamburger on mobile only */
     [data-testid="collapsedControl"],
     [data-testid="stSidebarCollapseButton"],
     [data-testid="stSidebarCollapsedControl"],
@@ -158,7 +158,9 @@ st.markdown(
     button[title="Close sidebar"],
     button[title="Show sidebar"],
     button[title="Hide sidebar"] {
-        display: inline-flex !important;
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
     }
 
     /* Buttons */
@@ -549,6 +551,11 @@ st.markdown(
             min-width: 100% !important;
         }
     }
+    @media (min-width: 701px){
+        section[data-testid="stSidebar"]{
+            transform: none !important;
+        }
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -636,8 +643,19 @@ components.html(
       const openDrawer = () => body.classList.add(OPEN_CLASS);
       const closeDrawer = () => body.classList.remove(OPEN_CLASS);
       const isMobile = () => doc.defaultView && doc.defaultView.matchMedia("(max-width: 700px)").matches;
+      const ensureDesktopSidebar = () => {
+        if (isMobile()) return;
+        const openBtn = doc.querySelector(
+          'button[aria-label="Open sidebar"], button[title="Open sidebar"], button[title="Show sidebar"]'
+        );
+        if (openBtn) openBtn.click();
+      };
+      ensureDesktopSidebar();
       doc.defaultView && doc.defaultView.addEventListener("resize", () => {
-        if (!isMobile()) closeDrawer();
+        if (!isMobile()) {
+          closeDrawer();
+          ensureDesktopSidebar();
+        }
       });
       const handler = function(e){
         const toggle = e.target.closest("[data-jl-drawer-toggle]");
