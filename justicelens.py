@@ -12,8 +12,6 @@ import requests
 import time
 import re
 import html
-import urllib.parse
-import base64
 import io
 from pinecone import Pinecone
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -477,11 +475,6 @@ st.markdown(
     }
     .jl-copy-btn:active{
         transform: translateY(1px);
-    }
-    .jl-translate-link{
-        color: var(--jl-muted) !important;
-        text-decoration: none !important;
-        font-size: 0.9em;
     }
 
     .jl-mobile-toggle{
@@ -1118,7 +1111,7 @@ def _justice_lens_2026_scenario_logic() -> str:
     - Jurisdiction: Focus strictly on Indian cyber law (IT Act 2000 + IT Rules). If clearly outside scope, respond with OUT OF SCOPE.
     - Phishing/identity theft/personation: Lead with IT Act Sections 66C (Identity Theft) and 66D (Cheating by Personation). Treat Section 43/43A as secondary civil-compensation remedies.
     - CERT-In Directions (28 Apr 2022): If the victim is an organisation/service provider or the incident affects enterprise systems, include reporting to CERT-In within 6 hours of noticing/being notified (for reportable incidents).
-    - Golden Hour: In ACTION PLAN, emphasize immediate reporting via 1930/cybercrime.gov.in to maximize lien/freeze chances (avoid promising refunds).
+    - Golden Hour: In ACTION PLAN, emphasize immediate reporting via 1930 and the national reporting portal (cybercrime.gov.in) to maximize lien/freeze chances (avoid promising refunds).
     - Liability nuance: Do NOT claim “0% liability” as a blanket rule. Clarify victim must report promptly and secure the breach (passwords/2FA/session revokes).
     - Evidence strategy (primary): Preserve Email Headers, UPI Transaction IDs, URL Metadata, and device logs; reference Section 65B (Indian Evidence Act) for admissibility of electronic records.
     """
@@ -1232,7 +1225,7 @@ def get_intent_category(user_input):
     If the query is about PHYSICAL CRIMES (Murder, Physical Theft, Assault, Physical Robbery)
     or non-legal topics (Math, Greetings), you MUST return 'INVALID'.
     Categories:
-    1. CYBER_SCENARIO: Digital crimes only (Hacking, Phishing, Identity Theft).
+    1. CYBER_SCENARIO: Cyber incidents only (Hacking, Phishing, Identity Theft).
     2. CYBER_EXPLAIN: IT Act 2000 section requests.
     3. INVALID: All other topics.
     Respond with ONLY the category name.
@@ -1252,31 +1245,33 @@ def ask_groq_lawyer(user_input, law_evidence, category):
     """Generates professional, non-repetitive legal reports."""
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
-    # SYSTEM PROMPT WITH 8 DYNAMIC PATHS
+    # Prefer neutral, section-explanation style responses (avoid "crime" framing).
     system_prompt = """
-Role: Professional Legal Validator (Indian IT Act 2000).
+Role: Indian IT Act 2000 Section Explainer.
 
-CASE SELECTION RULES (Choose ONLY ONE per report):
-1. Financial/UPI/Bank Fraud -> Dhule Vikas Bank vs. Axis Bank (2025)
-2. Identity Theft/Impersonation -> CBI vs. Arif Azim (Sony Sambandh Case)
-3. Deepfakes/AI Harassment -> Delhi HC Deepfake Injunction (2025)
-4. Hacking/Login Theft -> State vs. N.G. Arun Kumar (2011)
-5. Privacy/Fundamental Rights -> Justice K.S. Puttaswamy vs. Union of India
-6. Social Media/Intermediary -> Shreya Singhal vs. Union of India
-7. Electronic Evidence/Logs -> Anvar P.V. vs. P.K. Basheer (2014)
-8. Cyber Stalking/Obscenity -> State of Tamil Nadu vs. Suhas Katti
+GOAL:
+- Explain the relevant IT Act section(s) like a guide to the statute.
+- If the user asks "Explain Section X", focus on that section.
+- If the user describes an incident, identify the most relevant section(s) and explain them.
 
 CRITICAL CONSTRAINTS:
 - NEVER cite Section 66F (Terrorism) or Section 70 (Critical Systems) unless it involves National/Govt infrastructure.
-- Provide ONLY the single most relevant case. Do NOT list others or explain why they were not chosen.
-- Style: Professional technical plain text. No stars (*) or emojis.
+- Do NOT use the words "crime", "criminal", or "accused". Use neutral phrasing like "incident", "conduct", "scenario", "person", "party".
+- Style: Clear professional plain text. No stars (*) or emojis.
 
-REPORT FORMAT:
-1. LEGAL PROVISIONS: [List specific IT Act sections]
-2. STATUTORY PENALTIES: [List Jail/Fines]
-3. JUDICIAL PRECEDENT: [The single matching case name and one sentence on its significance]
-4. WIN PROBABILITY: [95% if logs exist, 40% if anonymous]
-5. MANDATORY ACTION: [Must include 6-hour CERT-In rule]
+OUTPUT FORMAT:
+SECTION(S):
+- [List the IT Act section numbers you are using]
+
+SECTION EXPLANATION (for each section):
+- SECTION TITLE:
+- WHAT IT COVERS (plain language):
+- KEY INGREDIENTS / WHEN IT APPLIES:
+- STATUTORY CONSEQUENCES (punishment/fine as per the Act; if uncertain, say "verify latest text"):
+
+PRACTICAL NOTES (optional):
+- Evidence/records to preserve (if relevant)
+- Reporting/takedown pointers (if relevant)
 """
 
     full_prompt = f"{system_prompt}\nUser Input: {user_input}\nContext: {law_evidence}"
@@ -1304,6 +1299,7 @@ def _looks_like_report(text: str) -> bool:
     upper = text.upper()
     return (
         "JUSTICE LENS ADVISORY REPORT" in upper
+        or "JUSTICE LENS SECTION EXPLANATION" in upper
         or "SECTION TITLE" in upper
         or "LEGAL DEFINITION" in upper
         or "STATUTORY PUNISHMENT" in upper
@@ -1325,7 +1321,7 @@ def _render_report_html(text: str) -> str:
 
     for line in lines:
         raw = line.strip()
-        if raw.upper().startswith("JUSTICE LENS ADVISORY REPORT"):
+        if raw.upper().startswith("JUSTICE LENS"):
             title = raw
             continue
 
@@ -1828,11 +1824,11 @@ if not st.session_state.user:
             with f1:
                 st.markdown(
                     """
-                    <div class="jl-feature">
-                        <div class="kicker">Always On</div>
-                        <div class="headline">24/7 Incident Support</div>
-                        <p class="desc">Get immediate, automated guidance for reporting cybercrimes, preserving critical digital evidence, and containing the incident to prevent further harm.</p>
-                    </div>
+                        <div class="jl-feature">
+                            <div class="kicker">Always On</div>
+                            <div class="headline">24/7 Incident Support</div>
+                        <p class="desc">Get immediate, automated guidance for reporting cyber incidents, preserving critical digital evidence, and containing the incident to prevent further harm.</p>
+                        </div>
                     """,
                     unsafe_allow_html=True,
                 )
@@ -1894,7 +1890,7 @@ else:
                     try:
                         report = ask_groq_lawyer(user_msg, dataset_evidence, category)
                         ans = "\n".join([
-                            "JUSTICE LENS ADVISORY REPORT",
+                            "JUSTICE LENS SECTION EXPLANATION",
                             "-" * 30,
                             report,
                             "-" * 30,
@@ -2027,19 +2023,6 @@ else:
                         )
                 else:
                     st.markdown(content)
-                if role == "assistant" and content:
-                    encoded_content = urllib.parse.quote_plus(content)
-                    translate_url = f"https://translate.google.com/m?sl=auto&tl=en&q={encoded_content}"
-                    try:
-                        b64 = base64.b64encode(content.encode("utf-8")).decode("ascii")
-                    except Exception:
-                        b64 = ""
-                    st.markdown(
-                        f'<div class="jl-chat-actions">'
-                        f'<a class="jl-translate-link" href="{translate_url}" target="_blank" rel="noopener">Translate</a>'
-                        f'</div>',
-                        unsafe_allow_html=True,
-                    )
 
         cooldown_remaining = max(0, int(st.session_state.cooldown_until - time.time()))
 
