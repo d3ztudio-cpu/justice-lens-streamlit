@@ -1040,6 +1040,7 @@ def _is_cyber_relevant(user_input: str) -> bool:
             or _is_phishing_portal_or_deepfake(text)
             or _is_data_breach(text)
             or _is_loan_identity_theft(text)
+            or _is_pocso_cyber_context(text)
         ):
             return True
     except Exception:
@@ -1054,6 +1055,7 @@ def _is_cyber_relevant(user_input: str) -> bool:
         "account hacked", "login hacked", "credential", "credential theft",
         "social media", "whatsapp scam", "sms scam", "email scam",
         "cyber stalking", "obscenity", "revenge porn",
+        "pocso", "csam", "child pornography", "grooming", "underage", "minor",
     ))
 
 def _is_phishing_portal_or_deepfake(user_input: str) -> bool:
@@ -1075,6 +1077,31 @@ def _is_data_breach(user_input: str) -> bool:
         "data breach", "breach", "leak", "leaked database", "exposed data",
         "ransomware", "stolen data", "database dump", "credential dump",
     ))
+
+def _is_pocso_cyber_context(user_input: str) -> bool:
+    """
+    Narrow allow-list: allow POCSO references only when the query is clearly about
+    online/digital child-safety content or conduct (e.g., circulation/hosting of CSAM,
+    grooming/sextortion via apps).
+
+    General/offline POCSO-only queries remain OUT OF SCOPE for this app.
+    """
+    text = str(user_input or "")
+    if not _contains_any(text, ("pocso",)):
+        return False
+
+    child_indicators = (
+        "minor", "child", "underage", "under age", "kid", "school student",
+        "csam", "child sexual", "child pornography", "grooming", "sextortion",
+    )
+    digital_indicators = (
+        "online", "internet", "social media", "instagram", "facebook", "whatsapp", "telegram", "snapchat",
+        "dm", "chat", "group", "link", "url", "site", "website",
+        "upload", "posted", "share", "shared", "forward", "forwarded", "circulated", "leaked",
+        "photo", "image", "video", "recording", "content",
+    )
+
+    return _contains_any(text, child_indicators) and _contains_any(text, digital_indicators)
 
 def _is_national_or_govt_infra(user_input: str) -> bool:
     return _contains_any(user_input, (
@@ -1235,7 +1262,10 @@ def get_intent_category(user_input):
         "robbery", "burglary", "theft", "physical theft",
         "acid attack", "sulphuric", "sulfuric",
     )):
-        return "INVALID"
+        # Allow cyber-scoped child-safety / intimate-content situations that can involve these words
+        # but are still digital/cyber relevant for this app.
+        if not (_is_ncii_or_intimate_imagery(user_input) or _is_pocso_cyber_context(user_input)):
+            return "INVALID"
 
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
@@ -1293,7 +1323,9 @@ GOAL:
 ACCURACY RULES:
 - Use the provided Context as primary grounding when available.
 - If you are not certain about an exact punishment/fine/term, say "verify latest text" instead of guessing.
-- If the query is outside IT Act / Indian cyber law scope, reply: OUT OF SCOPE.
+- Scope: Answer using IT Act 2000 + IT Rules for cyber/digital incidents and section explanations.
+- You MAY mention POCSO only when the scenario is clearly online/digital child-safety content or conduct (e.g., circulation/hosting of CSAM, grooming via apps). Otherwise treat POCSO-only queries as OUT OF SCOPE.
+- Do NOT use other non-cyber Acts/laws; if the user asks for them, reply: OUT OF SCOPE.
 
 CRITICAL CONSTRAINTS:
 {guardrail_66f_70}- Do NOT use the words "crime", "criminal", or "accused". Use neutral phrasing like "incident", "conduct", "scenario", "person", "party".
