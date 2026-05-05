@@ -1032,6 +1032,19 @@ def _is_cyber_relevant(user_input: str) -> bool:
         return True
     if _contains_any(text, ("it act", "information technology act", "cyber", "cybercrime", "cyber crime")):
         return True
+
+    # Recognize common cyber-law scenario phrases even if the user doesn't say "cyber".
+    try:
+        if (
+            _is_ncii_or_intimate_imagery(text)
+            or _is_phishing_portal_or_deepfake(text)
+            or _is_data_breach(text)
+            or _is_loan_identity_theft(text)
+        ):
+            return True
+    except Exception:
+        pass
+
     return _contains_any(text, (
         "hacking", "hack", "unauthorized access", "unauthorised access",
         "phishing", "otp", "upi", "bank fraud", "digital fraud",
@@ -1209,6 +1222,12 @@ def get_intent_category(user_input):
     # Deterministic local gate: block obvious physical/off-topic crimes before LLM call.
     if not _is_cyber_relevant(user_input):
         return "INVALID"
+
+    # Deterministic override: explicit "Explain Section X" queries should never be rejected
+    # by the classifier (keeps section explanations reliable even if the LLM classifier is flaky).
+    text = str(user_input or "").lower()
+    if re.search(r"\b(section|sec|s\.)\s*\d+[a-z]?\b", text) and _contains_any(text, ("explain", "meaning", "define", "what is", "what's")):
+        return "CYBER_EXPLAIN"
     if _contains_any(user_input, (
         "murder", "killed", "kill", "homicide", "manslaughter",
         "assault", "battery", "stabbing", "shooting",
