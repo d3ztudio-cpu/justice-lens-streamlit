@@ -1027,7 +1027,8 @@ def _is_cyber_relevant(user_input: str) -> bool:
     if not user_input:
         return False
     text = str(user_input).lower()
-    if re.search(r"\b(section|sec|s\.)\s*\d+\b", text):
+    # Accept section numbers with optional trailing letter (e.g., 66A, 66F, 67B).
+    if re.search(r"\b(section|sec|s\.)\s*\d+[a-z]?\b", text):
         return True
     if _contains_any(text, ("it act", "information technology act", "cyber", "cybercrime", "cyber crime")):
         return True
