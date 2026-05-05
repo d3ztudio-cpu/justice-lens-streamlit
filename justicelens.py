@@ -1245,8 +1245,24 @@ def ask_groq_lawyer(user_input, law_evidence, category):
     """Generates professional, non-repetitive legal reports."""
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
+
+    category_upper = str(category or "").strip().upper()
+    is_explain = "EXPLAIN" in category_upper
+
     # Prefer neutral, section-explanation style responses (avoid "crime" framing).
-    system_prompt = """
+    # IMPORTANT: For CYBER_EXPLAIN, allow explaining *any* requested section (including 66F/70).
+    # For CYBER_SCENARIO, keep the guardrail to avoid mis-citing 66F/70 unless critical/national infrastructure is involved.
+    if is_explain:
+        guardrail_66f_70 = (
+            "- If the user explicitly asks to explain Section 66F or Section 70, you MUST explain it.\n"
+            "- Only apply Section 66F/70 to an incident scenario when facts clearly involve national security/critical/protected systems.\n"
+        )
+    else:
+        guardrail_66f_70 = (
+            "- Do NOT cite Section 66F (Terrorism) or Section 70 (Protected Systems) unless facts clearly involve National/Govt/critical/protected infrastructure.\n"
+        )
+
+    system_prompt = f"""
 Role: Indian IT Act 2000 Section Explainer.
 
 GOAL:
@@ -1254,12 +1270,16 @@ GOAL:
 - If the user asks "Explain Section X", focus on that section.
 - If the user describes an incident, identify the most relevant section(s) and explain them.
 
+ACCURACY RULES:
+- Use the provided Context as primary grounding when available.
+- If you are not certain about an exact punishment/fine/term, say "verify latest text" instead of guessing.
+- If the query is outside IT Act / Indian cyber law scope, reply: OUT OF SCOPE.
+
 CRITICAL CONSTRAINTS:
-- NEVER cite Section 66F (Terrorism) or Section 70 (Critical Systems) unless it involves National/Govt infrastructure.
-- Do NOT use the words "crime", "criminal", or "accused". Use neutral phrasing like "incident", "conduct", "scenario", "person", "party".
+{guardrail_66f_70}- Do NOT use the words "crime", "criminal", or "accused". Use neutral phrasing like "incident", "conduct", "scenario", "person", "party".
 - Style: Clear professional plain text. No stars (*) or emojis.
 
-OUTPUT FORMAT:
+OUTPUT FORMAT (USE THIS EXACT STRUCTURE):
 SECTION(S):
 - [List the IT Act section numbers you are using]
 
@@ -1272,9 +1292,18 @@ SECTION EXPLANATION (for each section):
 PRACTICAL NOTES (optional):
 - Evidence/records to preserve (if relevant)
 - Reporting/takedown pointers (if relevant)
-"""
+""".strip()
 
-    full_prompt = f"{system_prompt}\nUser Input: {user_input}\nContext: {law_evidence}"
+    requested_sections = []
+    try:
+        # Extract explicit section requests like "Section 66F", "Sec 66", "s. 66e"
+        for m in re.finditer(r"\b(section|sec|s\.)\s*(\d+[a-z]?)\b", str(user_input or ""), flags=re.IGNORECASE):
+            requested_sections.append(m.group(2).upper())
+    except Exception:
+        requested_sections = []
+    requested_line = f"Requested Sections: {', '.join(sorted(set(requested_sections)))}" if requested_sections else "Requested Sections: (none)"
+
+    full_prompt = f"{system_prompt}\n{requested_line}\nUser Input: {user_input}\nContext: {law_evidence}"
     data = {
         "model": "llama-3.1-8b-instant",
         "messages": [{"role": "user", "content": full_prompt}],
@@ -1292,6 +1321,44 @@ def _format_report_body(body: str) -> str:
         return "JUSTICE LENS ADVISORY REPORT"
     cleaned = _normalize_report_spacing(cleaned)
     return "JUSTICE LENS ADVISORY REPORT\n" + cleaned
+
+def _ensure_section_explanation_format(text: str, user_input: str = "") -> str:
+    """
+    Best-effort guard to keep answers in the requested "section explainer" structure.
+    If the model returns something unstructured, wrap it into the expected headings
+    without inventing legal facts.
+    """
+    cleaned = (text or "").strip()
+    if not cleaned:
+        return cleaned
+
+    upper = cleaned.upper()
+    if "SECTION(S):" in upper and "SECTION EXPLANATION" in upper:
+        return cleaned
+
+    requested_sections = []
+    try:
+        for m in re.finditer(r"\b(section|sec|s\.)\s*(\d+[a-z]?)\b", str(user_input or ""), flags=re.IGNORECASE):
+            requested_sections.append(m.group(2).upper())
+    except Exception:
+        requested_sections = []
+
+    sections_line = ", ".join(sorted(set(requested_sections))) if requested_sections else "(not specified)"
+    return "\n".join([
+        "SECTION(S):",
+        f"- {sections_line}",
+        "",
+        "SECTION EXPLANATION (for each section):",
+        "- SECTION TITLE:",
+        "- WHAT IT COVERS (plain language):",
+        cleaned,
+        "- KEY INGREDIENTS / WHEN IT APPLIES:",
+        "- STATUTORY CONSEQUENCES (punishment/fine as per the Act; if uncertain, say \"verify latest text\"):",
+        "",
+        "PRACTICAL NOTES (optional):",
+        "- Evidence/records to preserve (if relevant)",
+        "- Reporting/takedown pointers (if relevant)",
+    ]).strip()
 
 def _looks_like_report(text: str) -> bool:
     if not text:
@@ -1889,6 +1956,7 @@ else:
                 with st.spinner("Generating legal report..."):
                     try:
                         report = ask_groq_lawyer(user_msg, dataset_evidence, category)
+                        report = _ensure_section_explanation_format(report, user_msg)
                         ans = "\n".join([
                             "JUSTICE LENS SECTION EXPLANATION",
                             "-" * 30,
